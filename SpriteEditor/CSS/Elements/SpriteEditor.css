@@ -1,0 +1,12 @@
+body {
+    margin: 0; /* Entfernt den Standardabstand des Body-Elements */
+    overflow: hidden; /* Verhindert das Scrollen der Seite */
+    display: flex; /* Verwendet das Flexbox-Layout */
+    height: 100vh; /* Setzt die Höhe des Body auf 100% der Bildschirmhöhe */
+}
+
+sprite-editor {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}

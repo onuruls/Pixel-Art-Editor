@@ -1,0 +1,57 @@
+import { Tool } from "./Tool.js";
+
+export class MirrorPen extends Tool {
+  /**
+   *
+   * @param {HTMLCanvasElement} canvas
+   */
+  constructor(canvas) {
+    super(canvas);
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_down(event) {
+    this.is_drawing = true;
+    this.draw(event);
+  }
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_move(event) {
+    if (this.is_drawing) {
+      this.draw(event);
+    }
+  }
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_up(event) {
+    this.is_drawing = false;
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  draw(event) {
+    var rect = this.canvas.getBoundingClientRect();
+    var mouseX = event.clientX - rect.left;
+    var mouseY = event.clientY - rect.top;
+    let color = [255, 255, 255, 255];
+    let middleX = rect.width / 2 - 5;
+    let x1 = Math.floor(mouseX / 10) * 10;
+    let y = Math.floor(mouseY / 10) * 10;
+    let x_mid_diff = x1 - middleX;
+    let x2 = x1 - 2 * x_mid_diff;
+    x1 = Math.floor(x1 / 10);
+    y = Math.floor(y / 10);
+    x2 = Math.floor(x2 / 10);
+    this.sprite_editor.change_canvas_matrix(x1, y, color);
+    this.sprite_editor.change_canvas_matrix(x2, y, color);
+  }
+}
