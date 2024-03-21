@@ -77,7 +77,7 @@ export class SpriteCanvas extends SpriteEditorPart {
       color[3] / 255
     })`;
     this.context.fillStyle = color_str;
-    if (color_str === "rgba(0,0,0,0)") {
+    if (event.detail.erase) {
       this.context.clearRect(x, y, 10, 10);
     } else {
       this.context.fillRect(x, y, 10, 10);

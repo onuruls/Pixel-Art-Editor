@@ -7,7 +7,7 @@ export class SpriteTools extends SpriteEditorPart {
 
   render() {
     return `
-        <input type="color" id="color_picker" name="color_picker" value="#ff0000">
+        <input type="color" id="color_picker" name="color_picker" value="#000000">
         <ul>
           <input type="radio" id="pen" name="tools" checked>
           <label for="pen">Pen</label>

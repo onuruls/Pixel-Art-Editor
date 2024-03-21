@@ -33,7 +33,9 @@ export class SpriteEditor extends HTMLElement {
     this.appendChild(this.sprite_tools);
     this.setToolsListeners();
     this.selected_tool = new Pen(this);
-    this.selected_color = null;
+    this.selected_color = this.hexToRgbArray(
+      this.sprite_tools.querySelector("#color_picker").value
+    );
     this.init_canvas_matrix();
   }
 
@@ -59,7 +61,7 @@ export class SpriteEditor extends HTMLElement {
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
-    const a = 1;
+    const a = 255;
     return [r, g, b, a];
   }
   init_canvas_matrix() {
@@ -76,22 +78,20 @@ export class SpriteEditor extends HTMLElement {
    *
    * @param {Number} x
    * @param {Number} y
-   * @param {Array<Number>} color
    */
-  change_canvas_matrix(x, y, color) {
-    if (!this.compare_colors(color, this.canvas_matrix[x][y].color)) {
-      this.canvas_matrix[x][y].color = color;
-      this.dispatchEvent(
-        new CustomEvent("canvas_matrix_changed", {
-          detail: {
-            x: x,
-            y: y,
-            hover: false,
-            color: color,
-          },
-        })
-      );
-    }
+  change_canvas_matrix(x, y, erase = false) {
+    this.canvas_matrix[x][y].color = this.selected_color;
+    this.dispatchEvent(
+      new CustomEvent("canvas_matrix_changed", {
+        detail: {
+          x: x,
+          y: y,
+          erase: erase,
+          hover: false,
+          color: this.selected_color,
+        },
+      })
+    );
   }
   /**
    *
@@ -100,20 +100,20 @@ export class SpriteEditor extends HTMLElement {
    * @param {Boolean} hover
    */
   hover_canvas_matrix(x, y, hover) {
-    if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
-      return;
-    }
-    this.canvas_matrix[x][y].hover = hover;
-    this.dispatchEvent(
-      new CustomEvent("hover_matrix_changed", {
-        detail: {
-          x: x,
-          y: y,
-          hover: hover,
-          color: this.canvas_matrix[x][y].color,
-        },
-      })
-    );
+    // if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
+    //   return;
+    // }
+    // this.canvas_matrix[x][y].hover = hover;
+    // this.dispatchEvent(
+    //   new CustomEvent("hover_matrix_changed", {
+    //     detail: {
+    //       x: x,
+    //       y: y,
+    //       hover: hover,
+    //       color: this.canvas_matrix[x][y].color,
+    //     },
+    //   })
+    // );
   }
   /**
    *
@@ -127,12 +127,12 @@ export class SpriteEditor extends HTMLElement {
       this.canvas_matrix[x][y].color
     );
     fill_pixels.forEach((pixel) => {
-      this.canvas_matrix[pixel.x][pixel.y].color = [224, 45, 45, 200];
+      this.canvas_matrix[pixel.x][pixel.y].color = this.selected_color;
     });
     this.dispatchEvent(
       new CustomEvent("fill_matrix_changed", {
         detail: {
-          color: [224, 45, 45, 200],
+          color: this.selected_color,
           points: fill_pixels,
         },
       })
@@ -145,10 +145,13 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    * @returns {Array}
    */
-  recursive_fill_matrix(x, y, color) {
+  recursive_fill_matrix(x, y) {
     if (
       this.fill_visited[`${x}_${y}`] === undefined &&
-      this.compare_colors(this.canvas_matrix[x][y].color, color) &&
+      this.compare_colors(
+        this.canvas_matrix[x][y].color,
+        this.selected_color
+      ) &&
       x >= 0 &&
       y >= 0
     ) {
@@ -156,10 +159,10 @@ export class SpriteEditor extends HTMLElement {
       this.fill_visited[`${x}_${y}`] = false;
       return [
         self,
-        ...this.recursive_fill_matrix(x + 1, y, color),
-        ...this.recursive_fill_matrix(x - 1, y, color),
-        ...this.recursive_fill_matrix(x, y + 1, color),
-        ...this.recursive_fill_matrix(x, y - 1, color),
+        ...this.recursive_fill_matrix(x + 1, y),
+        ...this.recursive_fill_matrix(x - 1, y),
+        ...this.recursive_fill_matrix(x, y + 1),
+        ...this.recursive_fill_matrix(x, y - 1),
       ];
     } else {
       return [];
@@ -183,6 +186,7 @@ export class SpriteEditor extends HTMLElement {
     switch (string) {
       case "pen":
         return new Pen(this);
+        this.sprite_canvas.style.cursor = "";
       case "eraser":
         return new Erazer(this);
       case "mirror_pen":

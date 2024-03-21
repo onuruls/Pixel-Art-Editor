@@ -42,7 +42,6 @@ export class MirrorPen extends Tool {
     var rect = this.canvas.getBoundingClientRect();
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
-    let color = [255, 255, 255, 255];
     let middleX = rect.width / 2 - 5;
     let x1 = Math.floor(mouseX / 10) * 10;
     let y = Math.floor(mouseY / 10) * 10;
@@ -51,7 +50,7 @@ export class MirrorPen extends Tool {
     x1 = Math.floor(x1 / 10);
     y = Math.floor(y / 10);
     x2 = Math.floor(x2 / 10);
-    this.sprite_editor.change_canvas_matrix(x1, y, color);
-    this.sprite_editor.change_canvas_matrix(x2, y, color);
+    this.sprite_editor.change_canvas_matrix(x1, y);
+    this.sprite_editor.change_canvas_matrix(x2, y);
   }
 }

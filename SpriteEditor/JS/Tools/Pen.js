@@ -43,9 +43,8 @@ export class Pen extends Tool {
     let rect = this.canvas.getBoundingClientRect();
     let mouseX = event.clientX - rect.left;
     let mouseY = event.clientY - rect.top;
-    let color = [54, 80, 32, 255];
     const x = Math.floor(mouseX / 10);
     const y = Math.floor(mouseY / 10);
-    this.sprite_editor.change_canvas_matrix(x, y, color);
+    this.sprite_editor.change_canvas_matrix(x, y);
   }
 }
