@@ -3,6 +3,7 @@ body {
     overflow: hidden; /* Verhindert das Scrollen der Seite */
     display: flex; /* Verwendet das Flexbox-Layout */
     height: 100vh; /* Setzt die Höhe des Body auf 100% der Bildschirmhöhe */
+    background-color: black; /* Setzt die Hintergrundfarbe auf Schwarz */
 }
 
 sprite-editor {

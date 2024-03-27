@@ -1,19 +1,23 @@
 sprite-canvas {
-    flex: 0 0 80%;
+    flex: 5;
     display: flex;
     align-items: center;
-    background-color: rgb(251, 251, 251);
+    background-color: #222;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
 
     > .canvas-wrapper {
         display: block;
         padding: 0px;
         margin: auto;
         background-image:
-        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc),
-        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
+        linear-gradient(90deg, #444 1px, transparent 1px),
+        linear-gradient(90deg, #444 1px, transparent 1px),
+        linear-gradient(0deg, #444 1px, transparent 1px),
+        linear-gradient(0deg, #444 1px, transparent 1px);
         background-size: 10px 10px;
         background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
-        border: 2px solid black;
+        border: 1cap solid #bbb;
     }
     canvas {
         position: relative;

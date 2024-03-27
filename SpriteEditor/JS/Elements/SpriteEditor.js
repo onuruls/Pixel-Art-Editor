@@ -25,16 +25,16 @@ export class SpriteEditor extends HTMLElement {
     this.css.setAttribute("rel", "stylesheet");
     this.css.setAttribute("type", "text/css");
     this.appendChild(this.css);
-    this.sprite_preview = new SpritePreview(this);
-    this.sprite_canvas = new SpriteCanvas(this);
     this.sprite_tools = new SpriteTools(this);
-    this.appendChild(this.sprite_preview);
-    this.appendChild(this.sprite_canvas);
+    this.sprite_canvas = new SpriteCanvas(this);
+    this.sprite_preview = new SpritePreview(this);
     this.appendChild(this.sprite_tools);
+    this.appendChild(this.sprite_canvas);
+    this.appendChild(this.sprite_preview);
     this.setToolsListeners();
     this.selected_tool = new Pen(this);
     this.selected_color = this.hexToRgbArray(
-      this.sprite_tools.querySelector("#color_picker").value
+      this.sprite_tools.querySelector("#color_input").value
     );
     this.init_canvas_matrix();
   }
@@ -50,7 +50,7 @@ export class SpriteEditor extends HTMLElement {
       }
     });
     this.sprite_tools
-      .querySelector("#color_picker")
+      .querySelector("#color_input")
       .addEventListener("input", (event) => {
         this.selected_color = this.hexToRgbArray(event.target.value);
       });
