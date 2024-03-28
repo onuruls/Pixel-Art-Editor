@@ -5,6 +5,7 @@ import { Erazer } from "../Tools/Erazer.js";
 import { Pen } from "../Tools/Pen.js";
 import { MirrorPen } from "../Tools/MirrorPen.js";
 import { Bucket } from "../Tools/Bucket.js";
+import { SameColorBucket } from "../Tools/SameColorBucket.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -100,20 +101,20 @@ export class SpriteEditor extends HTMLElement {
    * @param {Boolean} hover
    */
   hover_canvas_matrix(x, y, hover) {
-    // if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
-    //   return;
-    // }
-    // this.canvas_matrix[x][y].hover = hover;
-    // this.dispatchEvent(
-    //   new CustomEvent("hover_matrix_changed", {
-    //     detail: {
-    //       x: x,
-    //       y: y,
-    //       hover: hover,
-    //       color: this.canvas_matrix[x][y].color,
-    //     },
-    //   })
-    // );
+    if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
+      return;
+    }
+    this.canvas_matrix[x][y].hover = hover;
+    this.dispatchEvent(
+      new CustomEvent("hover_matrix_changed", {
+        detail: {
+          x: x,
+          y: y,
+          hover: hover,
+          color: this.canvas_matrix[x][y].color,
+        },
+      })
+    );
   }
   /**
    *
@@ -126,6 +127,7 @@ export class SpriteEditor extends HTMLElement {
       y,
       this.canvas_matrix[x][y].color
     );
+    this.fill_visited = {};
     fill_pixels.forEach((pixel) => {
       this.canvas_matrix[pixel.x][pixel.y].color = this.selected_color;
     });
@@ -137,7 +139,6 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
-    console.log("FILL PIXELS", fill_pixels);
   }
   /**
    *
@@ -145,28 +146,52 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    * @returns {Array}
    */
-  recursive_fill_matrix(x, y) {
+  recursive_fill_matrix(x, y, color) {
     if (
       this.fill_visited[`${x}_${y}`] === undefined &&
-      this.compare_colors(
-        this.canvas_matrix[x][y].color,
-        this.selected_color
-      ) &&
       x >= 0 &&
-      y >= 0
+      x < this.width &&
+      y >= 0 &&
+      y < this.height &&
+      this.compare_colors(this.canvas_matrix[x][y].color, color)
     ) {
       const self = { x: x, y: y };
       this.fill_visited[`${x}_${y}`] = false;
       return [
         self,
-        ...this.recursive_fill_matrix(x + 1, y),
-        ...this.recursive_fill_matrix(x - 1, y),
-        ...this.recursive_fill_matrix(x, y + 1),
-        ...this.recursive_fill_matrix(x, y - 1),
+        ...this.recursive_fill_matrix(x + 1, y, color),
+        ...this.recursive_fill_matrix(x - 1, y, color),
+        ...this.recursive_fill_matrix(x, y + 1, color),
+        ...this.recursive_fill_matrix(x, y - 1, color),
       ];
     } else {
       return [];
     }
+  }
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   */
+  fill_same_color_matrix(x, y) {
+    const color = this.canvas_matrix[x][y].color;
+    const fill_pixels = [];
+    for (var i = 0; i < this.height; i++) {
+      for (var j = 0; j < this.width; j++) {
+        if (this.compare_colors(this.canvas_matrix[i][j].color, color)) {
+          this.canvas_matrix[i][j].color = this.selected_color;
+          fill_pixels.push({ x: i, y: j });
+        }
+      }
+    }
+    this.dispatchEvent(
+      new CustomEvent("fill_matrix_changed", {
+        detail: {
+          color: this.selected_color,
+          points: fill_pixels,
+        },
+      })
+    );
   }
 
   /**
@@ -186,13 +211,14 @@ export class SpriteEditor extends HTMLElement {
     switch (string) {
       case "pen":
         return new Pen(this);
-        this.sprite_canvas.style.cursor = "";
       case "eraser":
         return new Erazer(this);
       case "mirror_pen":
         return new MirrorPen(this);
       case "bucket":
         return new Bucket(this);
+      case "same_color":
+        return new SameColorBucket(this);
       default:
         return new Pen(this);
     }

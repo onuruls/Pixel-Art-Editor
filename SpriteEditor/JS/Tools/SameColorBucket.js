@@ -1,6 +1,6 @@
 import { Tool } from "./Tool.js";
 
-export class Bucket extends Tool {
+export class SameColorBucket extends Tool {
   /**
    *
    * @param {HTMLCanvasElement} canvas
@@ -41,6 +41,6 @@ export class Bucket extends Tool {
     var mouseY = event.clientY - rect.top;
     const x = Math.floor(mouseX / 10);
     const y = Math.floor(mouseY / 10);
-    this.sprite_editor.fill_change_matrix(x, y);
+    this.sprite_editor.fill_same_color_matrix(x, y);
   }
 }

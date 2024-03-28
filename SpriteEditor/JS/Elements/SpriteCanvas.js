@@ -54,7 +54,6 @@ export class SpriteCanvas extends SpriteEditorPart {
       this.draw_hover(event),
     ]);
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
-      console.log("FILL EVENT", event);
       this.fill_canvas(event);
     });
   }
