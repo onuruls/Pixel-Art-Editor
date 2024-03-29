@@ -8,6 +8,7 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   constructor(sprite_editor) {
     super(sprite_editor);
+    this.line_holder = [];
   }
 
   render() {
@@ -23,7 +24,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.context = this.drawing_canvas.getContext("2d");
     this.drawing_canvas.height = 640;
     this.drawing_canvas.width = 640;
-
     this.drawing_canvas.addEventListener("resize", (event) => {
       this.drawing_canvas.height = event.target.getBoundingClientRect().height;
       this.drawing_canvas.width = event.target.getBoundingClientRect().width;
@@ -31,8 +31,6 @@ export class SpriteCanvas extends SpriteEditorPart {
 
     this.drawing_canvas.addEventListener("mousedown", (event) => {
       this.sprite_editor.selected_tool.mouse_down(event);
-      this.is_drawing = true;
-      this.draw(event);
     });
 
     this.drawing_canvas.addEventListener("mousemove", (event) => {
@@ -56,13 +54,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
     });
-  }
-  /**
-   *
-   * @param {Event} event
-   */
-  draw(event) {
-    this.sprite_editor.selected_tool.draw(event);
+    this.sprite_editor.addEventListener("draw_non_final_line", (event) => {
+      this.draw_non_final_line(event);
+    });
   }
   /**
    *
@@ -123,6 +117,54 @@ export class SpriteCanvas extends SpriteEditorPart {
       this.context.fillStyle = hover_color;
       this.context.fillRect(x, y, 10, 10);
     }
+  }
+  /**
+   *
+   * @param {Event} event
+   */
+  draw_non_final_line(event) {
+    const selected_color = event.detail.color;
+    const points = event.detail.points;
+    if (!event.detail.final) {
+      this.revert_canvas();
+      this.line_holder = points;
+    } else {
+      this.line_holder = [];
+    }
+    points.forEach((point) => {
+      this.paint_single_pixel(point.x, point.y, selected_color);
+    });
+  }
+  /**
+   * Reverts the old Line, when the Line is not finally drawn
+   */
+  revert_canvas() {
+    console.log("REVERT POINTS", this.line_holder);
+    this.line_holder.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.old_color);
+    });
+  }
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Array<Number>} color
+   */
+  paint_single_pixel(x, y, color) {
+    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
+      color[3] / 255
+    })`;
+    this.context.fillStyle = color_str;
+    this.context.fillRect(x * 10, y * 10, 10, 10);
+  }
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   */
+  erase_single_pixel(x, y) {
+    this.context.clearRect(x * 10, y * 10, 10, 10);
   }
 }
 

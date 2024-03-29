@@ -14,7 +14,7 @@ export class Bucket extends Tool {
    * @param {Event} event
    */
   mouse_down(event) {
-    return;
+    this.draw(event);
   }
   /**
    *
