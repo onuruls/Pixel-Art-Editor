@@ -6,6 +6,7 @@ import { Pen } from "../Tools/Pen.js";
 import { MirrorPen } from "../Tools/MirrorPen.js";
 import { Bucket } from "../Tools/Bucket.js";
 import { SameColorBucket } from "../Tools/SameColorBucket.js";
+import { ColorPicker } from "../Tools/ColorPicker.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -64,6 +65,12 @@ export class SpriteEditor extends HTMLElement {
     const b = bigint & 255;
     const a = 255;
     return [r, g, b, a];
+  }
+  rgbArrayToHex(color) {
+    const r = color[0].toString(16).padStart(2, "0");
+    const g = color[1].toString(16).padStart(2, "0");
+    const b = color[2].toString(16).padStart(2, "0");
+    return `#${r}${g}${b}`;
   }
   init_canvas_matrix() {
     this.canvas_matrix = new Array(64);
@@ -205,6 +212,22 @@ export class SpriteEditor extends HTMLElement {
 
   /**
    *
+   * @param {Number} x
+   * @param {Number} y
+   */
+  pick_color(x, y) {
+    const color = this.canvas_matrix[x][y].color;
+    // If the color is transparent, do nothing
+    if (color[3] === 0) {
+      return;
+    }
+    this.selected_color = color;
+    const hexColor = this.rgbArrayToHex(color);
+    this.sprite_tools.querySelector("#color_input").value = hexColor;
+  }
+
+  /**
+   *
    * @param {String} string
    */
   selectToolFromString(string) {
@@ -219,6 +242,8 @@ export class SpriteEditor extends HTMLElement {
         return new Bucket(this);
       case "same_color":
         return new SameColorBucket(this);
+      case "color_picker":
+        return new ColorPicker(this);
       default:
         return new Pen(this);
     }
