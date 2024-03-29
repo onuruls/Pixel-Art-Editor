@@ -217,7 +217,7 @@ export class SpriteEditor extends HTMLElement {
       });
     }
     this.dispatchEvent(
-      new CustomEvent("draw_non_final_line", {
+      new CustomEvent("draw_stroke_line", {
         detail: {
           points: line_points,
           color: this.selected_color,

@@ -54,8 +54,8 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
     });
-    this.sprite_editor.addEventListener("draw_non_final_line", (event) => {
-      this.draw_non_final_line(event);
+    this.sprite_editor.addEventListener("draw_stroke_line", (event) => {
+      this.draw_stroke_line(event);
     });
   }
   /**
@@ -122,7 +122,7 @@ export class SpriteCanvas extends SpriteEditorPart {
    *
    * @param {Event} event
    */
-  draw_non_final_line(event) {
+  draw_stroke_line(event) {
     const selected_color = event.detail.color;
     const points = event.detail.points;
     if (!event.detail.final) {
@@ -139,7 +139,6 @@ export class SpriteCanvas extends SpriteEditorPart {
    * Reverts the old Line, when the Line is not finally drawn
    */
   revert_canvas() {
-    console.log("REVERT POINTS", this.line_holder);
     this.line_holder.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.old_color);
