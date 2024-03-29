@@ -76,13 +76,13 @@ export class SpriteTools extends SpriteEditorPart {
 
   init() {
     // Get the color picker element
-    const colorInput = document.getElementById("color_input");
+    const color_input = document.getElementById("color_input");
 
     // Add event listener to update stroke color of title when color changes
-    colorInput.addEventListener("input", () => {
+    color_input.addEventListener("input", () => {
       const title = document.getElementById("title");
       if (title) {
-        title.style.webkitTextStrokeColor = colorInput.value;
+        title.style.webkitTextStrokeColor = color_input.value;
       }
     });
   }

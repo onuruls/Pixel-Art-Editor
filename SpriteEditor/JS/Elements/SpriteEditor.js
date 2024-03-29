@@ -35,7 +35,7 @@ export class SpriteEditor extends HTMLElement {
     this.appendChild(this.sprite_preview);
     this.setToolsListeners();
     this.selected_tool = new Pen(this);
-    this.selected_color = this.hexToRgbArray(
+    this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
     this.init_canvas_matrix();
@@ -54,10 +54,10 @@ export class SpriteEditor extends HTMLElement {
     this.sprite_tools
       .querySelector("#color_input")
       .addEventListener("input", (event) => {
-        this.selected_color = this.hexToRgbArray(event.target.value);
+        this.selected_color = this.hex_to_rgb_array(event.target.value);
       });
   }
-  hexToRgbArray(hexString) {
+  hex_to_rgb_array(hexString) {
     hexString = hexString.replace(/^#/, "");
     const bigint = parseInt(hexString, 16);
     const r = (bigint >> 16) & 255;
@@ -66,7 +66,7 @@ export class SpriteEditor extends HTMLElement {
     const a = 255;
     return [r, g, b, a];
   }
-  rgbArrayToHex(color) {
+  rgb_array_to_hex(color) {
     const r = color[0].toString(16).padStart(2, "0");
     const g = color[1].toString(16).padStart(2, "0");
     const b = color[2].toString(16).padStart(2, "0");
@@ -217,13 +217,9 @@ export class SpriteEditor extends HTMLElement {
    */
   pick_color(x, y) {
     const color = this.canvas_matrix[x][y].color;
-    // If the color is transparent, do nothing
-    if (color[3] === 0) {
-      return;
-    }
     this.selected_color = color;
-    const hexColor = this.rgbArrayToHex(color);
-    this.sprite_tools.querySelector("#color_input").value = hexColor;
+    const hex_color = this.rgb_array_to_hex(color);
+    this.sprite_tools.querySelector("#color_input").value = hex_color;
   }
 
   /**
