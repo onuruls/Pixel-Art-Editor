@@ -8,13 +8,13 @@ export class ColorPicker extends Tool {
   constructor(canvas) {
     super(canvas);
   }
-  
+
   /**
    *
    * @param {Event} event
    */
   mouse_down(event) {
-    return;
+    this.draw(event);
   }
   /**
    *
