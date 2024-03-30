@@ -106,4 +106,17 @@ export class Tool {
   build_rgba_string(r, g, b, a) {
     return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
   }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  get_mouse_position(event) {
+    var rect = this.canvas.getBoundingClientRect();
+    var mouse_x = event.clientX - rect.left;
+    var mouse_y = event.clientY - rect.top;
+    const x = Math.floor(mouse_x / 10);
+    const y = Math.floor(mouse_y / 10);
+    return { x: x, y: y };
+  }
 }
