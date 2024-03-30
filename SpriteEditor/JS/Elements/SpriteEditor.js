@@ -37,15 +37,17 @@ export class SpriteEditor extends HTMLElement {
     this.appendChild(this.sprite_tools);
     this.appendChild(this.sprite_canvas);
     this.appendChild(this.sprite_preview);
-    this.setToolsListeners();
+    this.set_listeners();
     this.selected_tool = new Pen(this);
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
     this.init_canvas_matrix();
   }
-
-  setToolsListeners() {
+  /**
+   * Setting up the necessary listeners
+   */
+  set_listeners() {
     this.sprite_tools.querySelector("ul").addEventListener("click", (event) => {
       const clicked_element = event.target;
       if (
@@ -66,21 +68,34 @@ export class SpriteEditor extends HTMLElement {
       }
     });
   }
-  hex_to_rgb_array(hexString) {
-    hexString = hexString.replace(/^#/, "");
-    const bigint = parseInt(hexString, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
+  /**
+   *
+   * @param {String} hexString
+   * @returns {Array<Numbers>}
+   */
+  hex_to_rgb_array(hex_string) {
+    hex_string = hex_string.replace(/^#/, "");
+    const big_int = parseInt(hex_string, 16);
+    const r = (big_int >> 16) & 255;
+    const g = (big_int >> 8) & 255;
+    const b = big_int & 255;
     const a = 255;
     return [r, g, b, a];
   }
+  /**
+   * Turns rgb-array to hex string
+   * @param {Array<Number>} color
+   * @returns {String}
+   */
   rgb_array_to_hex(color) {
     const r = color[0].toString(16).padStart(2, "0");
     const g = color[1].toString(16).padStart(2, "0");
     const b = color[2].toString(16).padStart(2, "0");
     return `#${r}${g}${b}`;
   }
+  /**
+   * Creates the pixel matrix
+   */
   init_canvas_matrix() {
     this.canvas_matrix = new Array(64);
     for (var i = 0; i < this.height; i++) {
@@ -126,12 +141,13 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} x
    * @param {Number} y
    */
-  change_canvas_matrix(x, y, erase = false) {
+  pen_change_matrix(x, y, erase = false) {
     const prev_color = this.canvas_matrix[x][y].color;
-    if (this.canvas_matrix[x][y].color === this.selected_color) return;
+    if (this.canvas_matrix[x][y].color === this.selected_color && !erase)
+      return;
     this.canvas_matrix[x][y].color = this.selected_color;
     this.dispatchEvent(
-      new CustomEvent("canvas_matrix_changed", {
+      new CustomEvent("pen_matrix_changed", {
         detail: {
           x: x,
           y: y,
@@ -141,7 +157,26 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
-    this.action_buffer.push({ x: x, y: y, color: prev_color });
+    this.action_buffer.push({ x: x, y: y, prev_color: prev_color });
+  }
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   */
+  erazer_change_matrix(x, y) {
+    const prev_color = this.canvas_matrix[x][y].color;
+    if (this.compare_colors(prev_color, [0, 0, 0, 0])) return;
+    this.canvas_matrix[x][y].color = [0, 0, 0, 0];
+    this.action_buffer.push({ x: x, y: y, prev_color: prev_color });
+    this.dispatchEvent(
+      new CustomEvent("erazer_matrix_changed", {
+        detail: {
+          x: x,
+          y: y,
+        },
+      })
+    );
   }
   /**
    *
@@ -171,6 +206,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    */
   fill_change_matrix(x, y) {
+    this.start_action_buffer();
     const fill_pixels = this.recursive_fill_matrix(
       x,
       y,
@@ -178,6 +214,11 @@ export class SpriteEditor extends HTMLElement {
     );
     this.fill_visited = {};
     fill_pixels.forEach((pixel) => {
+      this.action_buffer.push({
+        x: pixel.x,
+        y: pixel.y,
+        prev_color: this.canvas_matrix[pixel.x][pixel.y].color,
+      });
       this.canvas_matrix[pixel.x][pixel.y].color = this.selected_color;
     });
     this.dispatchEvent(
@@ -188,6 +229,7 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
+    this.end_action_buffer();
   }
   /**
    *
@@ -223,11 +265,17 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    */
   fill_same_color_matrix(x, y) {
+    this.start_action_buffer();
     const color = this.canvas_matrix[x][y].color;
     const fill_pixels = [];
     for (var i = 0; i < this.height; i++) {
       for (var j = 0; j < this.width; j++) {
         if (this.compare_colors(this.canvas_matrix[i][j].color, color)) {
+          this.action_buffer.push({
+            x: i,
+            y: j,
+            prev_color: this.canvas_matrix[i][j].color,
+          });
           this.canvas_matrix[i][j].color = this.selected_color;
           fill_pixels.push({ x: i, y: j });
         }
@@ -241,6 +289,7 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
+    this.end_action_buffer();
   }
   /**
    *
@@ -253,9 +302,16 @@ export class SpriteEditor extends HTMLElement {
   draw_line_matrix(x1, y1, x2, y2, final = false) {
     const line_points = this.calculate_line_points(x1, y1, x2, y2);
     if (final) {
+      this.start_action_buffer();
       line_points.forEach((point) => {
+        this.action_buffer.push({
+          x: point.x,
+          y: point.y,
+          prev_color: this.canvas_matrix[point.x][point.y].color,
+        });
         this.canvas_matrix[point.x][point.y].color = this.selected_color;
       });
+      this.end_action_buffer();
     }
     this.dispatchEvent(
       new CustomEvent("draw_stroke_line", {

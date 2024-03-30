@@ -45,8 +45,11 @@ export class SpriteCanvas extends SpriteEditorPart {
       this.sprite_editor.selected_tool.global_mouse_up(event);
     });
 
-    this.sprite_editor.addEventListener("canvas_matrix_changed", (event) => {
-      this.draw_canvas(event);
+    this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
+      this.draw_pen_canvas(event);
+    });
+    this.sprite_editor.addEventListener("erazer_matrix_changed", (event) => {
+      this.draw_erazer_canvas(event);
     });
     this.sprite_editor.addEventListener("hover_matrix_changed", (event) => [
       this.draw_hover(event),
@@ -65,7 +68,7 @@ export class SpriteCanvas extends SpriteEditorPart {
    *
    * @param {Event} event
    */
-  draw_canvas(event) {
+  draw_pen_canvas(event) {
     let color = event.detail.color;
     let x = event.detail.x * 10;
     let y = event.detail.y * 10;
@@ -73,11 +76,16 @@ export class SpriteCanvas extends SpriteEditorPart {
       color[3] / 255
     })`;
     this.context.fillStyle = color_str;
-    if (event.detail.erase) {
-      this.context.clearRect(x, y, 10, 10);
-    } else {
-      this.context.fillRect(x, y, 10, 10);
-    }
+    this.context.fillRect(x, y, 10, 10);
+  }
+  /**
+   *
+   * @param {Event} event
+   */
+  draw_erazer_canvas(event) {
+    const x = event.detail.x * 10;
+    const y = event.detail.y * 10;
+    this.context.clearRect(x, y, 10, 10);
   }
   /**
    *
@@ -127,6 +135,10 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   revert_action(event) {
     const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.prev_color);
+    });
   }
   /**
    *

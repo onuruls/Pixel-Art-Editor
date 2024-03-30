@@ -47,6 +47,6 @@ export class Pen extends Tool {
     let mouseY = event.clientY - rect.top;
     const x = Math.floor(mouseX / 10);
     const y = Math.floor(mouseY / 10);
-    this.sprite_editor.change_canvas_matrix(x, y);
+    this.sprite_editor.pen_change_matrix(x, y);
   }
 }
