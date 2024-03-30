@@ -14,7 +14,7 @@ export class SameColorBucket extends Tool {
    * @param {Event} event
    */
   mouse_down(event) {
-    return;
+    this.draw(event);
   }
   /**
    *
@@ -37,10 +37,10 @@ export class SameColorBucket extends Tool {
    */
   draw(event) {
     var rect = this.canvas.getBoundingClientRect();
-    var mouseX = event.clientX - rect.left;
-    var mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
+    var mouse_x = event.clientX - rect.left;
+    var mouse_y = event.clientY - rect.top;
+    const x = Math.floor(mouse_x / 10);
+    const y = Math.floor(mouse_y / 10);
     this.sprite_editor.fill_same_color_matrix(x, y);
   }
 }

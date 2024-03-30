@@ -6,6 +6,7 @@ import { Pen } from "../Tools/Pen.js";
 import { MirrorPen } from "../Tools/MirrorPen.js";
 import { Bucket } from "../Tools/Bucket.js";
 import { SameColorBucket } from "../Tools/SameColorBucket.js";
+import { Stroke } from "../Tools/Stroke.js";
 import { ColorPicker } from "../Tools/ColorPicker.js";
 import { ActionStack } from "../Classes/ActionStack.js";
 
@@ -51,7 +52,7 @@ export class SpriteEditor extends HTMLElement {
         clicked_element.tagName === "INPUT" &&
         clicked_element.type === "radio"
       ) {
-        this.selected_tool = this.selectToolFromString(clicked_element.id);
+        this.selected_tool = this.select_tool_from_string(clicked_element.id);
       }
     });
     this.sprite_tools
@@ -241,6 +242,69 @@ export class SpriteEditor extends HTMLElement {
       })
     );
   }
+  /**
+   *
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @param {Boolean} final
+   */
+  draw_line_matrix(x1, y1, x2, y2, final = false) {
+    const line_points = this.calculate_line_points(x1, y1, x2, y2);
+    if (final) {
+      line_points.forEach((point) => {
+        this.canvas_matrix[point.x][point.y].color = this.selected_color;
+      });
+    }
+    this.dispatchEvent(
+      new CustomEvent("draw_stroke_line", {
+        detail: {
+          points: line_points,
+          color: this.selected_color,
+          final: final,
+        },
+      })
+    );
+  }
+  /**
+   *
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @returns {Array<{x: Number, y: Number, old_color: Array<Number>}>}
+   */
+  calculate_line_points(x1, y1, x2, y2) {
+    const line_points = [];
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    const step_x = x1 < x2 ? 1 : -1;
+    const step_y = y1 < y2 ? 1 : -1;
+    let err = dx - dy;
+    let x = x1;
+    let y = y1;
+    while (true) {
+      line_points.push({
+        x: x,
+        y: y,
+        old_color: this.canvas_matrix[x][y].color,
+      });
+
+      if (x === x2 && y === y2) break;
+
+      const e2 = 2 * err;
+      if (e2 > -dy) {
+        err -= dy;
+        x += step_x;
+      }
+      if (e2 < dx) {
+        err += dx;
+        y += step_y;
+      }
+    }
+    return line_points;
+  }
 
   /**
    *
@@ -267,7 +331,7 @@ export class SpriteEditor extends HTMLElement {
    *
    * @param {String} string
    */
-  selectToolFromString(string) {
+  select_tool_from_string(string) {
     switch (string) {
       case "pen":
         return new Pen(this);
@@ -279,6 +343,8 @@ export class SpriteEditor extends HTMLElement {
         return new Bucket(this);
       case "same_color":
         return new SameColorBucket(this);
+      case "stroke":
+        return new Stroke(this);
       case "color_picker":
         return new ColorPicker(this);
       default:
