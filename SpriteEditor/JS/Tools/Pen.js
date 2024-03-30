@@ -15,6 +15,7 @@ export class Pen extends Tool {
    */
   mouse_down(event) {
     this.is_drawing = true;
+    this.sprite_editor.start_action_buffer();
     this.draw(event);
   }
   /**
@@ -33,6 +34,7 @@ export class Pen extends Tool {
    */
   mouse_up(event) {
     this.is_drawing = false;
+    this.sprite_editor.end_action_buffer();
   }
 
   /**

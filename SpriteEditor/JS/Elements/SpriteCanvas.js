@@ -56,6 +56,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
     });
+    this.sprite_editor.addEventListener("revert_action", (event) => {
+      this.revert_action(event);
+    });
   }
   /**
    *
@@ -123,6 +126,13 @@ export class SpriteCanvas extends SpriteEditorPart {
       this.context.fillStyle = hover_color;
       this.context.fillRect(x, y, 10, 10);
     }
+  }
+  /**
+   *
+   * @param {Event} event
+   */
+  revert_action(event) {
+    const points = event.detail.points;
   }
 }
 

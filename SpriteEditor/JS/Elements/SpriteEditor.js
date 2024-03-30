@@ -7,6 +7,7 @@ import { MirrorPen } from "../Tools/MirrorPen.js";
 import { Bucket } from "../Tools/Bucket.js";
 import { SameColorBucket } from "../Tools/SameColorBucket.js";
 import { ColorPicker } from "../Tools/ColorPicker.js";
+import { ActionStack } from "../Classes/ActionStack.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -16,6 +17,8 @@ export class SpriteEditor extends HTMLElement {
     this.width = 64;
     this.height = 64;
     this.fill_visited = {};
+    this.action_stack = new ActionStack();
+    this.action_buffer = [];
   }
 
   connectedCallback() {
@@ -56,6 +59,11 @@ export class SpriteEditor extends HTMLElement {
       .addEventListener("input", (event) => {
         this.selected_color = this.hex_to_rgb_array(event.target.value);
       });
+    document.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.key === "z") {
+        this.revert_last_action();
+      }
+    });
   }
   hex_to_rgb_array(hexString) {
     hexString = hexString.replace(/^#/, "");
@@ -83,11 +91,43 @@ export class SpriteEditor extends HTMLElement {
     }
   }
   /**
+   * Starts gouping pen or erazer points for the action stack
+   */
+  start_action_buffer() {
+    this.action_buffer = [];
+  }
+  /**
+   * Ends grouping and pushes to stack
+   */
+  end_action_buffer() {
+    this.action_stack.push(this.action_buffer);
+  }
+  /**
+   * Reverts the last action done (STRG + Z)
+   */
+  revert_last_action() {
+    if (!this.action_stack.is_empty()) {
+      const points = this.action_stack.pop();
+      points.forEach((point) => {
+        this.canvas_matrix[point.x][point.y].color = point.prev_color;
+      });
+      this.dispatchEvent(
+        new CustomEvent("revert_action", {
+          detail: {
+            points: points,
+          },
+        })
+      );
+    }
+  }
+  /**
    *
    * @param {Number} x
    * @param {Number} y
    */
   change_canvas_matrix(x, y, erase = false) {
+    const prev_color = this.canvas_matrix[x][y].color;
+    if (this.canvas_matrix[x][y].color === this.selected_color) return;
     this.canvas_matrix[x][y].color = this.selected_color;
     this.dispatchEvent(
       new CustomEvent("canvas_matrix_changed", {
@@ -100,6 +140,7 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
+    this.action_buffer.push({ x: x, y: y, color: prev_color });
   }
   /**
    *
