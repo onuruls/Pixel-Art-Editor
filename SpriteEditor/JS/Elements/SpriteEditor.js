@@ -34,7 +34,7 @@ export class SpriteEditor extends HTMLElement {
     this.appendChild(this.sprite_tools);
     this.appendChild(this.sprite_canvas);
     this.appendChild(this.sprite_preview);
-    this.setToolsListeners();
+    this.set_tools_listeners();
     this.selected_tool = new Pen(this);
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
@@ -42,14 +42,14 @@ export class SpriteEditor extends HTMLElement {
     this.init_canvas_matrix();
   }
 
-  setToolsListeners() {
-    this.sprite_tools.querySelector("ul").addEventListener("click", (event) => {
-      const clicked_element = event.target;
-      if (
-        clicked_element.tagName === "INPUT" &&
-        clicked_element.type === "radio"
-      ) {
-        this.selected_tool = this.select_tool_from_string(clicked_element.id);
+  set_tools_listeners() {
+    const toolbox = this.sprite_tools.querySelector(".toolbox");
+    toolbox.addEventListener("click", (event) => {
+      const clickedElement = event.target.closest(".tool-button");
+      if (clickedElement) {
+        const tool = clickedElement.dataset.tool;
+        this.selected_tool = this.select_tool_from_string(tool);
+        console.log(this.selected_tool);
       }
     });
     this.sprite_tools
