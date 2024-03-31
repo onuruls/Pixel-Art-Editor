@@ -25,6 +25,13 @@ sprite-tools {
     border: none;
     background: none;
     cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .tool-button:hover {
+    filter: invert(5%) brightness(100%) contrast(100%);
+  }
+  .tool-button.active {
+    filter: invert(100%) brightness(100%) contrast(100%);
   }
 
   .tool-button img {

@@ -49,7 +49,6 @@ export class SpriteEditor extends HTMLElement {
       if (clickedElement) {
         const tool = clickedElement.dataset.tool;
         this.selected_tool = this.select_tool_from_string(tool);
-        console.log(this.selected_tool);
       }
     });
     this.sprite_tools

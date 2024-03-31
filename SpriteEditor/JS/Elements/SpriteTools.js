@@ -9,13 +9,13 @@ export class SpriteTools extends SpriteEditorPart {
     return `
       <h1 id="title">Sprite Editor</h1>
       <div class="toolbox">
-        <button id="pen" class="tool-button" data-tool="pen"><img src="icons/pen.svg" alt="Pen"></button>
+        <button id="pen" class="tool-button active" data-tool="pen"><img src="icons/pen.svg" alt="Pen"></button>
         <button id="mirror_pen" class="tool-button" data-tool="mirror_pen"><img src="icons/mirror_pen.svg" alt="Mirror Pen"></button>
         <button id="bucket" class="tool-button" data-tool="bucket"><img src="icons/bucket.svg" alt="Bucket"></button>
         <button id="same_color" class="tool-button" data-tool="same_color"><img src="icons/same_color_bucket.svg" alt="Same Color Bucket"></button>
         <button id="eraser" class="tool-button" data-tool="eraser"><img src="icons/eraser.svg" alt="Eraser"></button>
         <button id="stroke" class="tool-button" data-tool="stroke"><img src="icons/stroke.svg" alt="Stroke"></button>
-        <button id="rectangle" class="tool-button" data-tool="rectangle"><img src="icons/rectangle.svg" alt="Rectangle"></button>
+        <button id="rectangle" class="tool-button" data-tool="recstangle"><img src="icons/rectangle.svg" alt="Rectangle"></button>
         <button id="circle" class="tool-button" data-tool="circle"><img src="icons/circle.svg" alt="Circle"></button>
         <button id="move" class="tool-button" data-tool="move"><img src="icons/move.svg" alt="Move"></button>
         <button id="shape" class="tool-button" data-tool="shape"><img src="icons/fill_shape.svg" alt="Shape"></button>
@@ -30,15 +30,20 @@ export class SpriteTools extends SpriteEditorPart {
   }
 
   init() {
-    // Get the color picker element
     const color_input = document.getElementById("color_input");
-
-    // Add event listener to update stroke color of title when color changes
     color_input.addEventListener("input", () => {
       const title = document.getElementById("title");
       if (title) {
         title.style.webkitTextStrokeColor = color_input.value;
       }
+    });
+
+    const toolButtons = document.querySelectorAll(".tool-button");
+    toolButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        toolButtons.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+      });
     });
   }
 }
