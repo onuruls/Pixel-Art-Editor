@@ -15,6 +15,7 @@ export class MirrorPen extends Tool {
    */
   mouse_down(event) {
     this.is_drawing = true;
+    this.sprite_editor.start_action_buffer();
     this.draw(event);
   }
   /**
@@ -32,6 +33,7 @@ export class MirrorPen extends Tool {
    */
   mouse_up(event) {
     this.is_drawing = false;
+    this.sprite_editor.end_action_buffer();
   }
 
   /**
@@ -50,7 +52,7 @@ export class MirrorPen extends Tool {
     x1 = Math.floor(x1 / 10);
     y = Math.floor(y / 10);
     x2 = Math.floor(x2 / 10);
-    this.sprite_editor.change_canvas_matrix(x1, y);
-    this.sprite_editor.change_canvas_matrix(x2, y);
+    this.sprite_editor.pen_change_matrix(x1, y);
+    this.sprite_editor.pen_change_matrix(x2, y);
   }
 }

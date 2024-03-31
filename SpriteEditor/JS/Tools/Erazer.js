@@ -16,6 +16,7 @@ export class Erazer extends Tool {
   mouse_down(event) {
     this.is_drawing = true;
     this.draw(event);
+    this.sprite_editor.start_action_buffer();
   }
   /**
    *
@@ -32,6 +33,7 @@ export class Erazer extends Tool {
    */
   mouse_up(event) {
     this.is_drawing = false;
+    this.sprite_editor.end_action_buffer();
   }
 
   draw() {
@@ -40,6 +42,6 @@ export class Erazer extends Tool {
     let mouseY = event.clientY - rect.top;
     const x = Math.floor(mouseX / 10);
     const y = Math.floor(mouseY / 10);
-    this.sprite_editor.change_canvas_matrix(x, y, true);
+    this.sprite_editor.erazer_change_matrix(x, y);
   }
 }
