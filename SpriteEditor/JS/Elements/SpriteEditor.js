@@ -141,18 +141,15 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} x
    * @param {Number} y
    */
-  pen_change_matrix(x, y, erase = false) {
+  pen_change_matrix(x, y) {
     const prev_color = this.canvas_matrix[x][y].color;
-    if (this.canvas_matrix[x][y].color === this.selected_color && !erase)
-      return;
+    if (this.canvas_matrix[x][y].color === this.selected_color) return;
     this.canvas_matrix[x][y].color = this.selected_color;
     this.dispatchEvent(
       new CustomEvent("pen_matrix_changed", {
         detail: {
           x: x,
           y: y,
-          erase: erase,
-          hover: false,
           color: this.selected_color,
         },
       })
