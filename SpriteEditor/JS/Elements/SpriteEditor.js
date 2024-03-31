@@ -45,7 +45,7 @@ export class SpriteEditor extends HTMLElement {
     );
     this.init_canvas_matrix();
   }
-  
+
   set_listeners() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
     toolbox.addEventListener("click", (event) => {
@@ -412,21 +412,52 @@ export class SpriteEditor extends HTMLElement {
     const canvas = this.sprite_canvas.querySelector("canvas");
     canvas.classList.remove(
       "using-pen",
+      "using-mirror-pen",
+      "using-bucket",
       "using-eraser",
+      "using-stroke",
+      "using-rectangle",
+      "using-circle",
       "using-move",
+      "using-shape",
+      "using-lighten",
+      "using-dithering",
       "using-color-picker"
     );
     switch (tool) {
       case "pen":
-      case "mirror_pen":
         canvas.classList.add("using-pen");
         break;
-
+      case "mirror_pen":
+        canvas.classList.add("using-mirror-pen");
+        break;
+      case "bucket":
+      case "same_color":
+        canvas.classList.add("using-bucket");
+        break;
       case "eraser":
         canvas.classList.add("using-eraser");
         break;
+      case "stroke":
+        canvas.classList.add("using-stroke");
+        break;
+      case "rectangle":
+        canvas.classList.add("using-rectangle");
+        break;
+      case "circle":
+        canvas.classList.add("using-circle");
+        break;
       case "move":
         canvas.classList.add("using-move");
+        break;
+      case "shape":
+        canvas.classList.add("using-shape");
+        break;
+      case "lighten":
+        canvas.classList.add("using-lighten");
+        break;
+      case "dithering":
+        canvas.classList.add("using-dithering");
         break;
       case "color_picker":
         canvas.classList.add("using-color-picker");
@@ -434,8 +465,16 @@ export class SpriteEditor extends HTMLElement {
       default:
         canvas.classList.remove(
           "using-pen",
+          "using-mirror-pen",
+          "using-bucket",
           "using-eraser",
+          "using-stroke",
+          "using-rectangle",
+          "using-circle",
           "using-move",
+          "using-shape",
+          "using-lighten",
+          "using-dithering",
           "using-color-picker"
         );
     }
