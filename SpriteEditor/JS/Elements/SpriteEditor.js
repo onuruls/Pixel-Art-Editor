@@ -34,21 +34,23 @@ export class SpriteEditor extends HTMLElement {
     this.appendChild(this.sprite_tools);
     this.appendChild(this.sprite_canvas);
     this.appendChild(this.sprite_preview);
-    this.set_tools_listeners();
+    this.set_listeners();
     this.selected_tool = new Pen(this);
+    this.update_cursor_for_tool("pen");
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
     this.init_canvas_matrix();
   }
 
-  set_tools_listeners() {
+  set_listeners() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
     toolbox.addEventListener("click", (event) => {
       const clickedElement = event.target.closest(".tool-button");
       if (clickedElement) {
         const tool = clickedElement.dataset.tool;
         this.selected_tool = this.select_tool_from_string(tool);
+        this.update_cursor_for_tool(tool);
       }
     });
     this.sprite_tools
@@ -314,8 +316,37 @@ export class SpriteEditor extends HTMLElement {
    *
    * @param {String} tool
    */
-  update_selected_tool(tool) {
-    this.selected_tool = tool;
+  update_cursor_for_tool(tool) {
+    const canvas = this.sprite_canvas.querySelector("canvas");
+    canvas.classList.remove(
+      "using-pen",
+      "using-eraser",
+      "using-move",
+      "using-color-picker"
+    );
+    switch (tool) {
+      case "pen":
+      case "mirror_pen":
+        canvas.classList.add("using-pen");
+        break;
+
+      case "eraser":
+        canvas.classList.add("using-eraser");
+        break;
+      case "move":
+        canvas.classList.add("using-move");
+        break;
+      case "color_picker":
+        canvas.classList.add("using-color-picker");
+        break;
+      default:
+        canvas.classList.remove(
+          "using-pen",
+          "using-eraser",
+          "using-move",
+          "using-color-picker"
+        );
+    }
   }
 }
 

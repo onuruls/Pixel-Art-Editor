@@ -1,30 +1,43 @@
 sprite-canvas {
-    flex: 5;
-    display: flex;
-    align-items: center;
-    background-color: #222;
-    border-left: 1px solid white;
-    border-right: 1px solid white;
+  flex: 5;
+  display: flex;
+  align-items: center;
+  background-color: #222;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
 
-    > .canvas-wrapper {
-        display: block;
-        padding: 0px;
-        margin: auto;
-        background-image:
-        linear-gradient(90deg, #444 1px, transparent 1px),
-        linear-gradient(90deg, #444 1px, transparent 1px),
-        linear-gradient(0deg, #444 1px, transparent 1px),
-        linear-gradient(0deg, #444 1px, transparent 1px);
-        background-size: 10px 10px;
-        background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
-        border: 1cap solid #bbb;
-    }
-    canvas {
-        position: relative;
-        display: block;
-        width: 640px;
-        height: 640px;
-        z-index: 5;
-        margin: auto;
-    }
+  > .canvas-wrapper {
+    display: block;
+    padding: 0px;
+    margin: auto;
+    background-image: linear-gradient(90deg, #444 1px, transparent 1px),
+      linear-gradient(90deg, #444 1px, transparent 1px),
+      linear-gradient(0deg, #444 1px, transparent 1px),
+      linear-gradient(0deg, #444 1px, transparent 1px);
+    background-size: 10px 10px;
+    background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
+    border: 1cap solid #bbb;
+  }
+  canvas {
+    position: relative;
+    display: block;
+    width: 640px;
+    height: 640px;
+    z-index: 5;
+    margin: auto;
+    cursor: crosshair;
+  }
+
+  canvas.using-pen {
+    cursor: url(../../img/cursors/pen.svg) 0 0, auto;
+  }
+  canvas.using-eraser {
+    cursor: url(../../img/cursors/eraser.svg) 0 0, auto;
+  }
+  canvas.using-move {
+    cursor: move;
+  }
+  canvas.using-color-picker {
+    cursor: url(../../img/cursors/color-picker.svg) 0 0, auto;
+  }
 }
