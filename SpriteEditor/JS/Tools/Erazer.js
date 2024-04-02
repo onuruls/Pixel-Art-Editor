@@ -7,6 +7,7 @@ export class Erazer extends Tool {
    */
   constructor(canvas) {
     super(canvas);
+    this.cursorIconUrl = "./img/cursors/eraser.png";
   }
 
   /**
@@ -23,6 +24,8 @@ export class Erazer extends Tool {
    * @param {Event} event
    */
   mouse_move(event) {
+    this.hover(event);
+    this.activateCursorIcon();
     if (this.is_drawing) {
       this.draw(event);
     }

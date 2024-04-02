@@ -7,6 +7,7 @@ export class SameColorBucket extends Tool {
    */
   constructor(canvas) {
     super(canvas);
+    this.cursorIconUrl = "./img/cursors/bucket.png";
   }
 
   /**
@@ -21,6 +22,7 @@ export class SameColorBucket extends Tool {
    * @param {Event} event
    */
   mouse_move(event) {
+    this.activateCursorIcon();
     return;
   }
   /**

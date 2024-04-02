@@ -119,4 +119,9 @@ export class Tool {
     const y = Math.floor(mouse_y / 10);
     return { x: x, y: y };
   }
+
+  activateCursorIcon() {
+    const canvas = this.canvas;
+    canvas.style.cursor = `url('${this.cursorIconUrl}'), auto`;
+  }
 }

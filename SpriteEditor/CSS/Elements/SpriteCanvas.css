@@ -27,44 +27,4 @@ sprite-canvas {
     margin: auto;
     cursor: crosshair;
   }
-
-  canvas.using-pen {
-    cursor: url(../../img/cursors/pen.png) 0 0, auto;
-  }
-  canvas.using-mirror-pen {
-    cursor: url(../../img/cursors/mirror-pen.png) 0 0, auto;
-  }
-  canvas.using-bucket {
-    cursor: url(../../img/cursors/bucket.png) 0 0, auto;
-  }
-  canvas.using-mirror-pen {
-    cursor: url(../../img/cursors/mirror-pen.png) 0 0, auto;
-  }
-  canvas.using-eraser {
-    cursor: url(../../img/cursors/eraser.png) 0 0, auto;
-  }
-  canvas.using-stroke {
-    cursor: url(../../img/cursors/stroke.png) 0 0, auto;
-  }
-  canvas.using-rectangle {
-    cursor: url(../../img/cursors/rectangle.png) 0 0, auto;
-  }
-  canvas.using-circle {
-    cursor: url(../../img/cursors/circle.png) 0 0, auto;
-  }
-  canvas.using-move {
-    cursor: move;
-  }
-  canvas.using-shape {
-    cursor: url(../../img/cursors/wand.png) 0 0, auto;
-  }
-  canvas.using-lighten {
-    cursor: url(../../img/cursors/lighten.png) 0 0, auto;
-  }
-  canvas.using-dithering {
-    cursor: url(../../img/cursors/dither.png) 0 0, auto;
-  }
-  canvas.using-color-picker {
-    cursor: url(../../img/cursors/dropper.png) 0 0, auto;
-  }
 }
