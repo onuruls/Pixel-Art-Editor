@@ -8,7 +8,7 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   constructor(sprite_editor) {
     super(sprite_editor);
-    this.line_holder = [];
+    this.shape_holder = [];
   }
 
   render() {
@@ -60,8 +60,8 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("revert_action", (event) => {
       this.revert_action(event);
     });
-    this.sprite_editor.addEventListener("draw_stroke_line", (event) => {
-      this.draw_stroke_line(event);
+    this.sprite_editor.addEventListener("draw_shape", (event) => {
+      this.draw_shape(event);
     });
   }
   /**
@@ -144,26 +144,27 @@ export class SpriteCanvas extends SpriteEditorPart {
    *
    * @param {Event} event
    */
-  draw_stroke_line(event) {
+  draw_shape(event) {
     const selected_color = event.detail.color;
     const points = event.detail.points;
     if (!event.detail.final) {
       this.revert_canvas();
-      this.line_holder = points;
+      this.shape_holder = points;
     } else {
-      this.line_holder = [];
+      this.shape_holder = [];
     }
     points.forEach((point) => {
       this.paint_single_pixel(point.x, point.y, selected_color);
     });
   }
   /**
-   * Reverts the old Line, when the Line is not finally drawn
+   * Reverts the old points, when shape is not finally drawn
    */
   revert_canvas() {
-    this.line_holder.forEach((point) => {
+    //console.log("REVERT: ", this.shape_holder);
+    this.shape_holder.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
-      this.paint_single_pixel(point.x, point.y, point.old_color);
+      this.paint_single_pixel(point.x, point.y, point.prev_color);
     });
   }
   /**

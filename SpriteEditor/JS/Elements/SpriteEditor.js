@@ -9,6 +9,7 @@ import { SameColorBucket } from "../Tools/SameColorBucket.js";
 import { Stroke } from "../Tools/Stroke.js";
 import { ColorPicker } from "../Tools/ColorPicker.js";
 import { ActionStack } from "../Classes/ActionStack.js";
+import { Rectangle } from "../Tools/Rectangle.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -45,7 +46,7 @@ export class SpriteEditor extends HTMLElement {
     );
     this.init_canvas_matrix();
   }
-  
+
   set_listeners() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
     toolbox.addEventListener("click", (event) => {
@@ -288,7 +289,7 @@ export class SpriteEditor extends HTMLElement {
     this.end_action_buffer();
   }
   /**
-   *
+   *  Draws a straight Line on the Canvas
    * @param {Number} x1
    * @param {Number} y1
    * @param {Number} x2
@@ -297,30 +298,10 @@ export class SpriteEditor extends HTMLElement {
    */
   draw_line_matrix(x1, y1, x2, y2, final = false) {
     const line_points = this.calculate_line_points(x1, y1, x2, y2);
-    if (final) {
-      this.start_action_buffer();
-      line_points.forEach((point) => {
-        this.action_buffer.push({
-          x: point.x,
-          y: point.y,
-          prev_color: this.canvas_matrix[point.x][point.y].color,
-        });
-        this.canvas_matrix[point.x][point.y].color = this.selected_color;
-      });
-      this.end_action_buffer();
-    }
-    this.dispatchEvent(
-      new CustomEvent("draw_stroke_line", {
-        detail: {
-          points: line_points,
-          color: this.selected_color,
-          final: final,
-        },
-      })
-    );
+    this.draw_shape_matrix(line_points, final);
   }
   /**
-   *
+   * Calculates the linepoints include in the line with Bresenham
    * @param {Number} x1
    * @param {Number} y1
    * @param {Number} x2
@@ -340,7 +321,7 @@ export class SpriteEditor extends HTMLElement {
       line_points.push({
         x: x,
         y: y,
-        old_color: this.canvas_matrix[x][y].color,
+        prev_color: this.canvas_matrix[x][y].color,
       });
 
       if (x === x2 && y === y2) break;
@@ -357,9 +338,76 @@ export class SpriteEditor extends HTMLElement {
     }
     return line_points;
   }
-
   /**
    *
+   * @param {Array<{x: Number, y: Number, old_color: Array<Number>}>} shape_points
+   * @param {Boolean} final
+   */
+  draw_shape_matrix(shape_points, final = false) {
+    if (final) {
+      this.start_action_buffer();
+      shape_points.forEach((point) => {
+        this.action_buffer.push({
+          x: point.x,
+          y: point.y,
+          prev_color: this.canvas_matrix[point.x][point.y].color,
+        });
+        this.canvas_matrix[point.x][point.y].color = this.selected_color;
+      });
+      this.end_action_buffer();
+    }
+    // this.sprite_canvas.draw_shape(shape_points, this.selected_color, final)
+    this.dispatchEvent(
+      new CustomEvent("draw_shape", {
+        detail: {
+          points: shape_points,
+          color: this.selected_color,
+          final: final,
+        },
+      })
+    );
+  }
+  /**
+   *  Draws a rectangle on the Canvas
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @param {Boolean} final
+   */
+  draw_rectangle_matrix(x1, y1, x2, y2, final = false) {
+    const rectangle_points = this.calculate_rectangle_points(x1, y1, x2, y2);
+    this.draw_shape_matrix(rectangle_points, final);
+  }
+  /**
+   * Calculates the matrix points included in the rectangle
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @returns {Array<{x: Number, y: Number, old_color: Array<Number>}>}
+   */
+  calculate_rectangle_points(x1, y1, x2, y2) {
+    const points = [];
+    const y_direction = y1 - y2 > 0 ? -1 : 1;
+    const x_direction = x1 - x2 > 0 ? -1 : 1;
+    for (let i = x1; x_direction > 0 ? i <= x2 : i >= x2; i += x_direction) {
+      points.push({ x: i, y: y1, prev_color: this.canvas_matrix[i][y1].color });
+      points.push({ x: i, y: y2, prev_color: this.canvas_matrix[i][x2].color });
+    }
+    for (
+      let j = y1 + y_direction;
+      y_direction > 0 ? j < y2 : j > y2;
+      j += y_direction
+    ) {
+      points.push({ x: x1, y: j, prev_color: this.canvas_matrix[x1][j].color });
+      points.push({ x: x2, y: j, prev_color: this.canvas_matrix[x2][j].color });
+    }
+    return points;
+  }
+
+  /**
+   *  Returns true if two color-Arrays are the same
    * @param {Array<Number>} color1
    * @param {Array<Number>} color2
    */
@@ -399,6 +447,8 @@ export class SpriteEditor extends HTMLElement {
         return new Stroke(this);
       case "color_picker":
         return new ColorPicker(this);
+      case "rectangle":
+        return new Rectangle(this);
       default:
         return new Pen(this);
     }

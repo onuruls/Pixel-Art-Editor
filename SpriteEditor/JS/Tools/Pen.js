@@ -42,11 +42,7 @@ export class Pen extends Tool {
    * @param {Event} event
    */
   draw(event) {
-    let rect = this.canvas.getBoundingClientRect();
-    let mouseX = event.clientX - rect.left;
-    let mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
-    this.sprite_editor.pen_change_matrix(x, y);
+    const position = this.get_mouse_position(event);
+    this.sprite_editor.pen_change_matrix(position.x, position.y);
   }
 }
