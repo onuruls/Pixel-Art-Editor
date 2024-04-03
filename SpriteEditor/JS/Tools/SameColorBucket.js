@@ -36,11 +36,7 @@ export class SameColorBucket extends Tool {
    * @param {Event} event
    */
   draw(event) {
-    var rect = this.canvas.getBoundingClientRect();
-    var mouse_x = event.clientX - rect.left;
-    var mouse_y = event.clientY - rect.top;
-    const x = Math.floor(mouse_x / 10);
-    const y = Math.floor(mouse_y / 10);
-    this.sprite_editor.fill_same_color_matrix(x, y);
+    const position = this.get_mouse_position(event);
+    this.sprite_editor.fill_same_color_matrix(position.x, position.y);
   }
 }

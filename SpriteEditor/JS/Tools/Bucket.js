@@ -36,11 +36,7 @@ export class Bucket extends Tool {
    * @param {Event} event
    */
   draw(event) {
-    var rect = this.canvas.getBoundingClientRect();
-    var mouseX = event.clientX - rect.left;
-    var mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
-    this.sprite_editor.fill_change_matrix(x, y);
+    const position = this.get_mouse_position(event);
+    this.sprite_editor.fill_change_matrix(position.x, position.y);
   }
 }

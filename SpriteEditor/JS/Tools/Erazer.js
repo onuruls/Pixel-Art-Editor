@@ -36,12 +36,8 @@ export class Erazer extends Tool {
     this.sprite_editor.end_action_buffer();
   }
 
-  draw() {
-    let rect = this.canvas.getBoundingClientRect();
-    let mouseX = event.clientX - rect.left;
-    let mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
-    this.sprite_editor.erazer_change_matrix(x, y);
+  draw(event) {
+    const position = this.get_mouse_position(event);
+    this.sprite_editor.erazer_change_matrix(position.x, position.y);
   }
 }
