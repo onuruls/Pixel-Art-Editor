@@ -27,17 +27,4 @@ sprite-canvas {
     margin: auto;
     cursor: crosshair;
   }
-
-  canvas.using-pen {
-    cursor: url(../../img/cursors/pen.svg) 0 0, auto;
-  }
-  canvas.using-eraser {
-    cursor: url(../../img/cursors/eraser.svg) 0 0, auto;
-  }
-  canvas.using-move {
-    cursor: move;
-  }
-  canvas.using-color-picker {
-    cursor: url(../../img/cursors/color-picker.svg) 0 0, auto;
-  }
 }
