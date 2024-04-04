@@ -428,6 +428,7 @@ export class SpriteEditor extends HTMLElement {
    */
   calculate_circle_points(x1, y1, x2, y2) {
     const points = [];
+    const added_points = [];
     const radiusX = Math.abs(x2 - x1) / 2;
     const radiusY = Math.abs(y2 - y1) / 2;
     const centerX = Math.min(x1, x2) + radiusX;
@@ -436,7 +437,12 @@ export class SpriteEditor extends HTMLElement {
     for (let a = 0; a < 2 * Math.PI; a += step) {
       const x = Math.round(centerX + radiusX * Math.cos(a));
       const y = Math.round(centerY + radiusY * Math.sin(a));
-      points.push({ x: x, y: y, prev_color: this.canvas_matrix[x][y].color });
+      const pointKey = `${x},${y}`;
+      if (!added_points[pointKey]) {
+        points.push({ x: x, y: y, prev_color: this.canvas_matrix[x][y].color });
+        added_points[pointKey] = true;
+      }
+      console.log(added_points);
     }
     return points;
   }
