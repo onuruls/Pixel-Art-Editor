@@ -10,6 +10,7 @@ import { Stroke } from "../Tools/Stroke.js";
 import { ColorPicker } from "../Tools/ColorPicker.js";
 import { ActionStack } from "../Classes/ActionStack.js";
 import { Rectangle } from "../Tools/Rectangle.js";
+import { Circle } from "../Tools/Circle.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -403,6 +404,40 @@ export class SpriteEditor extends HTMLElement {
     }
     return points;
   }
+  /**
+   * Draws a circle on the Canvas
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @param {Boolean} final
+   */
+  draw_circle_matrix(x1, y1, x2, y2, final = false) {
+    const circle_points = this.calculate_circle_points(x1, y1, x2, y2);
+    this.draw_shape_matrix(circle_points, final);
+  }
+  /**
+   * Calculates the matrix points included in the circle
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @returns {Array<{x: Number, y: Number, old_color: Array<Number>}>}
+   */
+  calculate_circle_points(x1, y1, x2, y2) {
+    const points = [];
+    const radiusX = Math.abs(x2 - x1) / 2;
+    const radiusY = Math.abs(y2 - y1) / 2;
+    const centerX = Math.min(x1, x2) + radiusX;
+    const centerY = Math.min(y1, y2) + radiusY;
+    const step = 1 / Math.max(radiusX, radiusY);
+    for (let a = 0; a < 2 * Math.PI; a += step) {
+      const x = Math.round(centerX + radiusX * Math.cos(a));
+      const y = Math.round(centerY + radiusY * Math.sin(a));
+      points.push({ x: x, y: y, prev_color: this.canvas_matrix[x][y].color });
+    }
+    return points;
+  }
 
   /**
    *  Returns true if two color-Arrays are the same
@@ -447,6 +482,8 @@ export class SpriteEditor extends HTMLElement {
         return new ColorPicker(this);
       case "rectangle":
         return new Rectangle(this);
+      case "circle":
+        return new Circle(this);
       default:
         return new Pen(this);
     }

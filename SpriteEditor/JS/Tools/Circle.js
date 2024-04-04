@@ -1,13 +1,13 @@
 import { Tool } from "./Tool.js";
 
-export class Rectangle extends Tool {
+export class Circle extends Tool {
   /**
    *
    * @param {HTMLCanvasElement} canvas
    */
   constructor(canvas) {
     super(canvas);
-    this.cursorIconUrl = "./img/cursors/rectangle.png";
+    this.cursorIconUrl = "./img/cursors/circle.png";
     this.start_x = 0;
     this.start_y = 0;
     this.end_x = 0;
@@ -51,7 +51,7 @@ export class Rectangle extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    this.sprite_editor.draw_rectangle_matrix(
+    this.sprite_editor.draw_circle_matrix(
       this.end_x,
       this.end_y,
       this.start_x,
