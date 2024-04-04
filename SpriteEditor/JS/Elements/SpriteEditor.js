@@ -442,7 +442,6 @@ export class SpriteEditor extends HTMLElement {
         points.push({ x: x, y: y, prev_color: this.canvas_matrix[x][y].color });
         added_points[pointKey] = true;
       }
-      console.log(added_points);
     }
     return points;
   }
