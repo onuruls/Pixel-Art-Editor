@@ -120,8 +120,8 @@ export class Tool {
     return { x: x, y: y };
   }
 
-  activateCursorIcon() {
+  activate_cursor_icon() {
     const canvas = this.canvas;
-    canvas.style.cursor = `url('${this.cursorIconUrl}'), auto`;
+    canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
   }
 }

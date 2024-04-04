@@ -11,6 +11,7 @@ import { ColorPicker } from "../Tools/ColorPicker.js";
 import { ActionStack } from "../Classes/ActionStack.js";
 import { Rectangle } from "../Tools/Rectangle.js";
 import { Circle } from "../Tools/Circle.js";
+import { Lighting } from "../Tools/Lighting.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -22,6 +23,7 @@ export class SpriteEditor extends HTMLElement {
     this.fill_visited = {};
     this.action_stack = new ActionStack();
     this.action_buffer = [];
+    this.changed_points = [];
   }
 
   connectedCallback() {
@@ -438,7 +440,36 @@ export class SpriteEditor extends HTMLElement {
     }
     return points;
   }
-
+  /**
+   * Changes the brightness of the pixel
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Number} brightness
+   */
+  change_brightness_matrix(x, y, brightness) {
+    const prev_color = this.canvas_matrix[x][y].color;
+    if (prev_color[3] == 0) return;
+    const new_color = [
+      Math.min(prev_color[0] + brightness, 255),
+      Math.min(prev_color[1] + brightness, 255),
+      Math.min(prev_color[2] + brightness, 255),
+      prev_color[3],
+    ];
+    this.canvas_matrix[x][y].color = new_color;
+    if (!this.changed_points.some((point) => point.x === x && point.y === y)) {
+      this.action_buffer.push({ x, y, prev_color });
+      this.changed_points.push({ x, y });
+    }
+    this.dispatchEvent(
+      new CustomEvent("pen_matrix_changed", {
+        detail: {
+          x,
+          y,
+          color: new_color,
+        },
+      })
+    );
+  }
   /**
    *  Returns true if two color-Arrays are the same
    * @param {Array<Number>} color1
@@ -484,6 +515,8 @@ export class SpriteEditor extends HTMLElement {
         return new Rectangle(this);
       case "circle":
         return new Circle(this);
+      case "lighting":
+        return new Lighting(this);
       default:
         return new Pen(this);
     }

@@ -7,7 +7,7 @@ export class Bucket extends Tool {
    */
   constructor(canvas) {
     super(canvas);
-    this.cursorIconUrl = "./img/cursors/bucket.png";
+    this.cursor_icon_url = "./img/cursors/bucket.png";
   }
 
   /**
@@ -22,7 +22,7 @@ export class Bucket extends Tool {
    * @param {Event} event
    */
   mouse_move(event) {
-    this.activateCursorIcon();
+    this.activate_cursor_icon();
     return;
   }
   /**

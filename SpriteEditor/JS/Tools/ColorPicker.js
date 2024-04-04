@@ -7,7 +7,7 @@ export class ColorPicker extends Tool {
    */
   constructor(canvas) {
     super(canvas);
-    this.cursorIconUrl = "./img/cursors/dropper.png";
+    this.cursor_icon_url = "./img/cursors/dropper.png";
   }
 
   /**
@@ -22,7 +22,7 @@ export class ColorPicker extends Tool {
    * @param {Event} event
    */
   mouse_move(event) {
-    this.activateCursorIcon();
+    this.activate_cursor_icon();
     return;
   }
   /**

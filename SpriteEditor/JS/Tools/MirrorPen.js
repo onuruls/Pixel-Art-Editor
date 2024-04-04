@@ -7,7 +7,7 @@ export class MirrorPen extends Tool {
    */
   constructor(canvas) {
     super(canvas);
-    this.cursorIconUrl = "./img/cursors/mirror-pen.png";
+    this.cursor_icon_url = "./img/cursors/mirror-pen.png";
   }
 
   /**
@@ -25,7 +25,7 @@ export class MirrorPen extends Tool {
    */
   mouse_move(event) {
     this.hover(event);
-    this.activateCursorIcon();
+    this.activate_cursor_icon();
     if (this.is_drawing) {
       this.draw(event);
     }
