@@ -7,7 +7,7 @@ export class Pen extends Tool {
    */
   constructor(canvas) {
     super(canvas);
-    this.cursorIconUrl = "./img/cursors/pen.png";
+    this.cursor_icon_url = "./img/cursors/pen.png";
   }
 
   /**
@@ -25,7 +25,7 @@ export class Pen extends Tool {
    */
   mouse_move(event) {
     this.hover(event);
-    this.activateCursorIcon();
+    this.activate_cursor_icon();
     if (this.is_drawing) {
       this.draw(event);
     }

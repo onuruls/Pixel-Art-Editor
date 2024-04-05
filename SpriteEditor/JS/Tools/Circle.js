@@ -1,13 +1,13 @@
 import { Tool } from "./Tool.js";
 
-export class Stroke extends Tool {
+export class Circle extends Tool {
   /**
    *
    * @param {HTMLCanvasElement} canvas
    */
   constructor(canvas) {
     super(canvas);
-    this.cursor_icon_url = "./img/cursors/stroke.png";
+    this.cursor_icon_url = "./img/cursors/circle.png";
     this.start_x = 0;
     this.start_y = 0;
     this.end_x = 0;
@@ -51,22 +51,12 @@ export class Stroke extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    if (this.start_x <= this.end_x) {
-      this.sprite_editor.draw_line_matrix(
-        this.start_x,
-        this.start_y,
-        this.end_x,
-        this.end_y,
-        final
-      );
-    } else {
-      this.sprite_editor.draw_line_matrix(
-        this.end_x,
-        this.end_y,
-        this.start_x,
-        this.start_y,
-        final
-      );
-    }
+    this.sprite_editor.draw_circle_matrix(
+      this.end_x,
+      this.end_y,
+      this.start_x,
+      this.start_y,
+      final
+    );
   }
 }

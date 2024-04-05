@@ -1,13 +1,13 @@
 import { Tool } from "./Tool.js";
 
-export class Erazer extends Tool {
+export class Lighting extends Tool {
   /**
    *
    * @param {HTMLCanvasElement} canvas
    */
   constructor(canvas) {
     super(canvas);
-    this.cursor_icon_url = "./img/cursors/eraser.png";
+    this.cursor_icon_url = "./img/cursors/lighten.png";
   }
 
   /**
@@ -16,8 +16,8 @@ export class Erazer extends Tool {
    */
   mouse_down(event) {
     this.is_drawing = true;
-    this.draw(event);
     this.sprite_editor.start_action_buffer();
+    this.draw(event);
   }
   /**
    *
@@ -37,10 +37,15 @@ export class Erazer extends Tool {
   mouse_up(event) {
     this.is_drawing = false;
     this.sprite_editor.end_action_buffer();
+    this.sprite_editor.changed_points = [];
   }
 
+  /**
+   *
+   * @param {Event} event
+   */
   draw(event) {
     const position = this.get_mouse_position(event);
-    this.sprite_editor.erazer_change_matrix(position.x, position.y);
+    this.sprite_editor.change_brightness_matrix(position.x, position.y, 5);
   }
 }

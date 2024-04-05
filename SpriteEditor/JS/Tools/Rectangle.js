@@ -7,6 +7,7 @@ export class Rectangle extends Tool {
    */
   constructor(canvas) {
     super(canvas);
+    this.cursor_icon_url = "./img/cursors/rectangle.png";
     this.start_x = 0;
     this.start_y = 0;
     this.end_x = 0;
@@ -28,6 +29,7 @@ export class Rectangle extends Tool {
    * @param {Event} event
    */
   mouse_move(event) {
+    this.activate_cursor_icon();
     const position = this.get_mouse_position(event);
     this.end_x = position.x;
     this.end_y = position.y;
