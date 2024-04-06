@@ -63,6 +63,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("draw_shape", (event) => {
       this.draw_shape(event);
     });
+    this.sprite_editor.addEventListener("move_canvas", (event) => {
+      this.move_canvas(event);
+    });
   }
   /**
    *
@@ -187,6 +190,31 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   erase_single_pixel(x, y) {
     this.context.clearRect(x * 10, y * 10, 10, 10);
+  }
+  /**
+   * Clears canvas and draws moved pixels
+   * @param {Event} event
+   */
+  move_canvas(event) {
+    this.context.clearRect(
+      0,
+      0,
+      this.drawing_canvas.width,
+      this.drawing_canvas.height
+    );
+    const points = event.detail.points;
+    points.forEach((point) => {
+      const new_x = point.x - event.detail.x_diff;
+      const new_y = point.y - event.detail.y_diff;
+      if (
+        new_x >= 0 &&
+        new_x < this.drawing_canvas.width / 10 &&
+        new_y >= 0 &&
+        new_y < this.drawing_canvas.height / 10
+      ) {
+        this.paint_single_pixel(new_x, new_y, point.color);
+      }
+    });
   }
 }
 

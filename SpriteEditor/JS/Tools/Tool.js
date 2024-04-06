@@ -108,8 +108,9 @@ export class Tool {
   }
 
   /**
-   *
+   * Calculates mouse position from event.
    * @param {Event} event
+   * @returns {{x: Number, y: Number}}
    */
   get_mouse_position(event) {
     var rect = this.canvas.getBoundingClientRect();
@@ -119,7 +120,9 @@ export class Tool {
     const y = Math.floor(mouse_y / 10);
     return { x: x, y: y };
   }
-
+  /**
+   * Sets the cursor-icon on the canvas element.
+   */
   activate_cursor_icon() {
     const canvas = this.canvas;
     canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
