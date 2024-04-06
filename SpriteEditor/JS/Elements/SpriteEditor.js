@@ -12,6 +12,7 @@ import { ActionStack } from "../Classes/ActionStack.js";
 import { Rectangle } from "../Tools/Rectangle.js";
 import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
+import { Move } from "../Tools/Move.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -24,6 +25,7 @@ export class SpriteEditor extends HTMLElement {
     this.action_stack = new ActionStack();
     this.action_buffer = [];
     this.changed_points = [];
+    this.move_points = [];
   }
 
   connectedCallback() {
@@ -46,7 +48,7 @@ export class SpriteEditor extends HTMLElement {
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
-    this.init_canvas_matrix();
+    this.canvas_matrix = this.create_canvas_matrix();
   }
 
   set_listeners() {
@@ -96,16 +98,18 @@ export class SpriteEditor extends HTMLElement {
   }
   /**
    * Creates the pixel matrix
+   * @returns {Array<Array<{hover: Boolean, color: Array<Number>}>>}
    */
-  init_canvas_matrix() {
-    this.canvas_matrix = new Array(64);
+  create_canvas_matrix() {
+    const matrix = new Array(64);
     for (var i = 0; i < this.height; i++) {
-      this.canvas_matrix[i] = new Array(64);
+      matrix[i] = new Array(64);
 
       for (var j = 0; j < this.width; j++) {
-        this.canvas_matrix[i][j] = { hover: false, color: [0, 0, 0, 0] };
+        matrix[i][j] = { hover: false, color: [0, 0, 0, 0] };
       }
     }
+    return matrix;
   }
   /**
    * Starts gouping pen or erazer points for the action stack
@@ -307,7 +311,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y1
    * @param {Number} x2
    * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, old_color: Array<Number>}>}
+   * @returns {Array<{x: Number, y: Number, prev_color: Array<Number>}>}
    */
   calculate_line_points(x1, y1, x2, y2) {
     const line_points = [];
@@ -341,7 +345,7 @@ export class SpriteEditor extends HTMLElement {
   }
   /**
    *
-   * @param {Array<{x: Number, y: Number, old_color: Array<Number>}>} shape_points
+   * @param {Array<{x: Number, y: Number, prev_color: Array<Number>}>} shape_points
    * @param {Boolean} final
    */
   draw_shape_matrix(shape_points, final = false) {
@@ -386,7 +390,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y1
    * @param {Number} x2
    * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, old_color: Array<Number>}>}
+   * @returns {Array<{x: Number, y: Number, prev_color: Array<Number>}>}
    */
   calculate_rectangle_points(x1, y1, x2, y2) {
     const points = [];
@@ -424,7 +428,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y1
    * @param {Number} x2
    * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, old_color: Array<Number>}>}
+   * @returns {Array<{x: Number, y: Number, prev_color: Array<Number>}>}
    */
   calculate_circle_points(x1, y1, x2, y2) {
     const points = [];
@@ -476,6 +480,76 @@ export class SpriteEditor extends HTMLElement {
     );
   }
   /**
+   * Filters canvas. Puts pixels with a color into move_points.
+   * Better performance than moving the whole canvas.
+   * The Pixels are added to the action_buffer as well.
+   */
+  filter_move_points() {
+    this.move_points = [];
+    for (let i = 0; i < this.canvas_matrix.length; i++) {
+      for (let j = 0; j < this.canvas_matrix[i].length; j++) {
+        if (
+          !this.compare_colors(this.canvas_matrix[i][j].color, [0, 0, 0, 0])
+        ) {
+          this.move_points.push({
+            x: i,
+            y: j,
+            color: this.canvas_matrix[i][j].color,
+          });
+          this.action_buffer.push({
+            x: i,
+            y: j,
+            prev_color: this.canvas_matrix[i][j].color,
+          });
+        }
+      }
+    }
+  }
+  /**
+   * Moves the move_pixels.
+   * @param {Number} x_diff
+   * @param {Number} y_diff
+   */
+  move_matrix(x_diff, y_diff) {
+    this.dispatchEvent(
+      new CustomEvent("move_canvas", {
+        detail: {
+          points: this.move_points,
+          x_diff: x_diff,
+          y_diff: y_diff,
+        },
+      })
+    );
+  }
+  /**
+   * Writes move-changes to canvas_matrix.
+   * Final position points are added to action_buffer.
+   * unshit not push, so [0,0,0,0] are drawn first, when reverting.
+   * @param {Number} x_diff
+   * @param {Number} y_diff
+   */
+  finish_move(x_diff, y_diff) {
+    this.canvas_matrix = this.create_canvas_matrix();
+    this.move_points.forEach((point) => {
+      const new_x = point.x - x_diff;
+      const new_y = point.y - y_diff;
+      if (
+        new_x >= 0 &&
+        new_x < this.width &&
+        new_y >= 0 &&
+        new_y < this.height
+      ) {
+        this.canvas_matrix[new_x][new_y].color = point.color;
+        this.action_buffer.unshift({
+          x: new_x,
+          y: new_y,
+          prev_color: [0, 0, 0, 0],
+        });
+      }
+    });
+  }
+
+  /**
    *  Returns true if two color-Arrays are the same
    * @param {Array<Number>} color1
    * @param {Array<Number>} color2
@@ -522,6 +596,8 @@ export class SpriteEditor extends HTMLElement {
         return new Circle(this);
       case "lighting":
         return new Lighting(this);
+      case "move":
+        return new Move(this);
       default:
         return new Pen(this);
     }
