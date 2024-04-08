@@ -13,6 +13,7 @@ import { Rectangle } from "../Tools/Rectangle.js";
 import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
+import { Dithering } from "../Tools/Dithering.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -598,6 +599,8 @@ export class SpriteEditor extends HTMLElement {
         return new Lighting(this);
       case "move":
         return new Move(this);
+      case "dithering":
+        return new Dithering(this);
       default:
         return new Pen(this);
     }
