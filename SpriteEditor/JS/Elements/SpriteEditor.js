@@ -13,6 +13,7 @@ import { Rectangle } from "../Tools/Rectangle.js";
 import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
+import { RectangleSelection } from "../Tools/RectangleSelection.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -26,6 +27,9 @@ export class SpriteEditor extends HTMLElement {
     this.action_buffer = [];
     this.changed_points = [];
     this.move_points = [];
+    this.selected_points = [];
+    this.selection_start_point = { x: 0, y: 0 };
+    this.selection_color = [196, 252, 250, 123];
   }
 
   connectedCallback() {
@@ -548,6 +552,47 @@ export class SpriteEditor extends HTMLElement {
       }
     });
   }
+  /**
+   * Sets the startposition for rectangle- and lasso-selection
+   * @param {{x: Number, y: Number}} position
+   */
+  set_selection_start_point(position) {
+    this.selection_start_point = position;
+  }
+  /**
+   *
+   * @param {{x: Number, y: Number}} position
+   */
+  draw_rectangle_selection(position) {
+    this.selected_points = [];
+    const y_direction = this.selection_start_point.y - position.y > 0 ? -1 : 1;
+    const x_direction = this.selection_start_point.x - position.x > 0 ? -1 : 1;
+    console.log();
+    for (
+      let i = this.selection_start_point.x;
+      x_direction > 0 ? i <= position.x : i >= position.x;
+      i += x_direction
+    ) {
+      for (
+        let j = this.selection_start_point.y;
+        y_direction > 0 ? j <= position.y : j >= position.y;
+        j += y_direction
+      ) {
+        this.selected_points.push({
+          x: i,
+          y: j,
+          prev_color: this.canvas_matrix[i][j].color,
+        });
+      }
+    }
+    this.dispatchEvent(
+      new CustomEvent("update_selected_area", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+  }
 
   /**
    *  Returns true if two color-Arrays are the same
@@ -598,6 +643,8 @@ export class SpriteEditor extends HTMLElement {
         return new Lighting(this);
       case "move":
         return new Move(this);
+      case "rectangle_selection":
+        return new RectangleSelection(this);
       default:
         return new Pen(this);
     }

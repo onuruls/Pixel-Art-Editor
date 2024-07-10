@@ -9,6 +9,7 @@ export class SpriteCanvas extends SpriteEditorPart {
   constructor(sprite_editor) {
     super(sprite_editor);
     this.shape_holder = [];
+    this.selected_points_holder = [];
   }
 
   render() {
@@ -65,6 +66,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     });
     this.sprite_editor.addEventListener("move_canvas", (event) => {
       this.move_canvas(event);
+    });
+    this.sprite_editor.addEventListener("update_selected_area", (event) => {
+      this.update_selected_area(event);
     });
   }
   /**
@@ -214,6 +218,30 @@ export class SpriteCanvas extends SpriteEditorPart {
       ) {
         this.paint_single_pixel(new_x, new_y, point.color);
       }
+    });
+  }
+  /**
+   *
+   * @param {Event} event
+   */
+  update_selected_area(event) {
+    const points = event.detail.points;
+    this.revert_selected_area();
+    this.selected_points_holder.push(...points);
+    //console.log("POINTS: ", points);
+    points.forEach((point) => {
+      this.paint_single_pixel(
+        point.x,
+        point.y,
+        this.sprite_editor.selection_color
+      );
+    });
+  }
+
+  revert_selected_area() {
+    this.selected_points_holder.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.prev_color);
     });
   }
 }
