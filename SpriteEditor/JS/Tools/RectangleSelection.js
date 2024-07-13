@@ -49,11 +49,6 @@ export class RectangleSelection extends SelectionTool {
    * @param {Event} event
    */
   mouse_up(event) {
-    if (this.is_drawing) {
-      this.sprite_editor.set_selection_end_point(
-        this.get_mouse_position(event)
-      );
-    }
     this.is_drawing = false;
     this.is_moving = false;
   }
