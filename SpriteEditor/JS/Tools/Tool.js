@@ -13,6 +13,28 @@ export class Tool {
       x: 0,
       y: 0,
     };
+    this.init();
+  }
+
+  /**
+   * Adds all key listeners
+   */
+  init() {
+    document.addEventListener("keydown", this.handle_key_events.bind(this));
+  }
+
+  /**
+   * Removes all key listeners
+   */
+  destroy() {
+    document.removeEventListener("keydown", this.handle_key_events.bind(this));
+  }
+
+  /**
+   * Handles all the keydown-Events of a tool e.g. CTRL + C
+   */
+  handle_key_events(e) {
+    console.log("Key events in tool class");
   }
 
   /**

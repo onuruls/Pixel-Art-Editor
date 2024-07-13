@@ -12,6 +12,10 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.selected_points_holder = [];
   }
 
+  /**
+   * Returns the Html-String
+   * @returns {String}
+   */
   render() {
     return `
         <div class="canvas-wrapper">
@@ -20,6 +24,9 @@ export class SpriteCanvas extends SpriteEditorPart {
       `;
   }
 
+  /**
+   * place for all the event listener
+   */
   init() {
     this.drawing_canvas = this.querySelector("#drawing_canvas");
     this.context = this.drawing_canvas.getContext("2d");
@@ -70,9 +77,15 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("update_selected_area", (event) => {
       this.update_selected_area(event);
     });
+    this.sprite_editor.addEventListener("paste_selected_area", (event) => {
+      this.paste_selected_area(event);
+    });
+    this.sprite_editor.addEventListener("remove_selection", (event) => {
+      this.remove_selection(event);
+    });
   }
   /**
-   *
+   * Pen tool
    * @param {Event} event
    */
   draw_pen_canvas(event) {
@@ -86,16 +99,14 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.context.fillRect(x, y, 10, 10);
   }
   /**
-   *
+   * Eraser tool
    * @param {Event} event
    */
   draw_erazer_canvas(event) {
-    const x = event.detail.x * 10;
-    const y = event.detail.y * 10;
-    this.context.clearRect(x, y, 10, 10);
+    this.erase_single_pixel(event.detail.x, event.detail.y);
   }
   /**
-   *
+   * Fills an area of the canvas
    * @param {Event} event
    */
   fill_canvas(event) {
@@ -116,7 +127,7 @@ export class SpriteCanvas extends SpriteEditorPart {
     });
   }
   /**
-   *
+   * Handles the hover effect
    * @param {Event} event
    */
   draw_hover(event) {
@@ -137,7 +148,7 @@ export class SpriteCanvas extends SpriteEditorPart {
     }
   }
   /**
-   *
+   * Reverts the last action from the action_stack in the sprite_editor
    * @param {Event} event
    */
   revert_action(event) {
@@ -147,8 +158,9 @@ export class SpriteCanvas extends SpriteEditorPart {
       this.paint_single_pixel(point.x, point.y, point.prev_color);
     });
   }
+
   /**
-   *
+   * Draws shapes on the matrix (rectangle, circle, line)
    * @param {Event} event
    */
   draw_shape(event) {
@@ -168,14 +180,13 @@ export class SpriteCanvas extends SpriteEditorPart {
    * Reverts the old points, when shape is not finally drawn
    */
   revert_canvas() {
-    //console.log("REVERT: ", this.shape_holder);
     this.shape_holder.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.prev_color);
     });
   }
   /**
-   *
+   * Paints a pixel in the given color
    * @param {Number} x
    * @param {Number} y
    * @param {Array<Number>} color
@@ -187,8 +198,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
   }
+
   /**
-   *
+   * Clears a pixel from the canvas
    * @param {Number} x
    * @param {Number} y
    */
@@ -221,28 +233,47 @@ export class SpriteCanvas extends SpriteEditorPart {
     });
   }
   /**
-   *
+   * Draws the selected area
    * @param {Event} event
    */
   update_selected_area(event) {
     const points = event.detail.points;
     this.revert_selected_area();
     this.selected_points_holder.push(...points);
-    //console.log("POINTS: ", points);
     points.forEach((point) => {
-      this.paint_single_pixel(
-        point.x,
-        point.y,
-        this.sprite_editor.selection_color
-      );
+      this.paint_single_pixel(point.x, point.y, point.selection_color);
     });
   }
 
+  /**
+   * Reverts the selection, when the area is updated or tool is changed
+   */
   revert_selected_area() {
     this.selected_points_holder.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.prev_color);
     });
+    this.selected_points_holder = [];
+  }
+
+  /**
+   * Pastes the selected area at new location
+   * @param {Event} event
+   */
+  paste_selected_area(event) {
+    this.selected_points_holder = [];
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.paint_single_pixel(point.x, point.y, point.original_color);
+    });
+  }
+
+  /**
+   * Removes the selected points
+   * @param {Event} event
+   */
+  remove_selection(event) {
+    this.revert_selected_area();
   }
 }
 
