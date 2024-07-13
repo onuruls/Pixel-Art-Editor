@@ -14,6 +14,7 @@ import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
 import { RectangleSelection } from "../Tools/RectangleSelection.js";
+import { Dithering } from "../Tools/Dithering.js";
 
 export class SpriteEditor extends HTMLElement {
   constructor() {
@@ -751,6 +752,8 @@ export class SpriteEditor extends HTMLElement {
         return new Move(this);
       case "rectangle_selection":
         return new RectangleSelection(this);
+      case "dithering":
+        return new Dithering(this);
       default:
         return new Pen(this);
     }
