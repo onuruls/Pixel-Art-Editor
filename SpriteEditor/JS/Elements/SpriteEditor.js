@@ -14,6 +14,7 @@ import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
 import { RectangleSelection } from "../Tools/RectangleSelection.js";
+import { IrregularSelection } from "../Tools/IrregularSelection.js";
 import { Dithering } from "../Tools/Dithering.js";
 
 export class SpriteEditor extends HTMLElement {
@@ -563,6 +564,7 @@ export class SpriteEditor extends HTMLElement {
     this.selection_start_point = position;
   }
 
+
   /**
    * Draws the selection area (Rectangle) and sends event to the canvas
    * @param {{x: Number, y: Number}} position
@@ -597,6 +599,106 @@ export class SpriteEditor extends HTMLElement {
       })
     );
   }
+
+
+/**
+ * Draws the selection area (Lasso) and dispatches an event to the canvas.
+ * @param {Array<{x: number, y: number}>} path - Array of points representing the path of the lasso.
+ */
+draw_lasso_selection(path) {
+  this.selected_points = [];
+
+  const { x: x1_start, y: y1_start } = this.selection_start_point;
+  const { x: x2_end, y: y2_end } = path[path.length - 1];
+
+  // Calculate points for the line between the start and end of the lasso selection
+  const linePoints = this.calculate_line_points(x1_start, y1_start, x2_end, y2_end);
+
+  // Add points of the line to the selected points list if they haven't been selected yet
+  linePoints.forEach((point) => {
+    if (!this.is_point_already_selected(point)) {
+      this.selected_points.push({
+        x: point.x,
+        y: point.y,
+        prev_color: this.canvas_matrix[point.x][point.y].color,
+        selection_color: this.selection_color,
+      });
+    }
+  });
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const { x: x1, y: y1 } = path[i];
+    const { x: x2, y: y2 } = path[i + 1];
+    const linePoints = this.calculate_line_points(x1, y1, x2, y2);
+
+    linePoints.forEach((point) => {
+      if (!this.is_point_already_selected(point)) {
+        this.selected_points.push({
+          x: point.x,
+          y: point.y,
+          prev_color: this.canvas_matrix[point.x][point.y].color,
+          selection_color: this.selection_color,
+        });
+      }
+    });
+  }
+
+  this.dispatchEvent(
+    new CustomEvent("update_selected_area", {
+      detail: {
+        points: this.selected_points,
+      },
+    })
+  );
+}
+
+ /**
+  * 
+ * Fills the selection area with selection color
+ * @param {Array<{x: number, y: number}>} pointsInsidePath
+ */
+ fill_selection(pointsInsidePath) {
+  pointsInsidePath.forEach((point) => {
+      if (!this.is_point_already_selected(point)) {
+          this.selected_points.push({
+              x: point.x,
+              y: point.y,
+              prev_color: this.canvas_matrix[point.y][point.x],
+              selection_color: this.selection_color,
+          });
+      }
+  });
+  this.dispatchEvent(
+    new CustomEvent("update_selected_area", {  
+      detail: {
+          points: this.selected_points,
+      },
+  })
+  );
+}
+
+/**
+ * Checks if a point is already selected (already in selected_points)
+ * @param {{x: Number, y: Number}} point
+ * @returns {Boolean}
+ */
+is_point_already_selected(point) {
+  if(this.selected_points.length === 0) return false;
+  return this.selected_points.some((p) => this.compare_points(p, point));
+}
+
+/**
+ * Compares two points
+ * @param {x: Number, y: Number} point1 
+ * @param {x: Number, y: Number} point2 
+ * @returns {Boolean}
+ */
+
+compare_points(point1, point2) {
+  return point1.x === point2.x && point1.y === point2.y;
+}
+
+
 
   /**
    * Sets the startposition for the movement of the selected area
@@ -752,6 +854,8 @@ export class SpriteEditor extends HTMLElement {
         return new Move(this);
       case "rectangle_selection":
         return new RectangleSelection(this);
+      case "irregular_selection":
+        return new IrregularSelection(this);
       case "dithering":
         return new Dithering(this);
       default:
