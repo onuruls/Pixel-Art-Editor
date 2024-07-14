@@ -14,6 +14,7 @@ import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
 import { RectangleSelection } from "../Tools/RectangleSelection.js";
+import { ShapeSelection } from "../Tools/ShapeSelection.js";
 import { Dithering } from "../Tools/Dithering.js";
 
 export class SpriteEditor extends HTMLElement {
@@ -607,6 +608,67 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
+   * Selects all neighboring pixels with the same color
+   * @param {Number} x
+   * @param {Number} y
+   */
+  shape_selection(x, y) {
+    const target_color = this.canvas_matrix[x][y].color;
+    const queue = [{ x, y }];
+    const visited = {};
+
+    this.selected_points = [];
+
+    while (queue.length > 0) {
+      const { x, y } = queue.shift();
+      const key = `${x}_${y}`;
+
+      if (
+        !visited[key] &&
+        x >= 0 &&
+        x < this.width &&
+        y >= 0 &&
+        y < this.height &&
+        this.compare_colors(this.canvas_matrix[x][y].color, target_color)
+      ) {
+        visited[key] = true;
+        this.selected_points.push({
+          x,
+          y,
+          prev_color: this.canvas_matrix[x][y].color,
+          selection_color: this.selection_color,
+        });
+        queue.push({ x: x + 1, y });
+        queue.push({ x: x - 1, y });
+        queue.push({ x, y: y + 1 });
+        queue.push({ x, y: y - 1 });
+      }
+    }
+
+    this.dispatchEvent(
+      new CustomEvent("shape_selection", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+    this.draw_shape_selection();
+  }
+
+  /**
+   * Draws the selection area based on shape selection and sends event to the canvas
+   */
+  draw_shape_selection() {
+    this.dispatchEvent(
+      new CustomEvent("update_selected_area", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+  }
+
+  /**
    * Moves the selected area
    * @param {{x: Number, y: Number}} position
    */
@@ -752,6 +814,8 @@ export class SpriteEditor extends HTMLElement {
         return new Move(this);
       case "rectangle_selection":
         return new RectangleSelection(this);
+      case "shape_selection":
+        return new ShapeSelection(this);
       case "dithering":
         return new Dithering(this);
       default:
