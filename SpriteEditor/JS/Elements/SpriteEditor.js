@@ -13,6 +13,8 @@ import { Rectangle } from "../Tools/Rectangle.js";
 import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
+import { RectangleSelection } from "../Tools/RectangleSelection.js";
+import { ShapeSelection } from "../Tools/ShapeSelection.js";
 import { Dithering } from "../Tools/Dithering.js";
 
 export class SpriteEditor extends HTMLElement {
@@ -27,6 +29,11 @@ export class SpriteEditor extends HTMLElement {
     this.action_buffer = [];
     this.changed_points = [];
     this.move_points = [];
+    this.selected_points = [];
+    this.selection_start_point = { x: 0, y: 0 };
+    this.selection_move_start_point = { x: 0, y: 0 };
+    this.selection_color = [196, 252, 250, 123];
+    this.selection_copied = false;
   }
 
   connectedCallback() {
@@ -58,6 +65,7 @@ export class SpriteEditor extends HTMLElement {
       const clickedElement = event.target.closest(".tool-button");
       if (clickedElement) {
         const tool = clickedElement.dataset.tool;
+        this.selected_tool.destroy();
         this.selected_tool = this.select_tool_from_string(tool);
       }
     });
@@ -345,7 +353,7 @@ export class SpriteEditor extends HTMLElement {
     return line_points;
   }
   /**
-   *
+   * Draws a shape to the matrix used for rectangles, circles and lines
    * @param {Array<{x: Number, y: Number, prev_color: Array<Number>}>} shape_points
    * @param {Boolean} final
    */
@@ -362,7 +370,6 @@ export class SpriteEditor extends HTMLElement {
       });
       this.end_action_buffer();
     }
-    // this.sprite_canvas.draw_shape(shape_points, this.selected_color, final)
     this.dispatchEvent(
       new CustomEvent("draw_shape", {
         detail: {
@@ -549,9 +556,215 @@ export class SpriteEditor extends HTMLElement {
       }
     });
   }
+  /**
+   * Sets the startposition for rectangle- and lasso-selection
+   * @param {{x: Number, y: Number}} position
+   */
+  set_selection_start_point(position) {
+    this.selection_start_point = position;
+  }
 
   /**
-   *  Returns true if two color-Arrays are the same
+   * Draws the selection area (Rectangle) and sends event to the canvas
+   * @param {{x: Number, y: Number}} position
+   */
+  draw_rectangle_selection(position) {
+    this.selected_points = [];
+    const y_direction = this.selection_start_point.y - position.y > 0 ? -1 : 1;
+    const x_direction = this.selection_start_point.x - position.x > 0 ? -1 : 1;
+    for (
+      let i = this.selection_start_point.x;
+      x_direction > 0 ? i <= position.x : i >= position.x;
+      i += x_direction
+    ) {
+      for (
+        let j = this.selection_start_point.y;
+        y_direction > 0 ? j <= position.y : j >= position.y;
+        j += y_direction
+      ) {
+        this.selected_points.push({
+          x: i,
+          y: j,
+          prev_color: this.canvas_matrix[i][j].color,
+          selection_color: this.selection_color,
+        });
+      }
+    }
+    this.dispatchEvent(
+      new CustomEvent("update_selected_area", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+  }
+
+  /**
+   * Sets the startposition for the movement of the selected area
+   * @param {{x: Number, y: Number}} position
+   */
+  set_selection_move_start_point(position) {
+    this.selection_move_start_point = position;
+  }
+
+  /**
+   * Selects all neighboring pixels with the same color
+   * @param {Number} x
+   * @param {Number} y
+   */
+  shape_selection(x, y) {
+    const target_color = this.canvas_matrix[x][y].color;
+    const queue = [{ x, y }];
+    const visited = {};
+
+    this.selected_points = [];
+
+    while (queue.length > 0) {
+      const { x, y } = queue.shift();
+      const key = `${x}_${y}`;
+
+      if (
+        !visited[key] &&
+        x >= 0 &&
+        x < this.width &&
+        y >= 0 &&
+        y < this.height &&
+        this.compare_colors(this.canvas_matrix[x][y].color, target_color)
+      ) {
+        visited[key] = true;
+        this.selected_points.push({
+          x,
+          y,
+          prev_color: this.canvas_matrix[x][y].color,
+          selection_color: this.selection_color,
+        });
+        queue.push({ x: x + 1, y });
+        queue.push({ x: x - 1, y });
+        queue.push({ x, y: y + 1 });
+        queue.push({ x, y: y - 1 });
+      }
+    }
+
+    this.dispatchEvent(
+      new CustomEvent("shape_selection", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+    this.draw_shape_selection();
+  }
+
+  /**
+   * Draws the selection area based on shape selection and sends event to the canvas
+   */
+  draw_shape_selection() {
+    this.dispatchEvent(
+      new CustomEvent("update_selected_area", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+  }
+
+  /**
+   * Moves the selected area
+   * @param {{x: Number, y: Number}} position
+   */
+  move_selected_area(position) {
+    const difference = this.calculate_move_difference(position);
+    this.selected_points = this.selected_points.map((point) => {
+      const x = point.x - difference.x;
+      const y = point.y - difference.y;
+      const prev_color = this.coordinates_in_bounds(x, y)
+        ? this.canvas_matrix[x][y].color
+        : [0, 0, 0, 0];
+      return {
+        x: x,
+        y: y,
+        prev_color: prev_color,
+        selection_color: point.selection_color,
+        original_color: point.original_color
+          ? point.original_color
+          : [0, 0, 0, 0],
+      };
+    });
+    this.selection_move_start_point = position;
+    this.dispatchEvent(
+      new CustomEvent("update_selected_area", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+  }
+
+  /**
+   * Calculates the difference between the move startpoint and current position
+   * @param {{x: Number, y: Number}} position
+   * @returns {{x: Number, y: Number}}
+   */
+  calculate_move_difference(position) {
+    return {
+      x: this.selection_move_start_point.x - position.x,
+      y: this.selection_move_start_point.y - position.y,
+    };
+  }
+
+  /**
+   * Copies all the colors to the selected_points
+   */
+  copy_selected_pixel() {
+    this.selection_copied = true;
+    this.selected_points = this.selected_points.map((point) => {
+      return {
+        ...point,
+        selection_color: this.combine_colors(
+          this.canvas_matrix[point.x][point.y].color,
+          this.selection_color
+        ),
+        original_color: this.canvas_matrix[point.x][point.y].color,
+      };
+    });
+  }
+
+  /**
+   * Inserts the selected_pixel on the new position
+   */
+  paste_selected_pixel() {
+    this.start_action_buffer();
+    this.selected_points.forEach((point) => {
+      if (this.coordinates_in_bounds(point.x, point.y)) {
+        this.action_buffer.push({
+          x: point.x,
+          y: point.y,
+          prev_color: this.canvas_matrix[point.x][point.y].color,
+        });
+        this.canvas_matrix[point.x][point.y].color = point.original_color;
+      }
+    });
+    this.end_action_buffer();
+    this.dispatchEvent(
+      new CustomEvent("paste_selected_area", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+  }
+
+  /**
+   * Removes selection, when tool is destroyed
+   */
+  destroy_selection() {
+    this.selection_copied = false;
+    this.selected_points = [];
+    this.dispatchEvent(new CustomEvent("remove_selection"));
+  }
+
+  /**
+   * Returns true if two color-Arrays are the same
    * @param {Array<Number>} color1
    * @param {Array<Number>} color2
    */
@@ -560,7 +773,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   *
+   * Gets the color from the canvas and puts it in the color input
    * @param {Number} x
    * @param {Number} y
    */
@@ -572,7 +785,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   *
+   * Gets the fitting tool, when clicked
    * @param {String} string
    */
   select_tool_from_string(string) {
@@ -599,11 +812,44 @@ export class SpriteEditor extends HTMLElement {
         return new Lighting(this);
       case "move":
         return new Move(this);
+      case "rectangle_selection":
+        return new RectangleSelection(this);
+      case "shape_selection":
+        return new ShapeSelection(this);
       case "dithering":
         return new Dithering(this);
       default:
         return new Pen(this);
     }
+  }
+
+  /**
+   * Combines two colors for the copied points
+   * @param {Array<Number>} color1
+   * @param {Array<Number>} color2
+   * @returns
+   */
+  combine_colors(color1, color2) {
+    const r = Math.round((color1[0] + color2[0]) / 2);
+    const g = Math.round((color1[1] + color2[1]) / 2);
+    const b = Math.round((color1[2] + color2[2]) / 2);
+    const a = Math.round((color1[3] + color2[3]) / 2);
+    return [r, g, b, a];
+  }
+
+  /**
+   * Returns true if the x and y coordinate are in the canvas bounds
+   * @param {Number} x
+   * @param {Number} y
+   * @returns {Boolean}
+   */
+  coordinates_in_bounds(x, y) {
+    return (
+      x >= 0 &&
+      y >= 0 &&
+      x < this.canvas_matrix.length &&
+      y < this.canvas_matrix.length
+    );
   }
 }
 

@@ -18,7 +18,7 @@ export class SpriteTools extends SpriteEditorPart {
         <button id="rectangle" class="tool-button" data-tool="rectangle" title="Rectangle tool"><img src="img/icons/rectangle.svg" alt="Rectangle"></button>
         <button id="circle" class="tool-button" data-tool="circle" title="Circle tool"><img src="img/icons/circle.svg" alt="Circle"></button>
         <button id="move" class="tool-button" data-tool="move" title="Move tool"><img src="img/icons/move.svg" alt="Move"></button>
-        <button id="shape" class="tool-button" data-tool="shape" title="Shape Selection"><img src="img/icons/fill_shape.svg" alt="Shape"></button>
+        <button id="shape_selection" class="tool-button" data-tool="shape_selection" title="Shape Selection"><img src="img/icons/fill_shape.svg" alt="Shape"></button>
         <button id="rectagle_selection" class="tool-button" data-tool="rectangle_selection" title="Rectangle Selection"><img src="img/icons/rectangle_selection.svg" alt="Rectangle Selection"></button>
         <button id="irregular_selection" class="tool-button" data-tool="irregular_selection" title="Irregular Selection"><img src="img/icons/irregular_selection.svg" alt="Irregular Selection"></button>
         <button id="lighting" class="tool-button" data-tool="lighting" title="Lighten"><img src="img/icons/lighting.svg" alt="Lighting"></button>
