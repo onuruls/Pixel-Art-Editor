@@ -33,9 +33,22 @@ export class SpriteEditor extends HTMLElement {
     this.action_buffer = [];
     this.changed_points = [];
     this.move_points = [];
+    this.initialized = false;
   }
 
+  /**
+   * From HTMLElement called when element is mounted
+   */
   connectedCallback() {
+    if (!this.initialized) {
+      this.init();
+    }
+  }
+
+  /**
+   * Initializes the SpriteEditor with its Parts
+   */
+  init() {
     this.css = document.createElement("link");
     this.css.setAttribute(
       "href",
@@ -56,8 +69,12 @@ export class SpriteEditor extends HTMLElement {
       this.sprite_tools.querySelector("#color_input").value
     );
     this.canvas_matrix = this.create_canvas_matrix();
+    this.initialized = true;
   }
 
+  /**
+   * Sets the necessary eventlisteners
+   */
   set_listeners() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
     toolbox.addEventListener("click", (event) => {

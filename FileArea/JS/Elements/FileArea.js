@@ -29,13 +29,6 @@ export class FileArea extends HTMLElement {
     this.appendChild(this.file_view);
     this.appendChild(this.file_tools_right);
     this.set_listeners();
-
-    const test_button = document.createElement("button");
-    test_button.appendChild(document.createTextNode("SWITCH"));
-    test_button.addEventListener("click", (event) => {
-      this.editor_tool.change_editor();
-    });
-    this.appendChild(test_button);
   }
 
   /**
