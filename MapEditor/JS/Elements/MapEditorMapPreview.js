@@ -1,6 +1,6 @@
 import { MapEditorPart } from "./MapEditorPart.js";
 
-export class MapEditorLayers extends MapEditorPart {
+export class MapEditorMapPreview extends MapEditorPart {
   constructor(map_editor) {
     super(map_editor);
   }
@@ -11,12 +11,12 @@ export class MapEditorLayers extends MapEditorPart {
    */
   render() {
     return `
-        <p>Layers</p>
-        <div class="placeholder-layers-box"></div>
+        <p>Map - Preview</p>
+        <div class="placeholder-map-preview-box"></div>
       `;
   }
 
   init() {}
 }
 
-customElements.define("map-editor-layers", MapEditorLayers);
+customElements.define("map-editor-map-preview", MapEditorMapPreview);

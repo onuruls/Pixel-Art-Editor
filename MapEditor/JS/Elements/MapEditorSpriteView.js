@@ -5,9 +5,14 @@ export class MapEditorSpritePreview extends MapEditorPart {
     super(map_editor);
   }
 
+  /**
+   * Returns the Html-String
+   * @returns {String}
+   */
   render() {
     return `
-        <p>Sprite - PreView</p>
+        <p>Sprite - Preview</p>
+        <div class="placeholder-sprite-preview-box"></div>
       `;
   }
 

@@ -1,5 +1,11 @@
 map-editor-sprite-preview {
-    background-color: green;
-    height: 50px;
-    width: 50px;
+    padding: 5px 5px;
+    background-color: #333;
+}
+
+.placeholder-sprite-preview-box {
+    width: 160px;
+    height: 160px;
+    background-color: gray;
+    margin: auto;
 }
