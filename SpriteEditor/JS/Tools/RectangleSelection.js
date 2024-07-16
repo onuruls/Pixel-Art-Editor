@@ -4,10 +4,10 @@ import { SelectionTool } from "./SelectionTool.js";
 export class RectangleSelection extends SelectionTool {
   /**
    *
-   * @param {SpriteEditor} sprite_edtor
+   * @param {SpriteEditor} sprite_editor
    */
-  constructor(sprite_edtor) {
-    super(sprite_edtor);
+  constructor(sprite_editor) {
+    super(sprite_editor);
     this.canvas.style.cursor = `crosshair`;
     this.is_moving = false;
     this.last_move_position = { x: -1, y: -1 };
