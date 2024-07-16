@@ -14,10 +14,16 @@ import { Circle } from "../Tools/Circle.js";
 import { Lighting } from "../Tools/Lighting.js";
 import { Move } from "../Tools/Move.js";
 import { Dithering } from "../Tools/Dithering.js";
+import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
 export class SpriteEditor extends HTMLElement {
-  constructor() {
+  /**
+   *
+   * @param {EditorTool} editor_tool
+   */
+  constructor(editor_tool) {
     super();
+    this.editor_tool = editor_tool;
     this.selected_tool = null;
     this.canvas_matrix = [];
     this.width = 64;

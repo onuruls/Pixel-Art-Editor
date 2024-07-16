@@ -1,10 +1,16 @@
+import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { FileAreaToolsLeft } from "./FileAreaToolsLeft.js";
 import { FileAreaToolsRight } from "./FileAreaToolsRight.js";
 import { FileAreaView } from "./FileAreaView.js";
 
 export class FileArea extends HTMLElement {
-  constructor() {
+  /**
+   *
+   * @param {EditorTool} editor_tool
+   */
+  constructor(editor_tool) {
     super();
+    this.editor_tool = editor_tool;
   }
 
   /**
@@ -23,6 +29,13 @@ export class FileArea extends HTMLElement {
     this.appendChild(this.file_view);
     this.appendChild(this.file_tools_right);
     this.set_listeners();
+
+    const test_button = document.createElement("button");
+    test_button.appendChild(document.createTextNode("SWITCH"));
+    test_button.addEventListener("click", (event) => {
+      this.editor_tool.change_editor();
+    });
+    this.appendChild(test_button);
   }
 
   /**

@@ -1,0 +1,5 @@
+body {
+    margin: 0; /* Entfernt den Standardabstand des Body-Elements */
+    overflow: hidden; /* Verhindert das Scrollen der Seite */
+    background-color: black; /* Setzt die Hintergrundfarbe auf Schwarz */
+}
