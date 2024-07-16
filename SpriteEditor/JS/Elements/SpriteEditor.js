@@ -603,7 +603,7 @@ export class SpriteEditor extends HTMLElement {
 
 /**
  * Draws the selection area (Lasso) and dispatches an event to the canvas.
- * @param {Array<{x: number, y: number}>} path - Array of points representing the path of the lasso.
+ * @param {Array<{x: number, y: number}>} path 
  */
 draw_lasso_selection(path) {
   this.selected_points = [];
@@ -611,10 +611,8 @@ draw_lasso_selection(path) {
   const { x: x1_start, y: y1_start } = this.selection_start_point;
   const { x: x2_end, y: y2_end } = path[path.length - 1];
 
-  // Calculate points for the line between the start and end of the lasso selection
   const linePoints = this.calculate_line_points(x1_start, y1_start, x2_end, y2_end);
 
-  // Add points of the line to the selected points list if they haven't been selected yet
   linePoints.forEach((point) => {
     if (!this.is_point_already_selected(point)) {
       this.selected_points.push({
@@ -663,7 +661,7 @@ draw_lasso_selection(path) {
           this.selected_points.push({
               x: point.x,
               y: point.y,
-              prev_color: this.canvas_matrix[point.y][point.x],
+              prev_color: this.canvas_matrix[point.x][point.y].color,
               selection_color: this.selection_color,
           });
       }
@@ -708,37 +706,37 @@ compare_points(point1, point2) {
     this.selection_move_start_point = position;
   }
 
-  /**
-   * Moves the selected area
-   * @param {{x: Number, y: Number}} position
-   */
-  move_selected_area(position) {
-    const difference = this.calculate_move_difference(position);
-    this.selected_points = this.selected_points.map((point) => {
-      const x = point.x - difference.x;
-      const y = point.y - difference.y;
-      const prev_color = this.coordinates_in_bounds(x, y)
-        ? this.canvas_matrix[x][y].color
-        : [0, 0, 0, 0];
-      return {
-        x: x,
-        y: y,
-        prev_color: prev_color,
-        selection_color: point.selection_color,
-        original_color: point.original_color
-          ? point.original_color
-          : [0, 0, 0, 0],
-      };
-    });
-    this.selection_move_start_point = position;
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
-  }
+/**
+ * Moves the selected area
+ * @param {{x: Number, y: Number}} position
+ */
+move_selected_area(position) {
+  const difference = this.calculate_move_difference(position);
+  this.selected_points = this.selected_points.map((point) => {
+    const x = point.x - difference.x;
+    const y = point.y - difference.y;
+    const prev_color = this.coordinates_in_bounds(x, y)
+      ? this.canvas_matrix[x][y].color
+      : [0, 0, 0, 0];
+    return {
+      x: x,
+      y: y,
+      prev_color: prev_color,
+      selection_color: point.selection_color,
+      original_color: point.original_color
+        ? point.original_color
+        : [0, 0, 0, 0],
+    };
+  });
+  this.selection_move_start_point = position;
+  this.dispatchEvent(
+    new CustomEvent("update_selected_area", {
+      detail: {
+        points: this.selected_points,
+      },
+    })
+  );
+}
 
   /**
    * Calculates the difference between the move startpoint and current position
@@ -752,47 +750,56 @@ compare_points(point1, point2) {
     };
   }
 
-  /**
-   * Copies all the colors to the selected_points
-   */
-  copy_selected_pixel() {
-    this.selection_copied = true;
-    this.selected_points = this.selected_points.map((point) => {
-      return {
-        ...point,
-        selection_color: this.combine_colors(
-          this.canvas_matrix[point.x][point.y].color,
-          this.selection_color
-        ),
-        original_color: this.canvas_matrix[point.x][point.y].color,
-      };
-    });
-  }
+/**
+ * Copies all the colors to the selected_points
+ */
+copy_selected_pixel() {
+  this.selection_copied = true;
+  this.selected_points = this.selected_points.map((point) => {
+    const originalColor = this.canvas_matrix[point.x][point.y].color;
+    
+    return {
+      ...point,
+      original_color: originalColor, 
+      selection_color: this.is_transparent(originalColor) ? this.selection_color : originalColor, 
+    };
+  });
+}
 
-  /**
-   * Inserts the selected_pixel on the new position
-   */
-  paste_selected_pixel() {
-    this.start_action_buffer();
-    this.selected_points.forEach((point) => {
-      if (this.coordinates_in_bounds(point.x, point.y)) {
-        this.action_buffer.push({
-          x: point.x,
-          y: point.y,
-          prev_color: this.canvas_matrix[point.x][point.y].color,
-        });
-        this.canvas_matrix[point.x][point.y].color = point.original_color;
-      }
-    });
-    this.end_action_buffer();
-    this.dispatchEvent(
-      new CustomEvent("paste_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
-  }
+
+ /**
+ * Inserts the selected_pixel on the new position
+ */
+paste_selected_pixel() {
+  this.start_action_buffer();
+  this.selected_points.forEach((point) => {
+    if (this.coordinates_in_bounds(point.x, point.y) && !this.is_transparent(point.original_color)) {
+      this.action_buffer.push({
+        x: point.x,
+        y: point.y,
+        prev_color: this.canvas_matrix[point.x][point.y].color,
+      });
+      this.canvas_matrix[point.x][point.y].color = point.original_color;
+    }
+  });
+  this.end_action_buffer();
+  this.dispatchEvent(
+    new CustomEvent("paste_selected_area", {
+      detail: {
+        points: this.selected_points,
+      },
+    })
+  );
+}
+
+/**
+ * Checks if the color is transparent
+ * @param {Array<Number>} color
+ * @returns {Boolean}
+ */
+is_transparent(color) {
+  return color[0] === 0 && color[1] === 0 && color[2] === 0 && color[3] === 0;
+}
 
   /**
    * Removes selection, when tool is destroyed
@@ -878,19 +885,20 @@ compare_points(point1, point2) {
   }
 
   /**
-   * Returns true if the x and y coordinate are in the canvas bounds
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Boolean}
-   */
-  coordinates_in_bounds(x, y) {
-    return (
-      x >= 0 &&
-      y >= 0 &&
-      x < this.canvas_matrix.length &&
-      y < this.canvas_matrix.length
-    );
-  }
+ * Returns true if the x and y coordinate are in the canvas bounds
+ * @param {Number} x
+ * @param {Number} y
+ * @returns {Boolean}
+ */
+coordinates_in_bounds(x, y) {
+  return (
+    x >= 0 &&
+    y >= 0 &&
+    x < this.canvas_matrix.length &&
+    y < this.canvas_matrix.length
+  );
+}
+
 }
 
 customElements.define("sprite-editor", SpriteEditor);

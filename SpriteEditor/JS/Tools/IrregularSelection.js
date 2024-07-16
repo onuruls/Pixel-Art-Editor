@@ -1,16 +1,13 @@
+import { SpriteEditor } from "../Elements/SpriteEditor.js";
 import { SelectionTool } from "./SelectionTool.js";
 
-/**
- * Represents an irregular selection tool that extends SelectionTool.
- * Allows drawing irregular selections on a canvas.
- */
+
 export class IrregularSelection extends SelectionTool {
   /**
-   * Constructs an instance of IrregularSelection.
-   * @param {HTMLCanvasElement} canvas - The canvas element to work on.
+   * @param {SpriteEditor} sprite_editor
    */
-  constructor(canvas) {
-    super(canvas);
+  constructor(sprite_editor) {
+    super(sprite_editor);
     this.canvas.style.cursor = `crosshair`;
     this.path = [];
     this.is_drawing = false;
@@ -19,9 +16,7 @@ export class IrregularSelection extends SelectionTool {
   }
 
   /**
-   * Handles mouse down event.
-   * Initiates drawing or moving of the selection.
-   * @param {MouseEvent} event - The mouse event.
+   * @param {MouseEvent} event 
    */
   mouse_down(event) {
     if (!this.mouse_over_selected_area(event)) {
@@ -41,9 +36,7 @@ export class IrregularSelection extends SelectionTool {
   }
 
   /**
-   * Handles mouse move event.
-   * Updates drawing or moving of the selection.
-   * @param {MouseEvent} event - The mouse event.
+   * @param {MouseEvent} event 
    */
   mouse_move(event) {
     if (this.is_moving) {
@@ -65,9 +58,7 @@ export class IrregularSelection extends SelectionTool {
   }
 
   /**
-   * Handles mouse up event.
-   * Finalizes drawing or moving of the selection.
-   * @param {MouseEvent} event - The mouse event.
+   * @param {MouseEvent} event 
    */
   mouse_up(event) {
     if (this.is_moving) {
@@ -77,7 +68,6 @@ export class IrregularSelection extends SelectionTool {
     } 
     if (this.is_drawing) {
       this.is_drawing = false;
-      // Also capture the complete stroke from the start to the end by using the selected points.
       this.path = this.sprite_editor.selected_points;
       const selectedPoints = this.find_points_inside_path();
       this.path.concat(selectedPoints);
@@ -91,8 +81,7 @@ export class IrregularSelection extends SelectionTool {
   }
 
   /**
-   * Adds a point to the current selection path.
-   * @param {MouseEvent} event - The mouse event.
+   * @param {MouseEvent} event 
    */
   add_point_to_path(event) {
     const position = this.get_mouse_position(event);
@@ -100,16 +89,14 @@ export class IrregularSelection extends SelectionTool {
   }
 
   /**
-   * Draws the current selection on the canvas.
-   * @param {MouseEvent} event - The mouse event.
+   * @param {MouseEvent} event 
    */
   draw(event) {
     this.sprite_editor.draw_lasso_selection(this.path);
   }
 
   /**
-   * Moves the current selection on the canvas.
-   * @param {MouseEvent} event - The mouse event.
+   * @param {MouseEvent} event 
    */
   move(event) {
     const position = this.get_mouse_position(event);
@@ -120,8 +107,9 @@ export class IrregularSelection extends SelectionTool {
   }
 
   /**
-   * Finds points inside the current selection path.
-   * @returns {Array<{x: Number, y: Number}>} - Array of points inside the path.
+   * Finds all points inside the current selection path using a bounding box approach.
+   * 
+   * @returns {Array<{x: Number, y: Number}>}
    */
   find_points_inside_path() {
     const maxX = Math.max(...this.path.map((p) => p.x));
@@ -140,35 +128,31 @@ export class IrregularSelection extends SelectionTool {
     return pointsInside;
   }
 
-  /**
- * Checks if a point is inside the path defined by this.path using the ray-casting algorithm.
- * @param {{ x: number, y: number }} point - The point to check
- * @returns {boolean} True if the point is inside the path, false otherwise
- */
-is_point_inside_path(point) {
+    /**
+   * Checks if a point is inside the path defined by path using the ray-casting algorithm.
+   * 
+   * @param {{ x: number, y: number }} point 
+   * @returns {boolean} 
+   */
+  is_point_inside_path(point) {
     const px = point.x;
     const py = point.y;
     let inside = false;
-  
-    // Iterate through each edge of the path
+
     for (let i = 0, j = this.path.length - 1; i < this.path.length; j = i++) {
       const pxi = this.path[i].x;
       const pyi = this.path[i].y;
       const pxj = this.path[j].x;
       const pyj = this.path[j].y;
-  
-      // Check if the point is to the left of the edge and intersects with it
+
       const is_above = (pyi > py) !== (pyj > py);
       const is_left_of_edge = px < (pxj - pxi) * (py - pyi) / (pyj - pyi) + pxi;
-  
-      // Toggle the inside flag if the point crosses the edge
+
       if (is_above && is_left_of_edge) {
         inside = !inside;
       }
-    }
-  
-    return inside;
   }
-  
 
+  return inside;
+}
 }
