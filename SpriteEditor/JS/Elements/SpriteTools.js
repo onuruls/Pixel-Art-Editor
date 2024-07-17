@@ -25,6 +25,16 @@ export class SpriteTools extends SpriteEditorPart {
         <button id="dithering" class="tool-button" data-tool="dithering" title="Dithering"><img src="img/icons/dithering.svg" alt="Dithering"></button>
         <button id="color_picker" class="tool-button" data-tool="color_picker" title="Color Picker"><img src="img/icons/color_picker.svg" alt="Color Picker"></button>
       </div>
+      <div class="pixel-size">
+        <h3>Pixel size</h3>
+        <div id="pixel-size-options">
+          <button class="pixel-size-option" data-size="1">1x</button>
+          <button class="pixel-size-option" data-size="2">2x</button>
+          <button class="pixel-size-option" data-size="4">4x</button>
+          <button class="pixel-size-option" data-size="8">8x</button>
+          <button class="pixel-size-option" data-size="16">16x</button>
+        </div>
+      </div>
       <input type="color" id="color_input" name="color_input" value="#000000" />
     `;
   }
@@ -43,6 +53,15 @@ export class SpriteTools extends SpriteEditorPart {
       button.addEventListener("click", () => {
         toolButtons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
+      });
+    });
+
+    const pixelSizeOptions = document.querySelectorAll(".pixel-size-option");
+    pixelSizeOptions.forEach((button) => {
+      button.addEventListener("click", () => {
+        pixelSizeOptions.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+        this.sprite_editor.set_pixel_size(button.dataset.size);
       });
     });
   }
