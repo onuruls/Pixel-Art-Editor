@@ -31,7 +31,9 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   init() {
     this.drawing_canvas = this.querySelector("#drawing_canvas");
-    this.context = this.drawing_canvas.getContext("2d", { willReadFrequently: true });
+    this.context = this.drawing_canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     this.drawing_canvas.height = 640;
     this.drawing_canvas.width = 640;
     this.drawing_canvas.addEventListener("resize", (event) => {
@@ -68,8 +70,11 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
     });
-    this.sprite_editor.addEventListener("revert_action", (event) => {
-      this.revert_action(event);
+    this.sprite_editor.addEventListener("revert_undo", (event) => {
+      this.revert_undo(event);
+    });
+    this.sprite_editor.addEventListener("revert_redo", (event) => {
+      this.revert_redo(event);
     });
     this.sprite_editor.addEventListener("draw_shape", (event) => {
       this.draw_shape(event);
@@ -96,7 +101,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     let color = event.detail.color;
     let x = event.detail.x;
     let y = event.detail.y;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
+    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
+      color[3] / 255
+    })`;
 
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
@@ -113,13 +120,15 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   addToActionStack(x, y, color) {
     // Ensure the context is created with willReadFrequently
-    this.context = this.drawing_canvas.getContext("2d", { willReadFrequently: true });
+    this.context = this.drawing_canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
     this.action_stack.push({
       x,
       y,
       prev_color: Array.from(prev_color),
-      new_color: color
+      new_color: color,
     });
   }
 
@@ -129,7 +138,7 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   draw_erazer_canvas(event) {
     this.erase_single_pixel(event.detail.x, event.detail.y);
-    this.lastPoint = null;  // Letzter Punkt zurücksetzen, wenn der Radiergummi verwendet wird
+    this.lastPoint = null; // Letzter Punkt zurücksetzen, wenn der Radiergummi verwendet wird
   }
 
   /**
@@ -139,7 +148,9 @@ export class SpriteCanvas extends SpriteEditorPart {
   fill_canvas(event) {
     let color = event.detail.color;
     let points = event.detail.points;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
+    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
+      color[3] / 255
+    })`;
     points.forEach((point) => {
       let x = point.x * 10;
       let y = point.y * 10;
@@ -163,7 +174,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     let color = event.detail.color;
     let x = event.detail.x * 10;
     let y = event.detail.y * 10;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
+    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
+      color[3] / 255
+    })`;
     this.context.clearRect(x, y, 10, 10);
     this.context.fillStyle = color_str;
     this.context.fillRect(x, y, 10, 10);
@@ -177,11 +190,23 @@ export class SpriteCanvas extends SpriteEditorPart {
    * Reverts the last action from the action_stack in the sprite_editor
    * @param {Event} event
    */
-  revert_action(event) {
+  revert_undo(event) {
     const points = event.detail.points;
     points.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.prev_color);
+    });
+  }
+
+  /**
+   * Redoing the last undo-action from the action stack
+   * @param {Event} event
+   */
+  revert_redo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.color);
     });
   }
 
@@ -220,7 +245,9 @@ export class SpriteCanvas extends SpriteEditorPart {
    * @param {Array<Number>} color
    */
   paint_single_pixel(x, y, color) {
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
+    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
+      color[3] / 255
+    })`;
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
     this.addToActionStack(x, y, color_str);
@@ -233,7 +260,9 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   erase_single_pixel(x, y) {
     // Ensure the context is created with willReadFrequently
-    this.context = this.drawing_canvas.getContext("2d", { willReadFrequently: true });
+    this.context = this.drawing_canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
     this.context.clearRect(x * 10, y * 10, 10, 10);
     this.addToActionStack(x, y, "rgba(0,0,0,0)");
