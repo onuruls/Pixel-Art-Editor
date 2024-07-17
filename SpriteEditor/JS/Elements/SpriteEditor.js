@@ -71,11 +71,13 @@ export class SpriteEditor extends HTMLElement {
         this.selected_tool = this.select_tool_from_string(tool);
       }
     });
+
     this.sprite_tools
       .querySelector("#color_input")
       .addEventListener("input", (event) => {
         this.selected_color = this.hex_to_rgb_array(event.target.value);
       });
+
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey && event.key === "z") {
         this.revert_last_action();
@@ -93,6 +95,25 @@ export class SpriteEditor extends HTMLElement {
       })
     );
   }
+
+  /**
+   * Applies the given action to a block of pixels defined by this.pixel_size
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Function} action
+   */
+  apply_to_pixel_block(x, y, action) {
+    for (let i = 0; i < this.pixel_size; i++) {
+      for (let j = 0; j < this.pixel_size; j++) {
+        const xi = x + i;
+        const yj = y + j;
+        if (this.coordinates_in_bounds(xi, yj)) {
+          action(xi, yj);
+        }
+      }
+    }
+  }
+
   /**
    *
    * @param {String} hexString
@@ -169,19 +190,27 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    */
   pen_change_matrix(x, y) {
-    const prev_color = this.canvas_matrix[x][y].color;
-    if (this.canvas_matrix[x][y].color === this.selected_color) return;
-    this.canvas_matrix[x][y].color = this.selected_color;
-    this.dispatchEvent(
-      new CustomEvent("pen_matrix_changed", {
-        detail: {
-          x: x,
-          y: y,
-          color: this.selected_color,
-        },
-      })
-    );
-    this.action_buffer.push({ x: x, y: y, prev_color: prev_color });
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      const prev_color = this.canvas_matrix[xi][yj].color;
+      if (
+        this.compare_colors(
+          this.canvas_matrix[xi][yj].color,
+          this.selected_color
+        )
+      )
+        return;
+      this.canvas_matrix[xi][yj].color = this.selected_color;
+      this.dispatchEvent(
+        new CustomEvent("pen_matrix_changed", {
+          detail: {
+            x: xi,
+            y: yj,
+            color: this.selected_color,
+          },
+        })
+      );
+      this.action_buffer.push({ x: xi, y: yj, prev_color: prev_color });
+    });
   }
   /**
    *
@@ -189,18 +218,20 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    */
   erazer_change_matrix(x, y) {
-    const prev_color = this.canvas_matrix[x][y].color;
-    if (this.compare_colors(prev_color, [0, 0, 0, 0])) return;
-    this.canvas_matrix[x][y].color = [0, 0, 0, 0];
-    this.action_buffer.push({ x: x, y: y, prev_color: prev_color });
-    this.dispatchEvent(
-      new CustomEvent("erazer_matrix_changed", {
-        detail: {
-          x: x,
-          y: y,
-        },
-      })
-    );
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      const prev_color = this.canvas_matrix[xi][yj].color;
+      if (this.compare_colors(prev_color, [0, 0, 0, 0])) return;
+      this.canvas_matrix[xi][yj].color = [0, 0, 0, 0];
+      this.action_buffer.push({ x: xi, y: yj, prev_color: prev_color });
+      this.dispatchEvent(
+        new CustomEvent("erazer_matrix_changed", {
+          detail: {
+            x: xi,
+            y: yj,
+          },
+        })
+      );
+    });
   }
   /**
    *
@@ -209,20 +240,19 @@ export class SpriteEditor extends HTMLElement {
    * @param {Boolean} hover
    */
   hover_canvas_matrix(x, y, hover) {
-    if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
-      return;
-    }
-    this.canvas_matrix[x][y].hover = hover;
-    this.dispatchEvent(
-      new CustomEvent("hover_matrix_changed", {
-        detail: {
-          x: x,
-          y: y,
-          hover: hover,
-          color: this.canvas_matrix[x][y].color,
-        },
-      })
-    );
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      this.canvas_matrix[xi][yj].hover = hover;
+      this.dispatchEvent(
+        new CustomEvent("hover_matrix_changed", {
+          detail: {
+            x: xi,
+            y: yj,
+            hover: hover,
+            color: this.canvas_matrix[xi][yj].color,
+          },
+        })
+      );
+    });
   }
   /**
    *
