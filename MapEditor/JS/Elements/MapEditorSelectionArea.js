@@ -23,7 +23,6 @@ export class MapEditorSelectionArea extends MapEditorPart {
     this.appendChild(this.map_sprite_preview);
     this.appendChild(this.map_map_preview);
     this.appendChild(this.map_layers);
-
   }
 }
 
