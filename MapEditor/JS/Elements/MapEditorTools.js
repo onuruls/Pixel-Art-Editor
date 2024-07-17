@@ -5,10 +5,20 @@ export class MapEditorTools extends MapEditorPart {
     super(map_editor);
   }
 
+  /**
+   * Returns the Html-String
+   * @returns {String}
+   */
   render() {
     return `
-        <p>Tools</p>
-      `;
+      <h1 id="title">Map Editor</h1>
+      <div class="toolbox">
+        <p>Tools Placeolder</p>
+      </div>
+      <div class="assetbox">
+        <p>Asset Placeolder</p>
+      </div>
+    `;
   }
 
   init() {}

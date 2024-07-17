@@ -1,9 +1,10 @@
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { MapEditorCanvas } from "./MapEditorCanvas.js";
 import { MapEditorLayers } from "./MapEditorLayers.js";
-import { MapEditorPreview } from "./MapEditorPreview.js";
+import { MapEditorMapPreview } from "./MapEditorMapPreview.js";
 import { MapEditorSpritePreview } from "./MapEditorSpriteView.js";
 import { MapEditorTools } from "./MapEditorTools.js";
+import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -19,16 +20,15 @@ export class MapEditor extends HTMLElement {
     this.css.setAttribute("rel", "stylesheet");
     this.css.setAttribute("type", "text/css");
     this.appendChild(this.css);
-    this.map_canvas = new MapEditorCanvas(this);
-    this.map_layers = new MapEditorLayers(this);
-    this.map_preview = new MapEditorPreview(this);
-    this.map_sprite_preview = new MapEditorSpritePreview(this);
     this.map_tools = new MapEditorTools(this);
-    this.appendChild(this.map_canvas);
-    this.appendChild(this.map_layers);
-    this.appendChild(this.map_preview);
-    this.appendChild(this.map_sprite_preview);
+    this.map_canvas = new MapEditorCanvas(this);
+    this.map_selection_area = new MapEditorSelectionArea(this);
+    this.map_layers = new MapEditorLayers(this);
+    this.map_map_preview = new MapEditorMapPreview(this);
+    this.map_sprite_preview = new MapEditorSpritePreview(this);
     this.appendChild(this.map_tools);
+    this.appendChild(this.map_canvas);
+    this.appendChild(this.map_selection_area);
   }
 
   /**
