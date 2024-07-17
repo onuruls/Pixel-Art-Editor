@@ -1,3 +1,4 @@
+import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { MapEditorCanvas } from "./MapEditorCanvas.js";
 import { MapEditorLayers } from "./MapEditorLayers.js";
 import { MapEditorMapPreview } from "./MapEditorMapPreview.js";
@@ -6,14 +7,14 @@ import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 
 export class MapEditor extends HTMLElement {
-  constructor() {
-    super();
-  }
-
   /**
-   * From HTMLElement - called when mounted to DOM
+   *
+   * @param {EditorTool} editor_tool
    */
-  connectedCallback() {
+  constructor(editor_tool) {
+    super();
+    this.editor_tool = editor_tool;
+
     this.css = document.createElement("link");
     this.css.setAttribute("href", "../MapEditor/CSS/Elements/MapEditor.css");
     this.css.setAttribute("rel", "stylesheet");
@@ -28,6 +29,12 @@ export class MapEditor extends HTMLElement {
     this.appendChild(this.map_tools);
     this.appendChild(this.map_canvas);
     this.appendChild(this.map_selection_area);
+  }
+
+  /**
+   * From HTMLElement - called when mounted to DOM
+   */
+  connectedCallback() {
     this.set_listeners();
   }
 
