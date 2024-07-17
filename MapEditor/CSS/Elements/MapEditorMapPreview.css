@@ -1,11 +1,11 @@
-map-editor-layers {
+map-editor-map-preview {
   padding: 5px 5px;
   background-color: #333;
 }
 
-.placeholder-layers-box {
-  width: 300px;
-  height: 200px;
+.placeholder-map-preview-box {
+  width: 320px;
+  height: 320px;
   background-color: gray;
   margin: auto;
 }
