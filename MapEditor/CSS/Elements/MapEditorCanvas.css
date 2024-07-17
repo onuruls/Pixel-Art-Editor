@@ -1,5 +1,30 @@
 map-editor-canvas {
-    background-color: grey;
-    height: 50px;
-    width: 50px;
+  flex: 5;
+  display: flex;
+  align-items: center;
+  background-color: #222;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+
+  > .canvas-wrapper {
+    display: block;
+    padding: 0px;
+    margin: auto;
+    background-image: linear-gradient(90deg, #444 1px, transparent 1px),
+      linear-gradient(90deg, #444 1px, transparent 1px),
+      linear-gradient(0deg, #444 1px, transparent 1px),
+      linear-gradient(0deg, #444 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
+    border: 1cap solid #bbb;
+  }
+  canvas {
+    position: relative;
+    display: block;
+    width: 640px;
+    height: 640px;
+    z-index: 5;
+    margin: auto;
+    cursor: crosshair;
+  }
 }
