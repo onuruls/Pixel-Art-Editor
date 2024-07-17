@@ -7,7 +7,12 @@ export class FileAreaToolsRight extends FileAreaPart {
 
   render() {
     return `
-        <p>RightTools</p>
+          <div class="right-panel">
+            <button class="button">Settings</button>
+            <button class="button">Resize</button>
+            <button class="button">Import</button>
+            <button class="button">Export</button>
+        </div>
       `;
   }
   /**
