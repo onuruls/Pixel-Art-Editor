@@ -42,8 +42,29 @@ map-editor-tools {
 
   .assetbox {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     width: min-content;
+    padding: 0.5rem 0.5rem;
+    background-color: whitesmoke;
     border: 0.2cap solid #bbb;
+  }
+
+  .asset-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .asset-button:hover {
+    filter: invert(25%) brightness(100%) contrast(100%);
+  }
+  .asset-button.active {
+    filter: invert(100%) brightness(100%) contrast(100%);
+  }
+
+  .asset-button img {
+    width: 50px;
+    height: 50px;
   }
 }
