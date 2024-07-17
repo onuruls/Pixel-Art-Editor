@@ -1,10 +1,16 @@
+import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { FileAreaToolsLeft } from "./FileAreaToolsLeft.js";
 import { FileAreaToolsRight } from "./FileAreaToolsRight.js";
 import { FileAreaView } from "./FileAreaView.js";
 
 export class FileArea extends HTMLElement {
-  constructor() {
+  /**
+   *
+   * @param {EditorTool} editor_tool
+   */
+  constructor(editor_tool) {
     super();
+    this.editor_tool = editor_tool;
   }
 
   /**

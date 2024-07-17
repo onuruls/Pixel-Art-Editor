@@ -1,13 +1,13 @@
+import { SpriteEditor } from "../Elements/SpriteEditor.js";
 import { SelectionTool } from "./SelectionTool.js";
-import { Tool } from "./Tool.js";
 
 export class RectangleSelection extends SelectionTool {
   /**
    *
-   * @param {HTMLCanvasElement} canvas
+   * @param {SpriteEditor} sprite_editor
    */
-  constructor(canvas) {
-    super(canvas);
+  constructor(sprite_editor) {
+    super(sprite_editor);
     this.canvas.style.cursor = `crosshair`;
     this.is_moving = false;
     this.last_move_position = { x: -1, y: -1 };
