@@ -26,7 +26,6 @@ export class SpriteTools extends SpriteEditorPart {
         <button id="color_picker" class="tool-button" data-tool="color_picker" title="Color Picker"><img src="img/icons/color_picker.svg" alt="Color Picker"></button>
       </div>
       <div class="pixel-size">
-        <h3>Pixel size</h3>
         <div id="pixel-size-options">
           <button class="pixel-size-option" data-size="1">1x</button>
           <button class="pixel-size-option" data-size="2">2x</button>
