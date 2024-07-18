@@ -8,10 +8,10 @@ export class FileAreaToolsRight extends FileAreaPart {
   render() {
     return `
           <div class="right-panel">
-            <button class="button">Settings</button>
-            <button class="button">Resize</button>
-            <button class="button">Import</button>
-            <button class="button">Export</button>
+            <button id="settings"><img src="img/settings.svg" alt="New Folder">Settings</button>
+            <button id="resize"><img src="img/resize.svg" alt="Resize">Resize</button>
+            <button id="import"><img src="img/import.svg" alt="Import">Import</button>
+            <button id="export"><img src="img/export.svg" alt="Export">Export</button>
         </div>
       `;
   }
@@ -19,12 +19,12 @@ export class FileAreaToolsRight extends FileAreaPart {
    * Called by upper class
    */
   init() {
-    const test_button = document.createElement("button");
-    test_button.appendChild(document.createTextNode("SWITCH"));
-    test_button.addEventListener("click", (event) => {
-      this.file_area.editor_tool.change_editor();
-    });
-    this.appendChild(test_button);
+    // const test_button = document.createElement("button");
+    // test_button.appendChild(document.createTextNode("SWITCH"));
+    // test_button.addEventListener("click", (event) => {
+    //   this.file_area.editor_tool.change_editor();
+    // });
+    // this.appendChild(test_button);
   }
 }
 
