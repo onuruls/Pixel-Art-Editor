@@ -1,5 +1,11 @@
 map-editor-layers {
-    background-color: yellow;
-    height: 50px;
-    width: 50px;
+  padding: 5px 5px;
+  background-color: #333;
+}
+
+.placeholder-layers-box {
+  width: 300px;
+  height: 200px;
+  background-color: gray;
+  margin: auto;
 }

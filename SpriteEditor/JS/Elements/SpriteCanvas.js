@@ -10,8 +10,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     super(sprite_editor);
     this.shape_holder = [];
     this.selected_points_holder = [];
-    this.lastPoint = null;
-    this.action_stack = [];
   }
 
   /**
@@ -55,7 +53,6 @@ export class SpriteCanvas extends SpriteEditorPart {
 
     window.addEventListener("mouseup", (event) => {
       this.sprite_editor.selected_tool.global_mouse_up(event);
-      this.lastPoint = null;
     });
 
     this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
@@ -107,6 +104,7 @@ export class SpriteCanvas extends SpriteEditorPart {
 
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
+<<<<<<< HEAD
     this.addToActionStack(x, y, color_str);
 
     this.lastPoint = { x, y };
@@ -130,6 +128,8 @@ export class SpriteCanvas extends SpriteEditorPart {
       prev_color: Array.from(prev_color),
       new_color: color,
     });
+=======
+>>>>>>> main
   }
 
   /**
@@ -138,7 +138,10 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   draw_erazer_canvas(event) {
     this.erase_single_pixel(event.detail.x, event.detail.y);
+<<<<<<< HEAD
     this.lastPoint = null; // Letzter Punkt zurücksetzen, wenn der Radiergummi verwendet wird
+=======
+>>>>>>> main
   }
 
   /**
@@ -160,7 +163,6 @@ export class SpriteCanvas extends SpriteEditorPart {
       } else {
         this.context.fillRect(x, y, 10, 10);
       }
-      this.addToActionStack(point.x, point.y, color_str);
     });
   }
 
@@ -250,7 +252,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     })`;
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
-    this.addToActionStack(x, y, color_str);
   }
 
   /**
@@ -265,7 +266,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     });
     const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
     this.context.clearRect(x * 10, y * 10, 10, 10);
-    this.addToActionStack(x, y, "rgba(0,0,0,0)");
   }
 
   /**

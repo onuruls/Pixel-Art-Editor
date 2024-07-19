@@ -7,13 +7,25 @@ export class FileAreaToolsRight extends FileAreaPart {
 
   render() {
     return `
-        <p>RightTools</p>
+          <div class="right-panel">
+            <button id="settings"><img src="img/settings.svg" alt="New Folder">Settings</button>
+            <button id="resize"><img src="img/resize.svg" alt="Resize">Resize</button>
+            <button id="import"><img src="img/import.svg" alt="Import">Import</button>
+            <button id="export"><img src="img/export.svg" alt="Export">Export</button>
+        </div>
       `;
   }
   /**
    * Called by upper class
    */
-  init() {}
+  init() {
+    // const test_button = document.createElement("button");
+    // test_button.appendChild(document.createTextNode("SWITCH"));
+    // test_button.addEventListener("click", (event) => {
+    //   this.file_area.editor_tool.change_editor();
+    // });
+    // this.appendChild(test_button);
+  }
 }
 
 customElements.define("file-area-tools-right", FileAreaToolsRight);

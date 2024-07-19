@@ -17,10 +17,16 @@ import { RectangleSelection } from "../Tools/RectangleSelection.js";
 import { IrregularSelection } from "../Tools/IrregularSelection.js";
 import { ShapeSelection } from "../Tools/ShapeSelection.js";
 import { Dithering } from "../Tools/Dithering.js";
+import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
 export class SpriteEditor extends HTMLElement {
-  constructor() {
+  /**
+   *
+   * @param {EditorTool} editor_tool
+   */
+  constructor(editor_tool) {
     super();
+    this.editor_tool = editor_tool;
     this.selected_tool = null;
     this.canvas_matrix = [];
     this.width = 64;
@@ -30,14 +36,35 @@ export class SpriteEditor extends HTMLElement {
     this.action_buffer = [];
     this.changed_points = [];
     this.move_points = [];
+    this.initialized = false;
     this.selected_points = [];
     this.selection_start_point = { x: 0, y: 0 };
     this.selection_move_start_point = { x: 0, y: 0 };
     this.selection_color = [196, 252, 250, 123];
     this.selection_copied = false;
+    this.palettes = [
+      "#A4A5A6",
+      "#A4A5A6",
+      "#A4A5A6",
+      "#A4A5A6",
+      "#A4A5A6",
+      "#A4A5A6",
+    ];
   }
 
+  /**
+   * From HTMLElement called when element is mounted
+   */
   connectedCallback() {
+    if (!this.initialized) {
+      this.init();
+    }
+  }
+
+  /**
+   * Initializes the SpriteEditor with its Parts
+   */
+  init() {
     this.css = document.createElement("link");
     this.css.setAttribute(
       "href",
@@ -58,8 +85,12 @@ export class SpriteEditor extends HTMLElement {
       this.sprite_tools.querySelector("#color_input").value
     );
     this.canvas_matrix = this.create_canvas_matrix();
+    this.initialized = true;
   }
 
+  /**
+   * Sets the necessary eventlisteners
+   */
   set_listeners() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
     toolbox.addEventListener("click", (event) => {

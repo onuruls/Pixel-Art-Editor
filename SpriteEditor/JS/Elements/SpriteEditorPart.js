@@ -1,18 +1,21 @@
+import { SpriteEditor } from "./SpriteEditor.js";
 export class SpriteEditorPart extends HTMLElement {
+  /**
+   * @param {SpriteEditor} sprite_editor
+   */
   constructor(sprite_editor) {
     super();
     this.sprite_editor = sprite_editor;
+    this.innerHTML = this.render();
+    this.initialized = false;
   }
 
-  /**
-   *
-   * @param {SpriteEditor} spriteEditor
-   */
-
   connectedCallback() {
-    this.innerHTML = this.render();
-    this.initCSS();
-    this.init();
+    if (!this.initialized) {
+      this.initCSS();
+      this.init();
+      this.initialized = true;
+    }
   }
 
   initCSS() {

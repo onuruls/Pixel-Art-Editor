@@ -5,9 +5,14 @@ export class MapEditorLayers extends MapEditorPart {
     super(map_editor);
   }
 
+  /**
+   * Returns the Html-String
+   * @returns {String}
+   */
   render() {
     return `
         <p>Layers</p>
+        <div class="placeholder-layers-box"></div>
       `;
   }
 

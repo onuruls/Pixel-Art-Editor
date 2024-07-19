@@ -5,9 +5,15 @@ export class MapEditorCanvas extends MapEditorPart {
     super(map_editor);
   }
 
+  /**
+   * Returns the Html-String
+   * @returns {String}
+   */
   render() {
     return `
-        <p>Canvas<p>
+        <div class="canvas-wrapper">
+          <canvas id="drawing_canvas"></canvas>
+        </div>
       `;
   }
 
