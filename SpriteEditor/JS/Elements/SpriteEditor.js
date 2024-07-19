@@ -851,7 +851,6 @@ export class SpriteEditor extends HTMLElement {
     this.selection_copied = true;
     this.selected_points = this.selected_points.map((point) => {
       const originalColor = this.canvas_matrix[point.x][point.y].color;
-
       return {
         ...point,
         original_color: originalColor,
@@ -860,6 +859,24 @@ export class SpriteEditor extends HTMLElement {
           : originalColor,
       };
     });
+  }
+
+  /**
+   * Copies all the colors to the selected_points and clears all selected_points
+   */
+  cut_selected_pixel() {
+    this.copy_selected_pixel();
+    const empty_color = [0, 0, 0, 0];
+    const cut_points = this.selected_points.map((point) => {
+      this.canvas_matrix[point.x][point.y].color = empty_color;
+      return {
+        x: point.x,
+        y: point.y,
+        prev_color: this.canvas_matrix[point.x][point.y].color,
+        color: empty_color,
+      };
+    });
+    this.action_stack.push(cut_points);
   }
 
   /**
