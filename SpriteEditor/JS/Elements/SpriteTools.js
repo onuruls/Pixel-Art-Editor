@@ -27,11 +27,9 @@ export class SpriteTools extends SpriteEditorPart {
       </div>
       <div class="pixel-size">
         <div id="pixel-size-options">
-          <button class="pixel-size-option" data-size="1">1x</button>
+          <button class="pixel-size-option active" data-size="1">1x</button>
           <button class="pixel-size-option" data-size="2">2x</button>
           <button class="pixel-size-option" data-size="4">4x</button>
-          <button class="pixel-size-option" data-size="8">8x</button>
-          <button class="pixel-size-option" data-size="16">16x</button>
         </div>
       </div>
       <input type="color" id="color_input" name="color_input" value="#000000" />
