@@ -67,8 +67,11 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
     });
-    this.sprite_editor.addEventListener("revert_action", (event) => {
-      this.revert_action(event);
+    this.sprite_editor.addEventListener("revert_undo", (event) => {
+      this.revert_undo(event);
+    });
+    this.sprite_editor.addEventListener("revert_redo", (event) => {
+      this.revert_redo(event);
     });
     this.sprite_editor.addEventListener("draw_shape", (event) => {
       this.draw_shape(event);
@@ -159,11 +162,23 @@ export class SpriteCanvas extends SpriteEditorPart {
    * Reverts the last action from the action_stack in the sprite_editor
    * @param {Event} event
    */
-  revert_action(event) {
+  revert_undo(event) {
     const points = event.detail.points;
     points.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.prev_color);
+    });
+  }
+
+  /**
+   * Redoing the last undo-action from the action stack
+   * @param {Event} event
+   */
+  revert_redo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.color);
     });
   }
 
