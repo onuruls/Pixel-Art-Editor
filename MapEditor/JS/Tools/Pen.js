@@ -1,0 +1,52 @@
+import { Tool } from "./Tool.js";
+
+export class Pen extends Tool {
+  /**
+   *
+   * @param {HTMLCanvasElement} canvas
+   */
+  constructor(canvas) {
+    super(canvas);
+    this.cursor_icon_url = "./img/cursors/pen.png";
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_down(event) {
+    this.is_drawing = true;
+    this.map_editor.start_action_buffer();
+    this.draw(event);
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_move(event) {
+    this.hover(event);
+    this.activate_cursor_icon();
+    if (this.is_drawing) {
+      this.draw(event);
+    }
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_up(event) {
+    this.is_drawing = false;
+    this.map_editor.end_action_buffer();
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  draw(event) {
+    const position = this.get_mouse_position(event);
+    this.map_editor.pen_change_matrix(position.x, position.y);
+  }
+}

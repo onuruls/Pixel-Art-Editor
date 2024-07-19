@@ -13,7 +13,7 @@ export class MapEditorTools extends MapEditorPart {
     return `
       <h1 id="title">Map Editor</h1>
       <div class="toolbox">
-        <p>Tools Placeolder</p>
+        <button id="pen" class="tool-button active" data-tool="pen" title="Pen tool"><img src="img/icons/pen.svg" alt="Pen"></button>
       </div>
       <div class="assetbox">
         <button class="asset-button" title="Dirt asset"><img src="img/assets/dummy_dirt.png" alt="Dummy Dirt"></button>
@@ -27,7 +27,23 @@ export class MapEditorTools extends MapEditorPart {
     `;
   }
 
-  init() {}
+  init() {
+    const toolButtons = document.querySelectorAll(".tool-button");
+    toolButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        toolButtons.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+
+    const assetButtons = document.querySelectorAll(".asset-button");
+    assetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        assetButtons.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+  }
 }
 
 customElements.define("map-editor-tools", MapEditorTools);

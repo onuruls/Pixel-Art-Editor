@@ -1,25 +1,22 @@
 export class MapEditorPart extends HTMLElement {
   /**
+   *
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
     super();
     this.map_editor = map_editor;
-  }
-
-  /**
-   * From HTMLElement - called when mounted to DOM
-   */
-  connectedCallback() {
     this.innerHTML = this.render();
-    this.initCSS();
-    this.init();
+    this.initialized = false;
   }
 
-  /**
-   * From HTMLElement - called when unmounted from DOM
-   */
-  disconnectedCallback() {}
+  connectedCallback() {
+    if (!this.initialized) {
+      this.initCSS();
+      this.init();
+      this.initialized = true;
+    }
+  }
 
   initCSS() {
     this.css = document.createElement("link");
