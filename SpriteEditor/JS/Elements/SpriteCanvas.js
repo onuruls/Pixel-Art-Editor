@@ -104,32 +104,6 @@ export class SpriteCanvas extends SpriteEditorPart {
 
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
-<<<<<<< HEAD
-    this.addToActionStack(x, y, color_str);
-
-    this.lastPoint = { x, y };
-  }
-
-  /**
-   * Adds an action to the action stack for undo functionality
-   * @param {Number} x - x coordinate
-   * @param {Number} y - y coordinate
-   * @param {String} color - color of the action
-   */
-  addToActionStack(x, y, color) {
-    // Ensure the context is created with willReadFrequently
-    this.context = this.drawing_canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
-    const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
-    this.action_stack.push({
-      x,
-      y,
-      prev_color: Array.from(prev_color),
-      new_color: color,
-    });
-=======
->>>>>>> main
   }
 
   /**
@@ -138,10 +112,6 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   draw_erazer_canvas(event) {
     this.erase_single_pixel(event.detail.x, event.detail.y);
-<<<<<<< HEAD
-    this.lastPoint = null; // Letzter Punkt zurücksetzen, wenn der Radiergummi verwendet wird
-=======
->>>>>>> main
   }
 
   /**
