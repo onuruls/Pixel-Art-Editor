@@ -3,12 +3,21 @@ import { FileAreaPart } from "./FileAreaPart.js";
 export class FileAreaToolsLeft extends FileAreaPart {
   constructor(file_area) {
     super(file_area);
+    this.editor_name = "SpriteEditor";
+  }
+
+  set_editor_name(name){
+    if(this.editor_name !== name){
+      this.editor_name = name;
+    }
+    this.querySelector("#switch_to img").alt = `${this.editor_name}`;
+    this.querySelector("#switch_to").innerText = `${this.editor_name}`;
   }
 
   render() {
     return `
         <div class="left-panel">
-            <a href="" id="go_to_sprite_editor"><img src="img/chevron-left-circle.svg" alt="Go to SpriteEditor">Sprite Editor</a>
+            <button id="switch_to"><img src="img/chevron-left-circle.svg" alt="${this.editor_name}">${this.editor_name}</button>
             <button id="new_folder"><img src="img/new-folder.svg" alt="New Folder">New Folder</button>
             <button id="delete_button"><img src="img/delete.svg" alt="Delete">Delete</button>
             <button id="rename_button"><img src="img/rename.svg" alt="Rename">Rename</button>
@@ -16,10 +25,21 @@ export class FileAreaToolsLeft extends FileAreaPart {
       `;
   }
 
+  connectedCallback(){
+    this.innerHTML = this.render();
+    this.init();
+  }
+
   /**
    * Called by upper class
    */
-  init() {}
+  init() {
+    const switch_button = this.querySelector("#switch_to");
+    switch_button.addEventListener("click", (event) => {
+         this.file_area.editor_tool.change_editor();
+    });
+  }
+ 
 }
 
 customElements.define("file-area-tools-left", FileAreaToolsLeft);
