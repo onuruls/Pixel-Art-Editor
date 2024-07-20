@@ -108,6 +108,10 @@ export class SpriteEditor extends HTMLElement {
     });
   }
 
+  /**
+   *
+   * @param {Number} size - The new pixel size to set
+   */
   set_pixel_size(size) {
     this.pixel_size = parseInt(size);
     this.dispatchEvent(
@@ -118,6 +122,7 @@ export class SpriteEditor extends HTMLElement {
       })
     );
   }
+
   /**
    * Applies the given action to a block of pixels defined by this.pixel_size
    * @param {Number} x
