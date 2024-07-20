@@ -10,8 +10,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     super(sprite_editor);
     this.shape_holder = [];
     this.selected_points_holder = [];
-    this.lastPoint = null;
-    this.action_stack = [];
   }
 
   /**
@@ -55,7 +53,6 @@ export class SpriteCanvas extends SpriteEditorPart {
 
     window.addEventListener("mouseup", (event) => {
       this.sprite_editor.selected_tool.global_mouse_up(event);
-      this.lastPoint = null;
     });
 
     this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
@@ -70,8 +67,11 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
     });
-    this.sprite_editor.addEventListener("revert_action", (event) => {
-      this.revert_action(event);
+    this.sprite_editor.addEventListener("revert_undo", (event) => {
+      this.revert_undo(event);
+    });
+    this.sprite_editor.addEventListener("revert_redo", (event) => {
+      this.revert_redo(event);
     });
     this.sprite_editor.addEventListener("draw_shape", (event) => {
       this.draw_shape(event);
@@ -87,6 +87,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     });
     this.sprite_editor.addEventListener("remove_selection", (event) => {
       this.remove_selection(event);
+    });
+    this.sprite_editor.addEventListener("repaint_after_import", (event) => {
+      this.repaint_after_import(event);
     });
   }
 
@@ -157,7 +160,6 @@ export class SpriteCanvas extends SpriteEditorPart {
       } else {
         this.context.fillRect(x, y, 10, 10);
       }
-      this.addToActionStack(point.x, point.y, color_str);
     });
   }
 
@@ -187,11 +189,23 @@ export class SpriteCanvas extends SpriteEditorPart {
    * Reverts the last action from the action_stack in the sprite_editor
    * @param {Event} event
    */
-  revert_action(event) {
+  revert_undo(event) {
     const points = event.detail.points;
     points.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.prev_color);
+    });
+  }
+
+  /**
+   * Redoing the last undo-action from the action stack
+   * @param {Event} event
+   */
+  revert_redo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.color);
     });
   }
 
@@ -239,7 +253,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     })`;
     this.context.fillStyle = color_str;
     this.context.fillRect(x * 10, y * 10, 10, 10);
-    this.addToActionStack(x, y, color_str);
   }
 
   /**
@@ -254,7 +267,6 @@ export class SpriteCanvas extends SpriteEditorPart {
     });
     const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
     this.context.clearRect(x * 10, y * 10, 10, 10);
-    this.addToActionStack(x, y, "rgba(0,0,0,0)");
   }
 
   /**
@@ -325,6 +337,18 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   remove_selection(event) {
     this.revert_selected_area();
+  }
+
+  /**
+   * Repaints the whole canvas, after sprite is imported
+   * @param {Event} event
+   */
+  repaint_after_import(event) {
+    this.sprite_editor.canvas_matrix.forEach((row, x) =>
+      row.forEach((pixel, y) => {
+        this.paint_single_pixel(x, y, pixel.color);
+      })
+    );
   }
 }
 

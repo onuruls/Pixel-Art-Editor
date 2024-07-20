@@ -6,6 +6,13 @@ export class SpriteTools extends SpriteEditorPart {
   }
 
   render() {
+    const palette_html = this.sprite_editor.palettes
+      .map(
+        (color, i) => `
+      <input type="color" class="palette-color" data-index="${i}" value="${color}">
+    `
+      )
+      .join("");
     return `
       <h1 id="title">Sprite Editor</h1>
       <div class="toolbox">
@@ -33,22 +40,25 @@ export class SpriteTools extends SpriteEditorPart {
         </div>
       </div>
       <input type="color" id="color_input" name="color_input" value="#000000" />
+      <div id="palettes" class="palettes">
+        <h3>Palettes (Double click to use color)</h3>
+        ${palette_html}
+      </div>
+      <button id="download_sprite">Download</button>
+      <input type="file" id="import_sprite">
     `;
   }
 
   init() {
     const color_input = document.getElementById("color_input");
     color_input.addEventListener("input", () => {
-      const title = document.getElementById("title");
-      if (title) {
-        title.style.webkitTextStrokeColor = color_input.value;
-      }
+      this.change_title_color(color_input.value);
     });
 
-    const toolButtons = document.querySelectorAll(".tool-button");
-    toolButtons.forEach((button) => {
+    const tool_buttons = document.querySelectorAll(".tool-button");
+    tool_buttons.forEach((button) => {
       button.addEventListener("click", () => {
-        toolButtons.forEach((btn) => btn.classList.remove("active"));
+        tool_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
       });
     });
@@ -61,6 +71,32 @@ export class SpriteTools extends SpriteEditorPart {
         this.sprite_editor.set_pixel_size(button.dataset.size);
       });
     });
+    
+    const palette_colors = this.querySelectorAll(".palette-color");
+    palette_colors.forEach((palette) => {
+      palette.addEventListener("click", () => {
+        const index = palette.getAttribute("data-index");
+        this.sprite_editor.palettes[index] = palette.value;
+      });
+      palette.addEventListener("dblclick", () => {
+        palette.style.display = "none";
+        setTimeout(() => {
+          palette.style.display = "inline-block";
+        }, 0);
+        const color = palette.value;
+        color_input.value = color;
+        this.sprite_editor.selected_color =
+          this.sprite_editor.hex_to_rgb_array(color);
+        this.change_title_color(color);
+      });
+    });
+  }
+
+  change_title_color(color) {
+    const title = document.getElementById("title");
+    if (title) {
+      title.style.webkitTextStrokeColor = color;
+    }
   }
 }
 
