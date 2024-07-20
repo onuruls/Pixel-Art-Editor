@@ -88,6 +88,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.sprite_editor.addEventListener("remove_selection", (event) => {
       this.remove_selection(event);
     });
+    this.sprite_editor.addEventListener("repaint_after_import", (event) => {
+      this.repaint_after_import(event);
+    });
   }
 
   /**
@@ -306,6 +309,18 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   remove_selection(event) {
     this.revert_selected_area();
+  }
+
+  /**
+   * Repaints the whole canvas, after sprite is imported
+   * @param {Event} event
+   */
+  repaint_after_import(event) {
+    this.sprite_editor.canvas_matrix.forEach((row, x) =>
+      row.forEach((pixel, y) => {
+        this.paint_single_pixel(x, y, pixel.color);
+      })
+    );
   }
 }
 
