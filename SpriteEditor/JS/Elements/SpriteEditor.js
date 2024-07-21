@@ -114,6 +114,17 @@ export class SpriteEditor extends HTMLElement {
         this.redo_last_action();
       }
     });
+    this.sprite_tools
+      .querySelector("#download_sprite")
+      .addEventListener("click", () => {
+        this.save_sprite();
+      });
+
+    this.sprite_tools
+      .querySelector("#import_sprite")
+      .addEventListener("change", (event) => {
+        this.import_sprite(event);
+      });
   }
   /**
    *
@@ -1058,6 +1069,53 @@ export class SpriteEditor extends HTMLElement {
       x < this.canvas_matrix.length &&
       y < this.canvas_matrix.length
     );
+  }
+
+  /**
+   * Saves the sprite in a JSON
+   */
+  save_sprite() {
+    const filename = "test.sprite";
+    const jsonString = JSON.stringify(this.canvas_matrix);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const download_link = document.createElement("a");
+    download_link.href = url;
+    download_link.download = filename;
+    this.appendChild(download_link);
+    download_link.click();
+    this.removeChild(download_link);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Imports the selected sprite into the sprite editor
+   * @param {Event} event
+   */
+  import_sprite(event) {
+    this.start_action_buffer();
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const file_content = e.target.result;
+        const loaded_canvas = JSON.parse(file_content);
+        this.canvas_matrix.forEach((row, x) =>
+          row.forEach((pixel, y) => {
+            this.action_buffer.push({
+              x: x,
+              y: y,
+              prev_color: pixel.color,
+              color: loaded_canvas[x][y],
+            });
+          })
+        );
+        this.canvas_matrix = loaded_canvas;
+        this.dispatchEvent(new CustomEvent("repaint_after_import"));
+        this.end_action_buffer();
+      };
+      reader.readAsText(file);
+    }
   }
 }
 

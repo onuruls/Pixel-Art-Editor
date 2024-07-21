@@ -37,6 +37,8 @@ export class SpriteTools extends SpriteEditorPart {
         <h3>Palettes (Double click to use color)</h3>
         ${palette_html}
       </div>
+      <button id="download_sprite">Download</button>
+      <input type="file" id="import_sprite">
     `;
   }
 
