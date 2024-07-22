@@ -7,16 +7,8 @@ export class FileAreaToolsLeft extends FileAreaPart {
   }
 
   set_editor_name(name) {
-    const imgElement = this.querySelector("#switch_to img");
-    const buttonElement = this.querySelector("#switch_to");
-
-    if (imgElement) {
-      imgElement.alt = name;
-    }
-
-    if (buttonElement) {
-      buttonElement.lastChild.textContent = name;
-    }
+    this.querySelector("#switch_to img").alt = name;
+    this.querySelector("#switch_to").lastChild.textContent = name;
   }
 
   render() {
@@ -36,12 +28,9 @@ export class FileAreaToolsLeft extends FileAreaPart {
   }
 
   init() {
-    const switch_button = this.querySelector("#switch_to");
-    if (switch_button) {
-      switch_button.addEventListener("click", (event) => {
-        this.file_area.editor_tool.change_editor();
-      });
-    }
+    this.querySelector("#switch_to").addEventListener("click", (event) => {
+      this.file_area.editor_tool.change_editor();
+    });
   }
 }
 
