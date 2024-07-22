@@ -508,6 +508,11 @@ export class SpriteEditor extends HTMLElement {
     }
   }
 
+  /**
+   * Expands the given shape points according to the pixel size
+   * @param {Array<{x: Number, y: Number}>} shape_points
+   * @returns {Array<{x: Number, y: Number}>}
+   */
   expand_shape_points(shape_points) {
     const expanded_points = [];
     shape_points.forEach((point) => {

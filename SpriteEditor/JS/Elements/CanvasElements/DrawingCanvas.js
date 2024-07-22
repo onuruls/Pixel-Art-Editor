@@ -175,7 +175,6 @@ export class DrawingCanvas extends HTMLElement {
     this.context = this.canvas.getContext("2d", {
       willReadFrequently: true,
     });
-    const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
     this.context.clearRect(x * 10, y * 10, 10, 10);
   }
 
