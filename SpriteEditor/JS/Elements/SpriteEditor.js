@@ -348,6 +348,7 @@ export class SpriteEditor extends HTMLElement {
         detail: {
           color: this.selected_color,
           points: fill_pixels,
+          size: this.pixel_size * 10,
         },
       })
     );
@@ -472,20 +473,24 @@ export class SpriteEditor extends HTMLElement {
   draw_shape_matrix(shape_points, final = false) {
     if (final) {
       this.start_action_buffer();
-      shape_points.forEach((point) => {
-        this.action_buffer.push({
-          x: point.x,
-          y: point.y,
-          prev_color: this.canvas_matrix[point.x][point.y],
-          color: this.selected_color,
-        });
-        this.canvas_matrix[point.x][point.y] = this.selected_color;
+      const expanded_shape_points = this.expand_shape_points(shape_points);
+      expanded_shape_points.forEach((point) => {
+        const prev_color = this.canvas_matrix[point.x][point.y];
+        if (!this.compare_colors(prev_color, this.selected_color)) {
+          this.action_buffer.push({
+            x: point.x,
+            y: point.y,
+            prev_color: prev_color,
+            color: this.selected_color,
+          });
+          this.canvas_matrix[point.x][point.y] = this.selected_color;
+        }
       });
       this.end_action_buffer();
       this.dispatchEvent(
         new CustomEvent("draw_shape", {
           detail: {
-            points: shape_points,
+            points: expanded_shape_points,
             color: this.selected_color,
             final: final,
           },
@@ -495,13 +500,24 @@ export class SpriteEditor extends HTMLElement {
       this.dispatchEvent(
         new CustomEvent("draw_temp_shape", {
           detail: {
-            points: shape_points,
+            points: this.expand_shape_points(shape_points),
             color: this.selected_color,
           },
         })
       );
     }
   }
+
+  expand_shape_points(shape_points) {
+    const expanded_points = [];
+    shape_points.forEach((point) => {
+      this.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
+        expanded_points.push({ x: xi, y: yj });
+      });
+    });
+    return expanded_points;
+  }
+
   /**
    *  Draws a rectangle on the Canvas
    * @param {Number} x1
@@ -616,6 +632,50 @@ export class SpriteEditor extends HTMLElement {
           },
         })
       );
+    });
+  }
+  /**
+   * Applies dithering effect to a block of pixels
+   * @param {Number} x
+   * @param {Number} y
+   */
+  dither_change_matrix(x, y) {
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      const is_draw = this.draw_or_erase({ x: xi, y: yj }) === "draw";
+      const prev_color = this.canvas_matrix[xi][yj];
+      if (is_draw) {
+        if (
+          !this.compare_colors(this.canvas_matrix[xi][yj], this.selected_color)
+        ) {
+          this.canvas_matrix[xi][yj] = this.selected_color;
+          this.dispatchEvent(
+            new CustomEvent("pen_matrix_changed", {
+              detail: {
+                x: xi,
+                y: yj,
+                color: this.selected_color,
+              },
+            })
+          );
+        }
+      } else {
+        if (!this.compare_colors(prev_color, [0, 0, 0, 0])) {
+          this.canvas_matrix[xi][yj] = [0, 0, 0, 0];
+          this.dispatchEvent(
+            new CustomEvent("erazer_matrix_changed", {
+              detail: {
+                x: xi,
+                y: yj,
+              },
+            })
+          );
+        }
+      }
+      this.action_buffer.push({
+        x: xi,
+        y: yj,
+        prev_color: prev_color,
+      });
     });
   }
   /**
@@ -800,6 +860,21 @@ export class SpriteEditor extends HTMLElement {
 
   compare_points(point1, point2) {
     return point1.x === point2.x && point1.y === point2.y;
+  }
+
+  /**
+   * Applies dithering effect to a block of pixels
+   * @param {Number} x
+   * @param {Number} y
+   */
+  draw_or_erase(position) {
+    const is_x_odd = position.x % 2 !== 0;
+    const is_y_odd = position.y % 2 !== 0;
+    if ((is_x_odd && !is_y_odd) || (!is_x_odd && is_y_odd)) {
+      return "draw";
+    } else {
+      return "erase";
+    }
   }
 
   /**
