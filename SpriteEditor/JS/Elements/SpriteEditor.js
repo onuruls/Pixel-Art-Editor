@@ -42,6 +42,7 @@ export class SpriteEditor extends HTMLElement {
     this.selection_move_start_point = { x: 0, y: 0 };
     this.selection_color = [196, 252, 250, 123];
     this.selection_copied = false;
+    this.pixel_size = 1;
     this.palettes = [
       "#A4A5A6",
       "#A4A5A6",
@@ -125,6 +126,13 @@ export class SpriteEditor extends HTMLElement {
       .addEventListener("change", (event) => {
         this.import_sprite(event);
       });
+  }
+  /**
+   *
+   * @param {Number} size - The new pixel size to set
+   */
+  set_pixel_size(size) {
+    this.pixel_size = size;
   }
   /**
    *
@@ -279,6 +287,7 @@ export class SpriteEditor extends HTMLElement {
         detail: {
           x: x,
           y: y,
+          size: this.pixel_size * 10,
         },
       })
     );
