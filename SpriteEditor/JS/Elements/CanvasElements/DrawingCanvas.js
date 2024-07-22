@@ -64,9 +64,9 @@ export class DrawingCanvas extends HTMLElement {
    * @param {Event} event
    */
   draw_pen_canvas(event) {
-    let color = event.detail.color;
-    let x = event.detail.x;
-    let y = event.detail.y;
+    const color = event.detail.color;
+    const x = event.detail.x;
+    const y = event.detail.y;
     const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
       color[3] / 255
     })`;
@@ -88,14 +88,14 @@ export class DrawingCanvas extends HTMLElement {
    * @param {Event} event
    */
   fill_canvas(event) {
-    let color = event.detail.color;
-    let points = event.detail.points;
+    const color = event.detail.color;
+    const points = event.detail.points;
     const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
       color[3] / 255
     })`;
     points.forEach((point) => {
-      let x = point.x * 10;
-      let y = point.y * 10;
+      const x = point.x * 10;
+      const y = point.y * 10;
       this.context.fillStyle = color_str;
       if (color_str === "rgba(0,0,0,0)") {
         this.context.clearRect(x, y, 10, 10);
@@ -175,7 +175,6 @@ export class DrawingCanvas extends HTMLElement {
     this.context = this.canvas.getContext("2d", {
       willReadFrequently: true,
     });
-    const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
     this.context.clearRect(x * 10, y * 10, 10, 10);
   }
 

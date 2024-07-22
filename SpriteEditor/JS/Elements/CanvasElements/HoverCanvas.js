@@ -43,14 +43,15 @@ export class HoverCanvas extends HTMLElement {
    * @param {Event} event
    */
   draw_hover(event) {
+    const size = event.detail.size;
     if (this.last_hover) {
-      this.context.clearRect(this.last_hover.x, this.last_hover.y, 10, 10);
+      this.context.clearRect(this.last_hover.x, this.last_hover.y, size, size);
     }
-    let x = event.detail.x * 10;
-    let y = event.detail.y * 10;
+    const x = event.detail.x * 10;
+    const y = event.detail.y * 10;
     this.context.fillStyle = this.hover_color;
-    this.context.fillRect(x, y, 10, 10);
-    this.last_hover = { x: x, y: y };
+    this.context.fillRect(x, y, size, size);
+    this.last_hover = { x, y };
   }
 
   /**
