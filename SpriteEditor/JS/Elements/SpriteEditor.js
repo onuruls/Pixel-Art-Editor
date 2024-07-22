@@ -1026,13 +1026,14 @@ export class SpriteEditor extends HTMLElement {
   copy_selected_pixel() {
     this.selection_copied = true;
     this.selected_points = this.selected_points.map((point) => {
-      const originalColor = this.canvas_matrix[point.x][point.y];
+      const original_color = this.canvas_matrix[point.x][point.y];
+
       return {
         ...point,
-        original_color: originalColor,
-        selection_color: this.is_transparent(originalColor)
+        original_color: original_color,
+        selection_color: this.is_transparent(original_color)
           ? this.selection_color
-          : originalColor,
+          : this.combine_colors(original_color, this.selection_color),
       };
     });
     this.dispatchEvent(
