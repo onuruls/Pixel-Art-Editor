@@ -76,7 +76,10 @@ export class Tool {
    * @param {Event} event
    */
   global_mouse_up(event) {
-    this.is_drawing = false;
+    if (this.is_drawing) {
+      this.is_drawing = false;
+      this.mouse_up(event);
+    }
   }
 
   /**
