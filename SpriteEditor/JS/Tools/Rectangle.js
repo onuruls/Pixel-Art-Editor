@@ -31,10 +31,12 @@ export class Rectangle extends Tool {
   mouse_move(event) {
     this.activate_cursor_icon();
     const position = this.get_mouse_position(event);
-    this.end_x = position.x;
-    this.end_y = position.y;
-    if (this.is_drawing) {
-      this.draw(event);
+    if (this.has_mouse_position_changed(position.x, position.y)) {
+      this.end_x = position.x;
+      this.end_y = position.y;
+      if (this.is_drawing) {
+        this.draw(event);
+      }
     }
   }
   /**
