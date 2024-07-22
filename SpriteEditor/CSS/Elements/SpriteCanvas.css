@@ -7,7 +7,7 @@ sprite-canvas {
   border-right: 1px solid white;
 
   > .canvas-wrapper {
-    display: block;
+    position: relative;
     padding: 0px;
     margin: auto;
     background-image: linear-gradient(90deg, #444 1px, transparent 1px),
@@ -17,14 +17,32 @@ sprite-canvas {
     background-size: 10px 10px;
     background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
     border: 1cap solid #bbb;
-  }
-  canvas {
-    position: relative;
-    display: block;
     width: 640px;
     height: 640px;
-    z-index: 5;
-    margin: auto;
+  }
+  
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     cursor: crosshair;
+  }
+
+  drawing-canvas {
+    z-index: 5;
+  }
+  
+  temp-canvas {
+    z-index: 6;
+  }
+  
+  hover-canvas {
+    z-index: 7;
+  }
+  
+  input-canvas {
+    z-index: 8;
   }
 }

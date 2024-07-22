@@ -1,5 +1,9 @@
 import { SpriteEditorPart } from "./SpriteEditorPart.js";
 import { SpriteEditor } from "./SpriteEditor.js";
+import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
+import { TempCanvas } from "./CanvasElements/TempCanvas.js";
+import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
+import { InputCanvas } from "./CanvasElements/InputCanvas.js";
 
 export class SpriteCanvas extends SpriteEditorPart {
   /**
@@ -10,6 +14,11 @@ export class SpriteCanvas extends SpriteEditorPart {
     super(sprite_editor);
     this.shape_holder = [];
     this.selected_points_holder = [];
+    this.drawing_canvas = new DrawingCanvas(this);
+    this.temp_canvas = new TempCanvas(this);
+    this.hover_canvas = new HoverCanvas(this);
+    this.input_canvas = new InputCanvas(this);
+    this.canvas_wrapper = null;
   }
 
   /**
@@ -17,338 +26,32 @@ export class SpriteCanvas extends SpriteEditorPart {
    * @returns {String}
    */
   render() {
-    return `
-        <div class="canvas-wrapper">
-          <canvas id="drawing_canvas"></canvas>
-        </div>
-      `;
+    return `<div class="canvas-wrapper"></div>`;
   }
 
   /**
    * place for all the event listener
    */
   init() {
-    this.drawing_canvas = this.querySelector("#drawing_canvas");
-    this.context = this.drawing_canvas.getContext("2d", {
-      willReadFrequently: true,
+    this.canvas_wrapper = this.querySelector(".canvas-wrapper");
+    this.canvas_wrapper.append(this.drawing_canvas);
+    this.canvas_wrapper.append(this.temp_canvas);
+    this.canvas_wrapper.append(this.hover_canvas);
+    this.canvas_wrapper.append(this.input_canvas);
+    this.drawing_canvas.canvas.addEventListener("resize", (event) => {
+      this.drawing_canvas.canvas.height =
+        event.target.getBoundingClientRect().height;
+      this.drawing_canvas.canvas.width =
+        event.target.getBoundingClientRect().width;
+      this.dispatchEvent(
+        new CustomEvent("canvas_resized", {
+          detail: {
+            height: event.target.getBoundingClientRect().height,
+            width: event.target.getBoundingClientRect().width,
+          },
+        })
+      );
     });
-    this.drawing_canvas.height = 640;
-    this.drawing_canvas.width = 640;
-    this.drawing_canvas.addEventListener("resize", (event) => {
-      this.drawing_canvas.height = event.target.getBoundingClientRect().height;
-      this.drawing_canvas.width = event.target.getBoundingClientRect().width;
-    });
-
-    this.drawing_canvas.addEventListener("mousedown", (event) => {
-      this.sprite_editor.selected_tool.mouse_down(event);
-    });
-
-    this.drawing_canvas.addEventListener("mousemove", (event) => {
-      this.sprite_editor.selected_tool.mouse_move(event);
-    });
-
-    this.drawing_canvas.addEventListener("mouseup", (event) => {
-      this.sprite_editor.selected_tool.mouse_up(event);
-    });
-
-    window.addEventListener("mouseup", (event) => {
-      this.sprite_editor.selected_tool.global_mouse_up(event);
-    });
-
-    this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
-      this.draw_pen_canvas(event);
-    });
-    this.sprite_editor.addEventListener("erazer_matrix_changed", (event) => {
-      this.draw_erazer_canvas(event);
-    });
-    this.sprite_editor.addEventListener("hover_matrix_changed", (event) => {
-      this.draw_hover(event);
-    });
-    this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
-      this.fill_canvas(event);
-    });
-    this.sprite_editor.addEventListener("revert_undo", (event) => {
-      this.revert_undo(event);
-    });
-    this.sprite_editor.addEventListener("revert_redo", (event) => {
-      this.revert_redo(event);
-    });
-    this.sprite_editor.addEventListener("draw_shape", (event) => {
-      this.draw_shape(event);
-    });
-    this.sprite_editor.addEventListener("move_canvas", (event) => {
-      this.move_canvas(event);
-    });
-    this.sprite_editor.addEventListener("update_selected_area", (event) => {
-      this.update_selected_area(event);
-    });
-    this.sprite_editor.addEventListener("paste_selected_area", (event) => {
-      this.paste_selected_area(event);
-    });
-    this.sprite_editor.addEventListener("remove_selection", (event) => {
-      this.remove_selection(event);
-    });
-    this.sprite_editor.addEventListener("repaint_after_import", (event) => {
-      this.repaint_after_import(event);
-    });
-  }
-
-  /**
-   * Pen tool
-   * @param {Event} event
-   */
-  draw_pen_canvas(event) {
-    let color = event.detail.color;
-    let x = event.detail.x;
-    let y = event.detail.y;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-
-    this.context.fillStyle = color_str;
-    this.context.fillRect(x * 10, y * 10, 10, 10);
-    this.addToActionStack(x, y, color_str);
-
-    this.lastPoint = { x, y };
-  }
-
-  /**
-   * Adds an action to the action stack for undo functionality
-   * @param {Number} x - x coordinate
-   * @param {Number} y - y coordinate
-   * @param {String} color - color of the action
-   */
-  addToActionStack(x, y, color) {
-    // Ensure the context is created with willReadFrequently
-    this.context = this.drawing_canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
-    const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
-    this.action_stack.push({
-      x,
-      y,
-      prev_color: Array.from(prev_color),
-      new_color: color,
-    });
-  }
-
-  /**
-   * Eraser tool
-   * @param {Event} event
-   */
-  draw_erazer_canvas(event) {
-    this.erase_single_pixel(event.detail.x, event.detail.y);
-    this.lastPoint = null; // Letzter Punkt zurücksetzen, wenn der Radiergummi verwendet wird
-  }
-
-  /**
-   * Fills an area of the canvas
-   * @param {Event} event
-   */
-  fill_canvas(event) {
-    let color = event.detail.color;
-    let points = event.detail.points;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-    points.forEach((point) => {
-      let x = point.x * 10;
-      let y = point.y * 10;
-      this.context.fillStyle = color_str;
-      if (color_str === "rgba(0,0,0,0)") {
-        this.context.clearRect(x, y, 10, 10);
-      } else {
-        this.context.fillRect(x, y, 10, 10);
-      }
-    });
-  }
-
-  /**
-   * Handles the hover effect
-   * @param {Event} event
-   */
-  draw_hover(event) {
-    let hover = event.detail.hover;
-    let hover_color = "rgba(180,240,213,0.5)";
-    let color = event.detail.color;
-    let x = event.detail.x * 10;
-    let y = event.detail.y * 10;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-    this.context.clearRect(x, y, 10, 10);
-    this.context.fillStyle = color_str;
-    this.context.fillRect(x, y, 10, 10);
-    if (hover) {
-      this.context.fillStyle = hover_color;
-      this.context.fillRect(x, y, 10, 10);
-    }
-  }
-
-  /**
-   * Reverts the last action from the action_stack in the sprite_editor
-   * @param {Event} event
-   */
-  revert_undo(event) {
-    const points = event.detail.points;
-    points.forEach((point) => {
-      this.erase_single_pixel(point.x, point.y);
-      this.paint_single_pixel(point.x, point.y, point.prev_color);
-    });
-  }
-
-  /**
-   * Redoing the last undo-action from the action stack
-   * @param {Event} event
-   */
-  revert_redo(event) {
-    const points = event.detail.points;
-    points.forEach((point) => {
-      this.erase_single_pixel(point.x, point.y);
-      this.paint_single_pixel(point.x, point.y, point.color);
-    });
-  }
-
-  /**
-   * Draws shapes on the matrix (rectangle, circle, line)
-   * @param {Event} event
-   */
-  draw_shape(event) {
-    const selected_color = event.detail.color;
-    const points = event.detail.points;
-    if (!event.detail.final) {
-      this.revert_canvas();
-      this.shape_holder = points;
-    } else {
-      this.shape_holder = [];
-    }
-    points.forEach((point) => {
-      this.sprite_editor.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
-        this.paint_single_pixel(xi, yj, selected_color);
-      });
-    });
-  }
-
-  /**
-   * Reverts the old points, when shape is not finally drawn
-   */
-  revert_canvas() {
-    this.shape_holder.forEach((point) => {
-      this.sprite_editor.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
-        this.erase_single_pixel(xi, yj);
-        this.paint_single_pixel(xi, yj, point.prev_color);
-      });
-    });
-  }
-
-  /**
-   * Paints a pixel in the given color
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Array<Number>} color
-   */
-  paint_single_pixel(x, y, color) {
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-    this.context.fillStyle = color_str;
-    this.context.fillRect(x * 10, y * 10, 10, 10);
-  }
-
-  /**
-   * Clears a pixel from the canvas
-   * @param {Number} x
-   * @param {Number} y
-   */
-  erase_single_pixel(x, y) {
-    // Ensure the context is created with willReadFrequently
-    this.context = this.drawing_canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
-    const prev_color = this.context.getImageData(x * 10, y * 10, 10, 10).data;
-    this.context.clearRect(x * 10, y * 10, 10, 10);
-  }
-
-  /**
-   * Clears canvas and draws moved pixels
-   * @param {Event} event
-   */
-  move_canvas(event) {
-    this.context.clearRect(
-      0,
-      0,
-      this.drawing_canvas.width,
-      this.drawing_canvas.height
-    );
-    const points = event.detail.points;
-    points.forEach((point) => {
-      const new_x = point.x - event.detail.x_diff;
-      const new_y = point.y - event.detail.y_diff;
-      if (
-        new_x >= 0 &&
-        new_x < this.drawing_canvas.width / 10 &&
-        new_y >= 0 &&
-        new_y < this.drawing_canvas.height / 10
-      ) {
-        this.paint_single_pixel(new_x, new_y, point.color);
-      }
-    });
-  }
-
-  /**
-   * Draws the selected area
-   * @param {Event} event
-   */
-  update_selected_area(event) {
-    const points = event.detail.points;
-    this.revert_selected_area();
-    this.selected_points_holder.push(...points);
-    points.forEach((point) => {
-      this.paint_single_pixel(point.x, point.y, point.selection_color);
-    });
-  }
-
-  /**
-   * Reverts the selection, when the area is updated or tool is changed
-   */
-  revert_selected_area() {
-    this.selected_points_holder.forEach((point) => {
-      this.erase_single_pixel(point.x, point.y);
-      this.paint_single_pixel(point.x, point.y, point.prev_color);
-    });
-    this.selected_points_holder = [];
-  }
-
-  /**
-   * Pastes the selected area at new location
-   * @param {Event} event
-   */
-  paste_selected_area(event) {
-    this.selected_points_holder = [];
-    const points = event.detail.points;
-    points.forEach((point) => {
-      this.paint_single_pixel(point.x, point.y, point.original_color);
-    });
-  }
-
-  /**
-   * Removes the selected points
-   * @param {Event} event
-   */
-  remove_selection(event) {
-    this.revert_selected_area();
-  }
-
-  /**
-   * Repaints the whole canvas, after sprite is imported
-   * @param {Event} event
-   */
-  repaint_after_import(event) {
-    this.sprite_editor.canvas_matrix.forEach((row, x) =>
-      row.forEach((pixel, y) => {
-        this.paint_single_pixel(x, y, pixel.color);
-      })
-    );
   }
 }
 
