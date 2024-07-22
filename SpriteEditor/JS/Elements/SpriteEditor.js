@@ -684,6 +684,31 @@ export class SpriteEditor extends HTMLElement {
     });
   }
   /**
+   * Filters canvas. Puts pixels with a color into move_points.
+   * Better performance than moving the whole canvas.
+   * The Pixels are added to the action_buffer as well.
+   */
+  filter_move_points() {
+    this.move_points = [];
+    for (let i = 0; i < this.canvas_matrix.length; i++) {
+      for (let j = 0; j < this.canvas_matrix[i].length; j++) {
+        if (!this.compare_colors(this.canvas_matrix[i][j], [0, 0, 0, 0])) {
+          this.move_points.push({
+            x: i,
+            y: j,
+            color: this.canvas_matrix[i][j],
+          });
+          this.action_buffer.push({
+            x: i,
+            y: j,
+            prev_color: this.canvas_matrix[i][j],
+            color: [0, 0, 0, 0],
+          });
+        }
+      }
+    }
+  }
+  /**
    * Moves the move_pixels.
    * @param {Number} x_diff
    * @param {Number} y_diff
