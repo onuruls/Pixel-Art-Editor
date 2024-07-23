@@ -19,6 +19,7 @@ export class Dithering extends Tool {
     this.sprite_editor.start_action_buffer();
     this.draw(event);
   }
+
   /**
    *
    * @param {Event} event
@@ -30,6 +31,7 @@ export class Dithering extends Tool {
       this.draw(event);
     }
   }
+
   /**
    *
    * @param {Event} event
@@ -45,20 +47,6 @@ export class Dithering extends Tool {
    */
   draw(event) {
     const position = this.get_mouse_position(event);
-    if (this.draw_or_erase(position) == "draw") {
-      this.sprite_editor.pen_change_matrix(position.x, position.y);
-    } else {
-      this.sprite_editor.erazer_change_matrix(position.x, position.y);
-    }
-  }
-
-  draw_or_erase(position) {
-    const is_x_odd = position.x % 2 !== 0;
-    const is_y_odd = position.y % 2 !== 0;
-    if ((is_x_odd && !is_y_odd) || (!is_x_odd && is_y_odd)) {
-      return "draw";
-    } else {
-      return "erase";
-    }
+    this.sprite_editor.dither_change_matrix(position.x, position.y);
   }
 }

@@ -1,6 +1,7 @@
 import { SpriteEditor } from "../../../SpriteEditor/JS/Elements/SpriteEditor.js";
 import { FileArea } from "../../../FileArea/JS/Elements/FileArea.js";
 import { MapEditor } from "../../../MapEditor/JS/Elements/MapEditor.js";
+
 export class EditorTool extends HTMLElement {
   constructor() {
     super();
@@ -30,9 +31,11 @@ export class EditorTool extends HTMLElement {
     if (this.sprite_editor.parentNode) {
       this.sprite_editor.remove();
       this.editor_container.appendChild(this.map_editor);
+      this.file_area.file_tools_left.set_editor_name("Sprite Editor")
     } else {
       this.map_editor.remove();
       this.editor_container.appendChild(this.sprite_editor);
+      this.file_area.file_tools_left.set_editor_name("Map Editor")
     }
   }
 }

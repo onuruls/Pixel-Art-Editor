@@ -24,6 +24,10 @@ export class SelectionTool extends Tool {
     if (e.ctrlKey && e.key === "v" && this.sprite_editor.selection_copied) {
       this.sprite_editor.paste_selected_pixel();
     }
+
+    if (e.ctrlKey && e.key === "x") {
+      this.sprite_editor.cut_selected_pixel();
+    }
   }
 
   /**

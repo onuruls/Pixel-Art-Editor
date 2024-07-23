@@ -1,8 +1,7 @@
 import { SpriteEditor } from "./SpriteEditor.js";
 export class SpriteEditorPart extends HTMLElement {
   /**
-   *
-   * @param {SpriteEditor} spriteEditor
+   * @param {SpriteEditor} sprite_editor
    */
   constructor(sprite_editor) {
     super();

@@ -1,11 +1,11 @@
 map-editor-map-preview {
   padding: 5px 5px;
   background-color: #333;
-}
 
-.placeholder-map-preview-box {
-  width: 320px;
-  height: 320px;
-  background-color: gray;
-  margin: auto;
+  .placeholder-map-preview-box {
+    width: 200px;
+    height: 200px;
+    background-color: gray;
+    margin: auto;
+  }
 }

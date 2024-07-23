@@ -16,8 +16,8 @@ export class Erazer extends Tool {
    */
   mouse_down(event) {
     this.is_drawing = true;
-    this.draw(event);
     this.sprite_editor.start_action_buffer();
+    this.draw(event);
   }
   /**
    *

@@ -1,5 +1,5 @@
 file-area-view {
-    background-color: #444;
-    width: 70%;
-    height: 100%;
+    #center-panel{
+        background-color: #333;/*has no effect*/
+    }
 }
