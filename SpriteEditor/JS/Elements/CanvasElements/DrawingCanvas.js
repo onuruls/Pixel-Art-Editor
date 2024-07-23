@@ -1,22 +1,17 @@
 import { SpriteCanvas } from "../SpriteCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class DrawingCanvas extends HTMLElement {
+export class DrawingCanvas extends CanvasElement {
   /**
    * Bottom level Canvas
    * Shows the drawing (canvas_matrix)
    * @param {SpriteCanvas} sprite_canvas
    */
   constructor(sprite_canvas) {
-    super();
-    this.sprite_canvas = sprite_canvas;
-    this.sprite_editor = sprite_canvas.sprite_editor;
-    this.canvas = null;
+    super(sprite_canvas);
+    this.context = null;
   }
-  connectedCallback() {
-    this.innerHTML = this.render();
-    this.canvas = this.querySelector("canvas");
-    this.init();
-  }
+
   render() {
     return `<canvas></canvas>`;
   }
@@ -24,9 +19,6 @@ export class DrawingCanvas extends HTMLElement {
    * Initializes the Canvas
    */
   init() {
-    this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
       this.draw_pen_canvas(event);
     });
@@ -67,12 +59,7 @@ export class DrawingCanvas extends HTMLElement {
     const color = event.detail.color;
     const x = event.detail.x;
     const y = event.detail.y;
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-
-    this.context.fillStyle = color_str;
-    this.context.fillRect(x * 10, y * 10, 10, 10);
+    this.paint_single_pixel(x, y, color);
   }
 
   /**
@@ -139,43 +126,6 @@ export class DrawingCanvas extends HTMLElement {
     points.forEach((point) => {
       this.paint_single_pixel(point.x, point.y, selected_color);
     });
-  }
-
-  /**
-   * Reverts the old points, when shape is not finally drawn
-   */
-  revert_canvas() {
-    this.shape_holder.forEach((point) => {
-      this.erase_single_pixel(point.x, point.y);
-      this.paint_single_pixel(point.x, point.y, point.prev_color);
-    });
-  }
-
-  /**
-   * Paints a pixel in the given color
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Array<Number>} color
-   */
-  paint_single_pixel(x, y, color) {
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-    this.context.fillStyle = color_str;
-    this.context.fillRect(x * 10, y * 10, 10, 10);
-  }
-
-  /**
-   * Clears a pixel from the canvas
-   * @param {Number} x
-   * @param {Number} y
-   */
-  erase_single_pixel(x, y) {
-    // Ensure the context is created with willReadFrequently
-    this.context = this.canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
-    this.context.clearRect(x * 10, y * 10, 10, 10);
   }
 
   /**

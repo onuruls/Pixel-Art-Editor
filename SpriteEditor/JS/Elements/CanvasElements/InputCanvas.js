@@ -1,25 +1,20 @@
 import { SpriteCanvas } from "../SpriteCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class InputCanvas extends HTMLElement {
+export class InputCanvas extends CanvasElement {
   /**
    * Top-Level Canvas
    * Handles all the mouse events
    * @param {SpriteCanvas} sprite_canvas
    */
   constructor(sprite_canvas) {
-    super();
-    this.sprite_canvas = sprite_canvas;
-    this.sprite_editor = sprite_canvas.sprite_editor;
-    this.canvas = null;
+    super(sprite_canvas);
   }
-  connectedCallback() {
-    this.innerHTML = this.render();
-    this.canvas = this.querySelector("canvas");
-    this.init();
-  }
+
   render() {
     return `<canvas></canvas>`;
   }
+
   /**
    * Initializes the Canvas
    */
