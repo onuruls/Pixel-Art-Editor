@@ -36,7 +36,6 @@ export class InputCanvas extends HTMLElement {
     this.canvas.addEventListener("pointermove", (event) => {
       const events = event.getCoalescedEvents();
       for (const e of events) {
-        this.movecounter++;
         this.sprite_editor.selected_tool.mouse_move(e);
       }
       this.sprite_editor.selected_tool.mouse_move(event);
