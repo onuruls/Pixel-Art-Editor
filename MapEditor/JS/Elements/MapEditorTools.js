@@ -16,31 +16,33 @@ export class MapEditorTools extends MapEditorPart {
         <button id="pen" class="tool-button active" data-tool="pen" title="Pen tool"><img src="img/icons/pen.svg" alt="Pen"></button>
       </div>
       <div class="assetbox">
-        <button class="asset-button" title="Dirt asset"><img src="img/assets/dummy_dirt.png" alt="Dummy Dirt"></button>
-        <button class="asset-button" title="Foliage asset"><img src="img/assets/dummy_foliage.png" alt="Dummy Foliage"></button>
-        <button class="asset-button" title="Lava asset"><img src="img/assets/dummy_lava.png" alt="Dummy Lava"></button>
-        <button class="asset-button" title="Sand asset"><img src="img/assets/dummy_sand.png" alt="Dummy Sand"></button>
-        <button class="asset-button" title="Stone asset"><img src="img/assets/dummy_stone.png" alt="Dummy Stone"></button>
-        <button class="asset-button" title="Water asset"><img src="img/assets/dummy_water.png" alt="Dummy Water"></button>
-        <button class="asset-button" title="Tree asset"><img src="img/assets/dummy_tree.png" alt="Dummy Tree"></button>
+        <button class="asset-button" data-asset="dummy_dirt" title="Dirt asset"><img src="img/assets/dummy_dirt.png" alt="Dummy Dirt"></button>
+        <button class="asset-button" data-asset="dummy_foliage" title="Foliage asset"><img src="img/assets/dummy_foliage.png" alt="Dummy Foliage"></button>
+        <button class="asset-button" data-asset="dummy_lava" title="Lava asset"><img src="img/assets/dummy_lava.png" alt="Dummy Lava"></button>
+        <button class="asset-button" data-asset="dummy_sand" title="Sand asset"><img src="img/assets/dummy_sand.png" alt="Dummy Sand"></button>
+        <button class="asset-button" data-asset="dummy_stone" title="Stone asset"><img src="img/assets/dummy_stone.png" alt="Dummy Stone"></button>
+        <button class="asset-button" data-asset="dummy_water" title="Water asset"><img src="img/assets/dummy_water.png" alt="Dummy Water"></button>
+        <button class="asset-button" data-asset="dummy_tree" title="Tree asset"><img src="img/assets/dummy_tree.png" alt="Dummy Tree"></button>
       </div>
     `;
   }
 
   init() {
-    const toolButtons = document.querySelectorAll(".tool-button");
-    toolButtons.forEach((button) => {
+    const tool_buttons = document.querySelectorAll(".tool-button");
+    tool_buttons.forEach((button) => {
       button.addEventListener("click", () => {
-        toolButtons.forEach((btn) => btn.classList.remove("active"));
+        tool_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
       });
     });
 
-    const assetButtons = document.querySelectorAll(".asset-button");
-    assetButtons.forEach((button) => {
+    const asset_buttons = document.querySelectorAll(".asset-button");
+    asset_buttons.forEach((button) => {
       button.addEventListener("click", () => {
-        assetButtons.forEach((btn) => btn.classList.remove("active"));
+        asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
+        const asset_name = button.dataset.asset;
+        this.map_editor.selected_asset = `img/assets/${asset_name}.png`;
       });
     });
   }

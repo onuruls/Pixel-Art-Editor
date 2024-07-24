@@ -1,6 +1,7 @@
+import { MapEditor } from "./MapEditor.js";
+
 export class MapEditorPart extends HTMLElement {
   /**
-   *
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {

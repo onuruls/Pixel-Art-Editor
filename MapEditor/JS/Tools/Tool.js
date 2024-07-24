@@ -13,6 +13,10 @@ export class Tool {
       x: 0,
       y: 0,
     };
+    this.last_position = {
+      x: 0,
+      y: 0,
+    };
     this.init();
   }
 
@@ -72,7 +76,10 @@ export class Tool {
    * @param {Event} event
    */
   global_mouse_up(event) {
-    this.is_drawing = false;
+    if (this.is_drawing) {
+      this.is_drawing = false;
+      this.mouse_up(event);
+    }
   }
 
   /**
@@ -97,23 +104,19 @@ export class Tool {
     const y = Math.floor(mouseY / 10);
     const position_changed = this.has_hover_position_changed(x, y);
     if (position_changed) {
-      this.map_editor.hover_canvas_matrix(
-        this.hover_position.x,
-        this.hover_position.y,
-        false
-      );
       this.hover_position = {
         x: Math.abs(x),
         y: Math.abs(y),
       };
-      this.map_editor.hover_canvas_matrix(x, y, true);
     }
+    this.map_editor.hover_canvas_matrix(x, y);
   }
 
   /**
    *
    * @param {Number} x
    * @param {Number} y
+   * @returns {Boolean}
    */
   has_hover_position_changed(x, y) {
     return !(x === this.hover_position.x && y === this.hover_position.y);
@@ -148,5 +151,15 @@ export class Tool {
   activate_cursor_icon() {
     const canvas = this.canvas;
     canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
+  }
+
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   * @returns {Boolean}
+   */
+  has_mouse_position_changed(x, y) {
+    return !(x === this.last_position.x && y === this.last_position.y);
   }
 }
