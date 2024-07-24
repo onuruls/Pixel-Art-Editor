@@ -1123,9 +1123,11 @@ export class SpriteEditor extends HTMLElement {
    */
   pick_color(x, y) {
     const color = this.canvas_matrix[x][y];
-    this.selected_color = color;
-    const hex_color = this.rgb_array_to_hex(color);
-    this.sprite_tools.querySelector("#color_input").value = hex_color;
+    if (color[3] !== 0) {
+      this.selected_color = color;
+      const hex_color = this.rgb_array_to_hex(color);
+      this.sprite_tools.querySelector("#color_input").value = hex_color;
+    }
   }
 
   /**

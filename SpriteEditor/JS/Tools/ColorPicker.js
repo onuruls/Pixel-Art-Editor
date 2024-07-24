@@ -23,7 +23,6 @@ export class ColorPicker extends Tool {
    */
   mouse_move(event) {
     this.activate_cursor_icon();
-    return;
   }
   /**
    *
