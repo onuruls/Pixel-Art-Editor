@@ -4,6 +4,10 @@ import { MapEditorSpritePreview } from "./MapEditorSpriteView.js";
 import { MapEditorLayers } from "./MapEditorLayers.js";
 
 export class MapEditorSelectionArea extends MapEditorPart {
+  /**
+   *
+   * @param {MapEditor} map_editor
+   */
   constructor(map_editor) {
     super(map_editor);
   }

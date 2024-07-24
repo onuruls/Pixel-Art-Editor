@@ -19,7 +19,6 @@ map-editor-tools {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     width: min-content;
-    border: 0.2cap solid #bbb;
   }
 
   .tool-button {
@@ -60,7 +59,7 @@ map-editor-tools {
     filter: invert(25%) brightness(100%) contrast(100%);
   }
   .asset-button.active {
-    filter: invert(100%) brightness(100%) contrast(100%);
+    filter: invert(35%) brightness(100%) contrast(100%);
   }
 
   .asset-button img {

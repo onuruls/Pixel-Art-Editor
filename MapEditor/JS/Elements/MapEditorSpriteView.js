@@ -1,6 +1,10 @@
 import { MapEditorPart } from "./MapEditorPart.js";
 
 export class MapEditorSpritePreview extends MapEditorPart {
+  /**
+   *
+   * @param {MapEditor} map_editor
+   */
   constructor(map_editor) {
     super(map_editor);
   }
