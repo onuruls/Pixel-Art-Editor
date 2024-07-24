@@ -7,8 +7,7 @@ export class FileAreaView extends FileAreaPart {
 
   render() {
     return `
-        <div class="center-panel" id="center-panel">
-            <!-- Initially empty, will be populated dynamically -->
+        <div class="center-panel">
         </div>
       `;
   }

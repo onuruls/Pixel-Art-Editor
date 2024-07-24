@@ -9,7 +9,7 @@ export class FileAreaToolsRight extends FileAreaPart {
     return `
           <div class="right-panel">
             <button id="settings"><img src="img/settings.svg" alt="New Folder">Settings</button>
-            <button id="resize"><img src="img/resize.svg" alt="Resize">Resize</button>
+            <button id="resize"><img src="img/save.svg" alt="Save">Save</button>
             <button id="import"><img src="img/import.svg" alt="Import">Import</button>
             <button id="export"><img src="img/export.svg" alt="Export">Export</button>
         </div>
