@@ -1,6 +1,7 @@
 import { SpriteCanvas } from "../SpriteCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class TempCanvas extends HTMLElement {
+export class TempCanvas extends CanvasElement {
   /**
    * Intermediate level Canvas
    * Shows temporary pixel like the selection area
@@ -8,20 +9,15 @@ export class TempCanvas extends HTMLElement {
    * @param {SpriteCanvas} sprite_canvas
    */
   constructor(sprite_canvas) {
-    super();
-    this.sprite_canvas = sprite_canvas;
-    this.sprite_editor = sprite_canvas.sprite_editor;
+    super(sprite_canvas);
+    this.context = null;
     this.selection_color = [196, 252, 250, 123];
-    this.canvas = null;
   }
-  connectedCallback() {
-    this.innerHTML = this.render();
-    this.canvas = this.querySelector("canvas");
-    this.init();
-  }
+
   render() {
     return `<canvas></canvas>`;
   }
+
   /**
    * Initializes the Canvas
    */
@@ -58,26 +54,6 @@ export class TempCanvas extends HTMLElement {
       this.paint_single_pixel(point.x, point.y, selected_color);
     });
   }
-  /**
-   * Clears the whole canvas
-   */
-  revert_canvas() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  /**
-   * Paints a pixel in the given color
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Array<Number>} color
-   */
-  paint_single_pixel(x, y, color) {
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
-      color[3] / 255
-    })`;
-    this.context.fillStyle = color_str;
-    this.context.fillRect(x * 10, y * 10, 10, 10);
-  }
 
   /**
    * Draws the selected area
@@ -108,26 +84,13 @@ export class TempCanvas extends HTMLElement {
       );
     });
   }
+
   /**
    * Removes the selected area
    * @param {Event} event
    */
   remove_selection(event) {
     this.revert_canvas();
-  }
-
-  /**
-   * Mixes to Colors into one
-   * @param {Array<Number>} color1
-   * @param {Array<Number>} color2
-   */
-  mix_colors(color1, color2) {
-    return [
-      Math.round((color1[0] + color2[0]) / 2),
-      Math.round((color1[1] + color2[1]) / 2),
-      Math.round((color1[2] + color2[2]) / 2),
-      128,
-    ];
   }
 }
 
