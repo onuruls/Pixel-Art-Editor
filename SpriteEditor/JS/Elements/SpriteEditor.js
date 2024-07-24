@@ -648,39 +648,29 @@ export class SpriteEditor extends HTMLElement {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const is_draw = this.draw_or_erase({ x: xi, y: yj }) === "draw";
       const prev_color = this.canvas_matrix[xi][yj];
-      if (is_draw) {
-        if (
-          !this.compare_colors(this.canvas_matrix[xi][yj], this.selected_color)
-        ) {
-          this.canvas_matrix[xi][yj] = this.selected_color;
-          this.dispatchEvent(
-            new CustomEvent("pen_matrix_changed", {
+      const new_color = is_draw ? this.selected_color : [0, 0, 0, 0];
+
+      if (!this.compare_colors(prev_color, new_color)) {
+        this.canvas_matrix[xi][yj] = new_color;
+        this.action_buffer.push({
+          x: xi,
+          y: yj,
+          prev_color: prev_color,
+          color: new_color,
+        });
+        this.dispatchEvent(
+          new CustomEvent(
+            is_draw ? "pen_matrix_changed" : "erazer_matrix_changed",
+            {
               detail: {
                 x: xi,
                 y: yj,
-                color: this.selected_color,
+                color: new_color,
               },
-            })
-          );
-        }
-      } else {
-        if (!this.compare_colors(prev_color, [0, 0, 0, 0])) {
-          this.canvas_matrix[xi][yj] = [0, 0, 0, 0];
-          this.dispatchEvent(
-            new CustomEvent("erazer_matrix_changed", {
-              detail: {
-                x: xi,
-                y: yj,
-              },
-            })
-          );
-        }
+            }
+          )
+        );
       }
-      this.action_buffer.push({
-        x: xi,
-        y: yj,
-        prev_color: prev_color,
-      });
     });
   }
   /**
