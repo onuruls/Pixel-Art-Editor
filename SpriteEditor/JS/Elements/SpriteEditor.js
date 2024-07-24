@@ -256,13 +256,12 @@ export class SpriteEditor extends HTMLElement {
    * @returns {Array<Number>}
    */
   get_tool_color(x, y, tool) {
+    const currentColor = this.canvas_matrix[x][y];
     switch (tool) {
       case "pen":
         return this.selected_color;
       case "erazer":
         return [0, 0, 0, 0];
-      case "dither":
-        return (x + y) % 2 === 0 ? this.selected_color : [0, 0, 0, 0];
       default:
         return this.selected_color;
     }
@@ -369,34 +368,6 @@ export class SpriteEditor extends HTMLElement {
       this.update_line(this.changed_points, "erazer", "erazer_matrix_changed");
     }
   }
-
-  /**
-   *
-   * @param {Number} x
-   * @param {Number} y
-   */
-  dither_change_matrix(x, y) {
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_color = this.canvas_matrix[xi][yj];
-      const color = (xi + yj) % 2 === 0 ? this.selected_color : [0, 0, 0, 0];
-
-      if (!this.compare_colors(prev_color, color)) {
-        this.update_point(
-          xi,
-          yj,
-          prev_color,
-          color,
-          color[3] === 0 ? "erazer_matrix_changed" : "pen_matrix_changed"
-        );
-      }
-    });
-
-    this.changed_points.push({ x, y });
-    if (this.changed_points.length >= 2) {
-      this.update_line(this.changed_points, "dither", "pen_matrix_changed");
-    }
-  }
-
   /**
    *
    * @param {Number} x1
@@ -771,6 +742,41 @@ export class SpriteEditor extends HTMLElement {
           },
         })
       );
+    });
+  }
+
+  /**
+   * Applies dithering effect to a block of pixels
+   * @param {Number} x
+   * @param {Number} y
+   */
+  dither_change_matrix(x, y) {
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      const is_draw = this.draw_or_erase({ x: xi, y: yj }) === "draw";
+      const prev_color = this.canvas_matrix[xi][yj];
+      const new_color = is_draw ? this.selected_color : [0, 0, 0, 0];
+
+      if (!this.compare_colors(prev_color, new_color)) {
+        this.canvas_matrix[xi][yj] = new_color;
+        this.action_buffer.push({
+          x: xi,
+          y: yj,
+          prev_color: prev_color,
+          color: new_color,
+        });
+        this.dispatchEvent(
+          new CustomEvent(
+            is_draw ? "pen_matrix_changed" : "erazer_matrix_changed",
+            {
+              detail: {
+                x: xi,
+                y: yj,
+                color: new_color,
+              },
+            }
+          )
+        );
+      }
     });
   }
   /**
