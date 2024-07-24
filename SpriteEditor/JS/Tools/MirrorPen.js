@@ -55,7 +55,6 @@ export class MirrorPen extends Tool {
     x1 = Math.floor(x1 / 10);
     y = Math.floor(y / 10);
     x2 = Math.floor(x2 / 10);
-    this.sprite_editor.pen_change_matrix(x1, y);
-    this.sprite_editor.pen_change_matrix(x2, y);
+    this.sprite_editor.mirror_pen_change_matrix(x1, x2, y);
   }
 }

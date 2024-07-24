@@ -35,6 +35,8 @@ export class SpriteEditor extends HTMLElement {
     this.action_stack = new ActionStack();
     this.action_buffer = [];
     this.changed_points = [];
+    this.changed_points_right = [];
+    this.changed_points_left = [];
     this.move_points = [];
     this.initialized = false;
     this.selected_points = [];
@@ -204,6 +206,9 @@ export class SpriteEditor extends HTMLElement {
    */
   end_action_buffer() {
     this.action_stack.push(this.action_buffer);
+    this.changed_points = [];
+    this.changed_points_right = [];
+    this.changed_points_left = [];
   }
   /**
    * Reverts the last action done (STRG + Z)
@@ -242,6 +247,78 @@ export class SpriteEditor extends HTMLElement {
       );
     }
   }
+
+  /**
+   * Determines the color to use for a given pixel based on the tool.
+   * @param {Number} x
+   * @param {Number} y
+   * @param {String} tool
+   * @returns {Array<Number>}
+   */
+  get_tool_color(x, y, tool) {
+    switch (tool) {
+      case "pen":
+        return this.selected_color;
+      case "erazer":
+        return [0, 0, 0, 0];
+      case "dither":
+        return (x + y) % 2 === 0 ? this.selected_color : [0, 0, 0, 0];
+      default:
+        return this.selected_color;
+    }
+  }
+
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Array<Number>} prev_color
+   * @param {Array<Number>} color
+   * @param {String} event_name
+   */
+  update_point(x, y, prev_color, color, event_name) {
+    this.canvas_matrix[x][y] = color;
+    this.action_buffer.push({ x, y, prev_color, color });
+
+    this.dispatchEvent(
+      new CustomEvent(event_name, {
+        detail: {
+          x: x,
+          y: y,
+          color: color,
+          prev_color: prev_color,
+        },
+      })
+    );
+  }
+
+  /**
+   *
+   * @param {Array<{x: Number, y: Number}>} points
+   * @param {String} tool
+   * @param {String} event_name
+   */
+  update_line(points, tool, event_name) {
+    const [last_point, current_point] = points.slice(-2);
+    const line_points = this.calculate_line_points(
+      last_point.x,
+      last_point.y,
+      current_point.x,
+      current_point.y
+    );
+
+    line_points.forEach(({ x, y }) => {
+      this.apply_to_pixel_block(x, y, (xi, yj) => {
+        const color = this.get_tool_color(xi, yj, tool);
+        const prev_color = this.canvas_matrix[xi][yj];
+
+        if (!this.compare_colors(prev_color, color)) {
+          this.update_point(xi, yj, prev_color, color, event_name);
+        }
+      });
+    });
+  }
+
   /**
    *
    * @param {Number} x
@@ -250,25 +327,23 @@ export class SpriteEditor extends HTMLElement {
   pen_change_matrix(x, y) {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_color = this.canvas_matrix[xi][yj];
-      if (this.compare_colors(prev_color, this.selected_color)) return;
-      this.canvas_matrix[xi][yj] = this.selected_color;
-      this.action_buffer.push({
-        x: xi,
-        y: yj,
-        prev_color: prev_color,
-        color: this.selected_color,
-      });
-      this.dispatchEvent(
-        new CustomEvent("pen_matrix_changed", {
-          detail: {
-            x: xi,
-            y: yj,
-            color: this.selected_color,
-          },
-        })
-      );
+      if (!this.compare_colors(prev_color, this.selected_color)) {
+        this.update_point(
+          xi,
+          yj,
+          prev_color,
+          this.selected_color,
+          "pen_matrix_changed"
+        );
+      }
     });
+
+    this.changed_points.push({ x, y });
+    if (this.changed_points.length >= 2) {
+      this.update_line(this.changed_points, "pen", "pen_matrix_changed");
+    }
   }
+
   /**
    *
    * @param {Number} x
@@ -277,25 +352,84 @@ export class SpriteEditor extends HTMLElement {
   erazer_change_matrix(x, y) {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_color = this.canvas_matrix[xi][yj];
-      const empty_color = [0, 0, 0, 0];
-      if (this.compare_colors(prev_color, empty_color)) return;
-      this.canvas_matrix[xi][yj] = empty_color;
-      this.action_buffer.push({
-        x: xi,
-        y: yj,
-        prev_color: prev_color,
-        color: empty_color,
-      });
-      this.dispatchEvent(
-        new CustomEvent("erazer_matrix_changed", {
-          detail: {
-            x: xi,
-            y: yj,
-          },
-        })
-      );
+      const erase_color = [0, 0, 0, 0];
+      if (!this.compare_colors(prev_color, erase_color)) {
+        this.update_point(
+          xi,
+          yj,
+          prev_color,
+          erase_color,
+          "erazer_matrix_changed"
+        );
+      }
     });
+
+    this.changed_points.push({ x, y });
+    if (this.changed_points.length >= 2) {
+      this.update_line(this.changed_points, "erazer", "erazer_matrix_changed");
+    }
   }
+
+  /**
+   *
+   * @param {Number} x
+   * @param {Number} y
+   */
+  dither_change_matrix(x, y) {
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      const prev_color = this.canvas_matrix[xi][yj];
+      const color = (xi + yj) % 2 === 0 ? this.selected_color : [0, 0, 0, 0];
+
+      if (!this.compare_colors(prev_color, color)) {
+        this.update_point(
+          xi,
+          yj,
+          prev_color,
+          color,
+          color[3] === 0 ? "erazer_matrix_changed" : "pen_matrix_changed"
+        );
+      }
+    });
+
+    this.changed_points.push({ x, y });
+    if (this.changed_points.length >= 2) {
+      this.update_line(this.changed_points, "dither", "pen_matrix_changed");
+    }
+  }
+
+  /**
+   *
+   * @param {Number} x1
+   * @param {Number} x2
+   * @param {Number} y
+   */
+  mirror_pen_change_matrix(x1, x2, y) {
+    const color = this.selected_color;
+    [x1, x2].forEach((x, index) => {
+      this.apply_to_pixel_block(x, y, (xi, yj) => {
+        const prev_color = this.canvas_matrix[xi][yj];
+        if (!this.compare_colors(prev_color, color)) {
+          this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
+          if (index === 0) {
+            this.changed_points_left.push({ x: x, y: y });
+          } else {
+            this.changed_points_right.push({ x: x, y: y });
+          }
+        }
+      });
+    });
+
+    if (
+      this.changed_points_left.length >= 2 &&
+      this.changed_points_right.length >= 2
+    ) {
+      const [a, c] = this.changed_points_left.slice(-2);
+      const [b, d] = this.changed_points_right.slice(-2);
+      this.update_line([a, c], "pen", "pen_matrix_changed");
+      this.update_line([b, d], "pen", "pen_matrix_changed");
+    }
+  }
+
   /**
    *
    * @param {Number} x
@@ -637,50 +771,6 @@ export class SpriteEditor extends HTMLElement {
           },
         })
       );
-    });
-  }
-  /**
-   * Applies dithering effect to a block of pixels
-   * @param {Number} x
-   * @param {Number} y
-   */
-  dither_change_matrix(x, y) {
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const is_draw = this.draw_or_erase({ x: xi, y: yj }) === "draw";
-      const prev_color = this.canvas_matrix[xi][yj];
-      if (is_draw) {
-        if (
-          !this.compare_colors(this.canvas_matrix[xi][yj], this.selected_color)
-        ) {
-          this.canvas_matrix[xi][yj] = this.selected_color;
-          this.dispatchEvent(
-            new CustomEvent("pen_matrix_changed", {
-              detail: {
-                x: xi,
-                y: yj,
-                color: this.selected_color,
-              },
-            })
-          );
-        }
-      } else {
-        if (!this.compare_colors(prev_color, [0, 0, 0, 0])) {
-          this.canvas_matrix[xi][yj] = [0, 0, 0, 0];
-          this.dispatchEvent(
-            new CustomEvent("erazer_matrix_changed", {
-              detail: {
-                x: xi,
-                y: yj,
-              },
-            })
-          );
-        }
-      }
-      this.action_buffer.push({
-        x: xi,
-        y: yj,
-        prev_color: prev_color,
-      });
     });
   }
   /**
