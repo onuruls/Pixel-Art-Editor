@@ -26,17 +26,19 @@ map-editor-tools {
     background: none;
     cursor: pointer;
     transition: background-color 0.3s;
-  }
-  .tool-button:hover {
-    filter: invert(5%) brightness(100%) contrast(100%);
-  }
-  .tool-button.active {
-    filter: invert(100%) brightness(100%) contrast(100%);
-  }
 
-  .tool-button img {
-    width: 50px;
-    height: 50px;
+    &:hover {
+      filter: invert(5%) brightness(100%) contrast(100%);
+    }
+
+    &.active {
+      filter: invert(100%) brightness(100%) contrast(100%);
+    }
+
+    img {
+      width: 50px;
+      height: 50px;
+    }
   }
 
   .assetbox {
@@ -53,17 +55,17 @@ map-editor-tools {
     background: none;
     cursor: pointer;
     transition: background-color 0.3s;
-  }
 
-  .asset-button:hover {
-    filter: invert(25%) brightness(100%) contrast(100%);
-  }
-  .asset-button.active {
-    filter: invert(35%) brightness(100%) contrast(100%);
-  }
+    &:hover {
+      filter: invert(25%) brightness(100%) contrast(100%);
+    }
+    &.active {
+      filter: invert(35%) brightness(100%) contrast(100%);
+    }
 
-  .asset-button img {
-    width: 50px;
-    height: 50px;
+    img {
+      width: 50px;
+      height: 50px;
+    }
   }
 }

@@ -26,17 +26,19 @@ sprite-tools {
     background: none;
     cursor: pointer;
     transition: background-color 0.3s;
-  }
-  .tool-button:hover {
-    filter: invert(5%) brightness(100%) contrast(100%);
-  }
-  .tool-button.active {
-    filter: invert(100%) brightness(100%) contrast(100%);
-  }
 
-  .tool-button img {
-    width: 50px;
-    height: 50px;
+    &:hover {
+      filter: invert(5%) brightness(100%) contrast(100%);
+    }
+
+    &.active {
+      filter: invert(100%) brightness(100%) contrast(100%);
+    }
+
+    img {
+      width: 50px;
+      height: 50px;
+    }
   }
 
   .pixel-size-option {
@@ -44,11 +46,12 @@ sprite-tools {
     color: white;
     padding: 4px 6px;
     border: none;
-  }
-  .pixel-size-option.active {
-    background-color: white;
-    color: black;
-    border: solid 1px black;
+
+    &.active {
+      background-color: white;
+      color: black;
+      border: solid 1px black;
+    }
   }
 
   .palette-color {
