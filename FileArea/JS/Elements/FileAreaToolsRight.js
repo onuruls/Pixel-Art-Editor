@@ -18,7 +18,14 @@ export class FileAreaToolsRight extends FileAreaPart {
   /**
    * Called by upper class
    */
-  init() {}
+  init() {
+    this.querySelector("#export").addEventListener("click", () => {
+      this.file_area.editor_tool.sprite_editor.export_as_png();
+    });
+    this.querySelector("#import").addEventListener("click", () => {
+      this.file_area.editor_tool.sprite_editor.import_clicked();
+    });
+  }
 }
 
 customElements.define("file-area-tools-right", FileAreaToolsRight);

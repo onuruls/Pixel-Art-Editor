@@ -44,8 +44,6 @@ export class SpriteTools extends SpriteEditorPart {
         <h3>Palettes (Double click to use color)</h3>
         ${palette_html}
       </div>
-      <button id="download_sprite">Download</button>
-      <input type="file" id="import_sprite">
     `;
   }
 
@@ -71,7 +69,6 @@ export class SpriteTools extends SpriteEditorPart {
         this.sprite_editor.set_pixel_size(button.dataset.size);
       });
     });
-    
     const palette_colors = this.querySelectorAll(".palette-color");
     palette_colors.forEach((palette) => {
       palette.addEventListener("click", () => {
