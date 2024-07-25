@@ -1326,16 +1326,17 @@ export class SpriteEditor extends HTMLElement {
    * @returns {Array<Array<Array<Number>>>}
    */
   image_data_to_matrix(data) {
+    const result = this.create_canvas_matrix();
     const segment_size = 4;
     const row_size = 64;
-    const result = [];
-    const segments = [];
-    for (let i = 0; i < data.length; i += segment_size) {
-      segments.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
-    }
-    for (let i = 0; i < segments.length; i += row_size) {
-      result.push(segments.slice(i, i + row_size));
-    }
+    data.forEach((color, index) => {
+      const row = Math.floor(index / (row_size * segment_size));
+      const col = Math.floor(
+        (index % (row_size * segment_size)) / segment_size
+      );
+      const colorIndex = index % segment_size;
+      result[row][col][colorIndex] = color;
+    });
     return result;
   }
 }
