@@ -256,7 +256,6 @@ export class SpriteEditor extends HTMLElement {
    * @returns {Array<Number>}
    */
   get_tool_color(x, y, tool) {
-    const currentColor = this.canvas_matrix[x][y];
     switch (tool) {
       case "pen":
         return this.selected_color;
@@ -372,21 +371,24 @@ export class SpriteEditor extends HTMLElement {
    *
    * @param {Number} x1
    * @param {Number} x2
-   * @param {Number} y
+   * @param {Number} y1
+   * @param {Number} y2
    */
-  mirror_pen_change_matrix(x1, x2, y) {
+  mirror_pen_change_matrix(x1, x2, y1, y2) {
     const color = this.selected_color;
     [x1, x2].forEach((x, index) => {
-      this.apply_to_pixel_block(x, y, (xi, yj) => {
-        const prev_color = this.canvas_matrix[xi][yj];
-        if (!this.compare_colors(prev_color, color)) {
-          this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
-          if (index === 0) {
-            this.changed_points_left.push({ x: x, y: y });
-          } else {
-            this.changed_points_right.push({ x: x, y: y });
+      [y1, y2].forEach((y) => {
+        this.apply_to_pixel_block(x, y, (xi, yj) => {
+          const prev_color = this.canvas_matrix[xi][yj];
+          if (!this.compare_colors(prev_color, color)) {
+            this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
+            if (index === 0) {
+              this.changed_points_left.push({ x: x, y: y });
+            } else {
+              this.changed_points_right.push({ x: x, y: y });
+            }
           }
-        }
+        });
       });
     });
 
@@ -1229,9 +1231,11 @@ export class SpriteEditor extends HTMLElement {
    */
   pick_color(x, y) {
     const color = this.canvas_matrix[x][y];
-    this.selected_color = color;
-    const hex_color = this.rgb_array_to_hex(color);
-    this.sprite_tools.querySelector("#color_input").value = hex_color;
+    if (color[3] !== 0) {
+      this.selected_color = color;
+      const hex_color = this.rgb_array_to_hex(color);
+      this.sprite_tools.querySelector("#color_input").value = hex_color;
+    }
   }
 
   /**

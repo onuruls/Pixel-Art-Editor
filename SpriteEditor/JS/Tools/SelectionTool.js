@@ -16,7 +16,7 @@ export class SelectionTool extends Tool {
   /**
    * Handles all the keydown-Events of a tool e.g. CTRL + C
    */
-  handle_key_events(e) {
+  handle_key_down_events(e) {
     if (e.ctrlKey && e.key === "c") {
       this.sprite_editor.copy_selected_pixel();
     }
