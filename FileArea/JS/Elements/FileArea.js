@@ -49,6 +49,10 @@ export class FileArea extends HTMLElement {
     this.file_tools_left
       .querySelector("#delete_button")
       .addEventListener("click", () => this.delete_selected_folder());
+
+    this.file_tools_left
+      .querySelector("#rename_button")
+      .addEventListener("click", () => this.rename_selected_folder());
   }
   /**
    * Creates a new folder element in the file view.
@@ -100,6 +104,28 @@ export class FileArea extends HTMLElement {
     if (this.selected_item) {
       this.selected_item.remove();
       this.selected_item = null;
+    }
+  }
+
+  rename_selected_folder() {
+    if (this.selected_item) {
+      const folder_name_text = this.selected_item.querySelector(".folder-name");
+      if (folder_name_text) {
+        const folder_name_input = document.createElement("input");
+        folder_name_input.type = "text";
+        folder_name_input.value = folder_name_text.textContent;
+        folder_name_input.classList.add("folder-name-input");
+        folder_name_input.maxLength = 12;
+
+        folder_name_input.addEventListener("blur", () => {
+          folder_name_text.textContent =
+            folder_name_input.value || folder_name_text.textContent;
+          folder_name_input.remove();
+        });
+
+        this.selected_item.appendChild(folder_name_input);
+        folder_name_input.focus();
+      }
     }
   }
 }
