@@ -22,6 +22,10 @@ file-area-view {
     position: relative;
   }
 
+  .selected-folder {
+    background-color: #646464cc;
+  }
+
   .folder-icon {
     width: 40px;
     height: 40px;
@@ -35,5 +39,4 @@ file-area-view {
     font-size: small;
     text-align: center;
   }
-
 }

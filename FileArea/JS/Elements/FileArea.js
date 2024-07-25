@@ -61,10 +61,10 @@ export class FileArea extends HTMLElement {
     folder_div.classList.add("folder");
     folder_div.addEventListener("click", () => {
       if (this.selected_item) {
-        this.selected_item.style.backgroundColor = "";
+        this.selected_item.classList.remove("selected-folder");
       }
       this.selected_item = folder_div;
-      folder_div.style.backgroundColor = "rgba(96, 96, 96, 0.8)";
+      this.selected_item.classList.add("selected-folder");
     });
 
     const folder_img = document.createElement("img");
