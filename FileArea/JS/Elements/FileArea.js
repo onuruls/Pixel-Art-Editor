@@ -78,6 +78,8 @@ export class FileArea extends HTMLElement {
     folder_name_input.type = "text";
     folder_name_input.placeholder = "New Folder";
     folder_name_input.classList.add("folder-name-input");
+    folder_name_input.maxLength = 12;
+    
     folder_name_input.addEventListener("blur", () => {
       const folder_name_text = document.createElement("span");
       folder_name_text.classList.add("folder-name");
