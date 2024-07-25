@@ -15,7 +15,7 @@ export class FileAreaToolsLeft extends FileAreaPart {
     return `
       <div class="left-panel">
           <button id="switch_to"><img src="img/chevron-left-circle.svg" alt="${this.editor_name}">${this.editor_name}</button>
-          <button id="new_folder"><img src="img/new-folder.svg" alt="New Folder">New Folder</button>
+          <button id="create_folder_button"><img src="img/new-folder.svg" alt="New Folder">New Folder</button>
           <button id="delete_button"><img src="img/delete.svg" alt="Delete">Delete</button>
           <button id="rename_button"><img src="img/rename.svg" alt="Rename">Rename</button>
       </div>
