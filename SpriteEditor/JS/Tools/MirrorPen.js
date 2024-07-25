@@ -49,14 +49,15 @@ export class MirrorPen extends Tool {
     const mouseY = event.clientY - rect.top;
     const x = Math.floor(mouseX / 10);
     const y = Math.floor(mouseY / 10);
+    const half_of_pixel = (this.sprite_editor.pixel_size * 10) / 2;
 
     if (this.is_shift_pressed) {
-      const middleY = rect.height / 2 - 5;
+      const middleY = rect.height / 2 - half_of_pixel;
       const { y1, y2 } = this.calculateHorizontalMirrorCoords(mouseY, middleY);
       this.sprite_editor.pen_change_matrix(x, y1);
       this.sprite_editor.pen_change_matrix(x, y2);
     } else {
-      const middleX = rect.width / 2 - 5;
+      const middleX = rect.width / 2 - half_of_pixel;
       const { x1, x2 } = this.calculateVerticalMirrorCoords(mouseX, middleX);
       this.sprite_editor.pen_change_matrix(x1, y);
       this.sprite_editor.pen_change_matrix(x2, y);
