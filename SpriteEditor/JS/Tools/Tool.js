@@ -9,6 +9,7 @@ export class Tool {
     this.sprite_editor = sprite_editor;
     this.canvas = sprite_editor.sprite_canvas.drawing_canvas.canvas;
     this.is_drawing = false;
+    this.is_shift_pressed = false;
     this.hover_position = {
       x: 0,
       y: 0,
@@ -17,6 +18,8 @@ export class Tool {
       x: 0,
       y: 0,
     };
+    this.handle_key_down_events = this.handle_key_down_events.bind(this);
+    this.handle_key_up_events = this.handle_key_up_events.bind(this);
     this.init();
   }
 
@@ -24,21 +27,30 @@ export class Tool {
    * Adds all key listeners
    */
   init() {
-    document.addEventListener("keydown", this.handle_key_events.bind(this));
+    document.addEventListener("keydown", this.handle_key_down_events);
+    document.addEventListener("keyup", this.handle_key_up_events);
   }
 
   /**
    * Removes all key listeners
    */
   destroy() {
-    document.removeEventListener("keydown", this.handle_key_events.bind(this));
+    document.removeEventListener("keydown", this.handle_key_down_events);
+    document.removeEventListener("keyup", this.handle_key_up_events);
   }
 
   /**
    * Handles all the keydown-Events of a tool e.g. CTRL + C
    */
-  handle_key_events(e) {
-    console.log("Key events in tool class");
+  handle_key_down_events(e) {
+    this.is_shift_pressed = e.shiftKey;
+  }
+
+  /**
+   * Handles all the keyup-Events of a tool
+   */
+  handle_key_up_events(e) {
+    this.is_shift_pressed = e.shiftKey;
   }
 
   /**
