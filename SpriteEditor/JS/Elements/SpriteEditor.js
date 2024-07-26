@@ -74,6 +74,9 @@ export class SpriteEditor extends HTMLElement {
     this.css.setAttribute("rel", "stylesheet");
     this.css.setAttribute("type", "text/css");
     this.appendChild(this.css);
+    this.import_input = document.createElement("input");
+    this.import_input.setAttribute("type", "file");
+    this.import_input.setAttribute("accept", "image/png");
     this.sprite_tools = new SpriteTools(this);
     this.sprite_canvas = new SpriteCanvas(this);
     this.sprite_preview = new SpritePreview(this);
@@ -115,17 +118,9 @@ export class SpriteEditor extends HTMLElement {
         this.redo_last_action();
       }
     });
-    this.sprite_tools
-      .querySelector("#download_sprite")
-      .addEventListener("click", () => {
-        this.save_sprite();
-      });
-
-    this.sprite_tools
-      .querySelector("#import_sprite")
-      .addEventListener("change", (event) => {
-        this.import_sprite(event);
-      });
+    this.import_input.addEventListener("change", (event) => {
+      this.import_sprite(event);
+    });
   }
   /**
    *
@@ -1203,7 +1198,7 @@ export class SpriteEditor extends HTMLElement {
   /**
    * Saves the sprite in a JSON
    */
-  save_sprite() {
+  save_as_sprite_file() {
     const filename = "test.sprite";
     const jsonString = JSON.stringify(this.canvas_matrix);
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -1222,29 +1217,127 @@ export class SpriteEditor extends HTMLElement {
    * @param {Event} event
    */
   import_sprite(event) {
-    this.start_action_buffer();
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const file_content = e.target.result;
-        const loaded_canvas = JSON.parse(file_content);
-        this.canvas_matrix.forEach((row, x) =>
-          row.forEach((pixel, y) => {
-            this.action_buffer.push({
-              x: x,
-              y: y,
-              prev_color: pixel,
-              color: loaded_canvas[x][y],
-            });
-          })
-        );
-        this.canvas_matrix = loaded_canvas;
-        this.dispatchEvent(new CustomEvent("repaint_after_import"));
-        this.end_action_buffer();
-      };
-      reader.readAsText(file);
+    const name = file.name;
+    const parts = name.split(".");
+    const file_type = parts[parts.length - 1];
+    if (file_type === "png" && file) {
+      this.import_from_png(file);
+    } else {
+      this.import_from_sprite(file);
     }
+  }
+
+  /**
+   * imports .sprite files into the editor
+   * @param {File} file
+   */
+  import_from_sprite(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const file_content = e.target.result;
+      this.handle_loaded_matrix(JSON.parse(file_content));
+    };
+    reader.readAsText(file);
+  }
+
+  /**
+   * imports .png files into the editor
+   * @param {File} file
+   */
+  import_from_png(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0, 64, 64);
+        const image_data = context.getImageData(0, 0, 64, 64).data;
+        this.handle_loaded_matrix(this.image_data_to_matrix(image_data));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
+   * Swaps the loaded matrix with the current one
+   * used during the import of png or sprite files
+   * @param {Array<Array<Array<Number>>>} loaded_canvas
+   */
+  handle_loaded_matrix(loaded_canvas) {
+    this.start_action_buffer();
+    this.canvas_matrix.forEach((row, x) =>
+      row.forEach((pixel, y) => {
+        this.action_buffer.push({
+          x: x,
+          y: y,
+          prev_color: pixel,
+          color: loaded_canvas[x][y],
+        });
+      })
+    );
+    this.canvas_matrix = loaded_canvas;
+    this.end_action_buffer();
+    this.dispatchEvent(new CustomEvent("repaint_after_import"));
+  }
+
+  /**
+   * Exportiert das Bild als PNG-File
+   */
+  export_as_png() {
+    const canvas = document.createElement("canvas");
+    const link = document.createElement("a");
+    const context = canvas.getContext("2d");
+    canvas.height = this.height;
+    canvas.width = this.width;
+    this.canvas_matrix.forEach((row, i) =>
+      row.forEach((pixel, j) => {
+        context.fillStyle = this.color_array_to_rbga(pixel);
+        context.fillRect(j, i, 1, 1);
+      })
+    );
+    link.href = canvas.toDataURL("image/png");
+    link.download = "image.png";
+    link.click();
+  }
+
+  /**
+   * Wandelt einen Array-Eintrag in einen Farbstring um
+   * @param {Array<Number>} pixel
+   * @returns {String}
+   */
+  color_array_to_rbga(pixel) {
+    return `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3] / 255})`;
+  }
+
+  /**
+   * Called when Import is clicked in FileArea
+   */
+  import_clicked() {
+    this.import_input.click();
+  }
+
+  /**
+   * Turns an ImageData-Array into a two
+   * dimensional Array
+   * @param {Array<Number>} data
+   * @returns {Array<Array<Array<Number>>>}
+   */
+  image_data_to_matrix(data) {
+    const result = this.create_canvas_matrix();
+    const segment_size = 4;
+    const row_size = 64;
+    data.forEach((color, index) => {
+      const row = Math.floor(index / (row_size * segment_size));
+      const col = Math.floor(
+        (index % (row_size * segment_size)) / segment_size
+      );
+      const colorIndex = index % segment_size;
+      result[row][col][colorIndex] = color;
+    });
+    return result;
   }
 }
 
