@@ -630,7 +630,8 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    * @param {Number} brightness
    */
-  change_brightness_matrix(x, y, brightness) {
+  change_brightness_matrix(x, y, brightness, darken) {
+    brightness = darken ? -brightness : brightness;
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_color = this.canvas_matrix[xi][yj];
       if (prev_color[3] == 0) return;
