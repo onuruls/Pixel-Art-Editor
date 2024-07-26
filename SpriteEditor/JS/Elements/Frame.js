@@ -113,7 +113,7 @@ export class Frame extends HTMLElement {
   }
 
   /**
-   * shows the delete label
+   * Shows the delete label
    */
   show_delete_label() {
     this.delete_label.classList.remove("hidden");
