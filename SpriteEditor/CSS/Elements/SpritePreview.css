@@ -3,6 +3,10 @@ sprite-preview {
     padding: 5px 10px;
     background-color: #333;
 
+    .hidden {
+        display: none !important;
+    }
+
     sprite-frames {
         display: flex;
         flex-direction: column;
@@ -25,12 +29,13 @@ sprite-preview {
                 border: 3px solid black;
                 margin: 3px;
 
-                .canvas_wrapper {
+                .thumbnail_wrapper {
                     height: 100%;
                     width: 100%;
                     background-size: 10px 10px;
                     background-color: #222;
-                    canvas {
+                    
+                    img {
                         height: 100%;
                         width: 100%;
                     }

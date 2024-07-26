@@ -33,7 +33,8 @@ export class SpriteEditor extends HTMLElement {
     this.canvas_matrix = this.create_canvas_matrix();
     this.canvas_matrices = [this.canvas_matrix];
     this.fill_visited = {};
-    this.action_stack = new ActionStack();
+    this.action_stack = new ActionStack(this);
+    this.action_stacks = [this.action_stack];
     this.action_buffer = [];
     this.changed_points = [];
     this.move_points = [];
@@ -217,6 +218,7 @@ export class SpriteEditor extends HTMLElement {
         })
       );
     }
+    this.update_frame_thumbnail();
   }
 
   /**
@@ -236,6 +238,7 @@ export class SpriteEditor extends HTMLElement {
         })
       );
     }
+    this.update_frame_thumbnail();
   }
   /**
    *
@@ -1345,6 +1348,7 @@ export class SpriteEditor extends HTMLElement {
    */
   add_matrix() {
     this.canvas_matrices.push(this.create_canvas_matrix());
+    this.action_stacks.push(new ActionStack(this));
   }
 
   /**
@@ -1353,6 +1357,7 @@ export class SpriteEditor extends HTMLElement {
    */
   remove_matrix(index) {
     this.canvas_matrices.splice(index, 1);
+    this.action_stacks.splice(index, 1);
   }
 
   /**
@@ -1361,6 +1366,7 @@ export class SpriteEditor extends HTMLElement {
    */
   switch_active_matrix(index) {
     this.canvas_matrix = this.canvas_matrices[index];
+    this.action_stack = this.action_stacks[index];
     this.active_canvas_index = 0;
     this.repaint_canvas();
   }
@@ -1372,8 +1378,18 @@ export class SpriteEditor extends HTMLElement {
     this.dispatchEvent(new CustomEvent("repaint_canvas"));
   }
 
-  update_frame_canvas() {
-    this.dispatchEvent(new CustomEvent("update_frame_canvas", { detail: {} }));
+  /**
+   * Called by the ActionStack fires event
+   * to update the frame thumbnail
+   */
+  update_frame_thumbnail() {
+    this.dispatchEvent(
+      new CustomEvent("update_frame_thumbnail", {
+        detail: {
+          img_url: this.sprite_canvas.drawing_canvas.canvas.toDataURL(),
+        },
+      })
+    );
   }
 }
 

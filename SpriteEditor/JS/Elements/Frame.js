@@ -1,4 +1,3 @@
-import { SpriteEditor } from "./SpriteEditor.js";
 import { SpriteFrames } from "./SpriteFrames.js";
 
 export class Frame extends HTMLElement {
@@ -10,21 +9,20 @@ export class Frame extends HTMLElement {
     super();
     this.sprite_frames = sprite_frames;
     this.index = index;
-    this.canvas = this.create_canvas();
+    this.thumbnail = this.create_thumbnail();
     this.label = this.create_label();
     this.delete_label = this.create_delete_label();
-    this.canvas_wrapper = this.create_canvas_wrapper();
+    this.thumbnail_wrapper = this.create_thumbnail_wrapper();
     this.init();
   }
 
   /**
    *
-   * @returns {HTMLCanvasElement}
+   * @returns {HTMLImageElement}
    */
-  create_canvas() {
-    const canvas = document.createElement("canvas");
-    canvas.classList.add("frame_canvas");
-    return canvas;
+  create_thumbnail() {
+    const thumbnail = document.createElement("img");
+    return thumbnail;
   }
 
   /**
@@ -53,38 +51,77 @@ export class Frame extends HTMLElement {
    * Creates the wrapper div for the canvas
    * @returns
    */
-  create_canvas_wrapper() {
-    const canvas_wraper = document.createElement("div");
-    canvas_wraper.classList.add("canvas_wrapper");
-    return canvas_wraper;
+  create_thumbnail_wrapper() {
+    const thumbnail_wrapper = document.createElement("div");
+    thumbnail_wrapper.classList.add("thumbnail_wrapper");
+    return thumbnail_wrapper;
   }
 
   init() {
-    this.canvas_wrapper.appendChild(this.canvas);
-    this.appendChild(this.canvas_wrapper);
+    this.thumbnail_wrapper.appendChild(this.thumbnail);
+    this.appendChild(this.thumbnail_wrapper);
     this.appendChild(this.label);
     this.appendChild(this.delete_label);
     this.addEventListener("click", this.frame_clicked);
     this.delete_label.addEventListener("click", this.delete_clicked.bind(this));
   }
 
+  /**
+   * Triggered when frame is clicked
+   * @param {Event} event
+   */
   frame_clicked(event) {
     this.sprite_frames.switch_active_frame(this.index);
   }
 
+  /**
+   * Triggered when a delete label is clicked
+   * @param {Event} event
+   */
   delete_clicked(event) {
-    this.sprite_frames.delete_frame(this.index);
+    this.sprite_frames.remove_frame(this.index);
   }
 
   /**
-   *
+   * Informs the frame on his index and the total frame count
    * @param {Number} index
    */
-  update_index(index) {
+  update_frame_information(index, frame_count) {
+    if (frame_count === 1) {
+      this.hide_delete_label();
+    } else {
+      this.show_delete_label();
+    }
     this.index = index;
     this.label.textContent = `${index}`;
   }
 
+  /**
+   * Called from parent class
+   * updates the small thumbnail
+   * @param {URL} img_url
+   */
+  update_thumbnail(img_url) {
+    this.thumbnail.src = img_url;
+  }
+
+  /**
+   * Hides the delete label
+   */
+  hide_delete_label() {
+    this.delete_label.classList.add("hidden");
+  }
+
+  /**
+   * shows the delete label
+   */
+  show_delete_label() {
+    this.delete_label.classList.remove("hidden");
+  }
+
+  /**
+   * Removes all listeners before removing element from DOM
+   */
   disconnectedCallback() {
     this.removeEventListener("click", this.frame_clicked);
     this.delete_label.removeEventListener(

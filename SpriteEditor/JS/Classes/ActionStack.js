@@ -17,7 +17,7 @@ export class ActionStack {
   push(points_array) {
     this.actions.push(points_array);
     this.redo_actions = [];
-    this.sprite_editor.update_frame_canvas();
+    this.sprite_editor.update_frame_thumbnail();
   }
   /**
    * Returns the last action from the stack
