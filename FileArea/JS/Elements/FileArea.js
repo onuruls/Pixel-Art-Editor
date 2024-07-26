@@ -82,18 +82,22 @@ export class FileArea extends HTMLElement {
     folder_name_input.classList.add("folder-name-input");
     folder_name_input.maxLength = 12;
 
+    const folder_name_text = document.createElement("span");
+    folder_name_text.classList.add("folder-name");
+    folder_name_text.textContent = "New Folder";
+
     folder_name_input.addEventListener("blur", () => {
-      const folder_name_text = document.createElement("span");
-      folder_name_text.classList.add("folder-name");
       folder_name_text.textContent = folder_name_input.value || "New Folder";
-      folder_div.appendChild(folder_name_text);
-      folder_name_input.remove();
+      folder_name_input.style.display = "none";
+      folder_name_text.style.display = "inline";
     });
 
     folder_div.appendChild(folder_img);
     folder_div.appendChild(folder_name_input);
+    folder_div.appendChild(folder_name_text);
     folder_container.appendChild(folder_div);
 
+    folder_name_text.style.display = "none";
     folder_name_input.focus();
   }
 
@@ -110,20 +114,12 @@ export class FileArea extends HTMLElement {
   rename_selected_folder() {
     if (this.selected_item) {
       const folder_name_text = this.selected_item.querySelector(".folder-name");
-      if (folder_name_text) {
-        const folder_name_input = document.createElement("input");
-        folder_name_input.type = "text";
+      const folder_name_input =
+        this.selected_item.querySelector(".folder-name-input");
+      if (folder_name_text && folder_name_input) {
         folder_name_input.value = folder_name_text.textContent;
-        folder_name_input.classList.add("folder-name-input");
-        folder_name_input.maxLength = 12;
-
-        folder_name_input.addEventListener("blur", () => {
-          folder_name_text.textContent =
-            folder_name_input.value || folder_name_text.textContent;
-          folder_name_input.remove();
-        });
-
-        this.selected_item.appendChild(folder_name_input);
+        folder_name_text.style.display = "none";
+        folder_name_input.style.display = "inline";
         folder_name_input.focus();
       }
     }
