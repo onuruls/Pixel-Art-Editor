@@ -31,12 +31,15 @@ export class FileArea extends HTMLElement {
     this.appendChild(this.file_view);
     this.appendChild(this.file_tools_right);
     this.set_listeners();
+    this.set_global_click_listener();
   }
 
   /**
    * From HTMLElement - called when unmounted from DOM
    */
-  disconnectedCallback() {}
+  disconnectedCallback() {
+    document.removeEventListener("click", this.global_click_listener);
+  }
 
   /**
    * inits all EventListeners
@@ -53,6 +56,20 @@ export class FileArea extends HTMLElement {
     this.file_tools_left
       .querySelector("#rename_button")
       .addEventListener("click", () => this.rename_selected_folder());
+  }
+  /**
+   * Sets a global click listener to deselect the folder
+   */
+  set_global_click_listener() {
+    this.global_click_listener = (event) => {
+      const isClickInside =
+        this.contains(event.target) && event.target.closest(".folder") !== null;
+      if (!isClickInside && this.selected_item) {
+        this.selected_item.classList.remove("selected-folder");
+        this.selected_item = null;
+      }
+    };
+    document.addEventListener("click", this.global_click_listener);
   }
   /**
    * Creates a new folder element in the file view.
