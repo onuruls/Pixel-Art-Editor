@@ -2,4 +2,107 @@ sprite-preview {
     flex: 1;
     padding: 5px 10px;
     background-color: #333;
+
+    sprite-frames {
+        display: flex;
+        flex-direction: column;
+        width: 130px;
+        height: 100%;
+
+        .frame_container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+
+            sprite-frame {
+                cursor: pointer;
+                position: relative;
+                align-self: center;
+                height: 100px;
+                width: 100px;
+                background-color: yellow;
+                border-radius: 3px;
+                border: 3px solid black;
+                margin: 3px;
+
+                .canvas_wrapper {
+                    height: 100%;
+                    width: 100%;
+                    background-size: 10px 10px;
+                    background-color: #222;
+                    canvas {
+                        height: 100%;
+                        width: 100%;
+                    }
+                }
+
+                .index_label {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    background-color: gold;
+                    color: #222;
+                    height: 25px;
+                    width: 25px;
+                    font-size: larger;
+                    text-align: center;
+                }
+            }
+
+            sprite-frame:hover {
+                border-color: #777;
+
+                .delete_label{
+                    display: block;
+                }
+            }
+
+            sprite-frame.selected {
+                border-color: gold;
+
+                .delete_label{
+                    display: block;
+                }
+            }
+
+            .delete_label {
+                display:  none;
+                position: absolute;
+                background-color: red;
+                color: #222;
+                top: 75px;
+                left: 75px;
+                height: 25px;
+                width: 25px;
+                font-family:Verdana, Geneva, Tahoma, sans-serif;
+                font-size: 20px;
+                font-weight:normal;
+                text-align: center;
+            }
+
+            .delete_label:hover {
+                font-weight:bolder;
+            }
+        }
+
+        .new_frame_container {
+            cursor: pointer;
+            display: flex;
+            font-size: larger;
+            border: 3px solid #888;
+            margin: 3px;
+            align-self: center;
+            justify-content: center;
+            align-items: center;
+            background-color: #222;
+            height: 40px;
+            width: 100px;
+            color: #888;
+        }
+
+        .new_frame_container:hover {
+            border-color: gold;
+            color: gold;
+        }
+    }
 }

@@ -46,8 +46,8 @@ export class DrawingCanvas extends CanvasElement {
     this.sprite_editor.addEventListener("paste_selected_area", (event) => {
       this.paste_selected_area(event);
     });
-    this.sprite_editor.addEventListener("repaint_after_import", (event) => {
-      this.repaint_after_import(event);
+    this.sprite_editor.addEventListener("repaint_canvas", (event) => {
+      this.repaint_canvas(event);
     });
   }
 
@@ -175,9 +175,10 @@ export class DrawingCanvas extends CanvasElement {
    * Repaints the whole canvas, after sprite is imported
    * @param {Event} event
    */
-  repaint_after_import(event) {
+  repaint_canvas(event) {
     this.sprite_editor.canvas_matrix.forEach((row, x) =>
       row.forEach((pixel, y) => {
+        this.erase_single_pixel(x, y);
         this.paint_single_pixel(x, y, pixel);
       })
     );

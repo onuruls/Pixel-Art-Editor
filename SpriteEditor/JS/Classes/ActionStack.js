@@ -1,5 +1,12 @@
+import { SpriteEditor } from "../Elements/SpriteEditor.js";
+
 export class ActionStack {
-  constructor() {
+  /**
+   *
+   * @param {SpriteEditor} sprite_editor
+   */
+  constructor(sprite_editor) {
+    this.sprite_editor = sprite_editor;
     this.actions = [];
     this.redo_actions = [];
   }
@@ -10,6 +17,7 @@ export class ActionStack {
   push(points_array) {
     this.actions.push(points_array);
     this.redo_actions = [];
+    this.sprite_editor.update_frame_canvas();
   }
   /**
    * Returns the last action from the stack
