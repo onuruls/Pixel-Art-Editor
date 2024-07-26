@@ -51,18 +51,36 @@ export class Stroke extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    if (this.start_x <= this.end_x) {
+    let end_x = this.end_x;
+    let end_y = this.end_y;
+
+    if (event.shiftKey) {
+      const dx = this.end_x - this.start_x;
+      const dy = this.end_y - this.start_y;
+      const angle = Math.atan2(dy, dx);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const snapAngle = Math.round(angle / (Math.PI / 4)) * (Math.PI / 4);
+
+      end_x = this.start_x + Math.cos(snapAngle) * distance;
+      end_y = this.start_y + Math.sin(snapAngle) * distance;
+    }
+
+    end_x = Math.round(end_x);
+    end_y = Math.round(end_y);
+
+    if (this.start_x <= end_x) {
       this.sprite_editor.draw_line_matrix(
         this.start_x,
         this.start_y,
-        this.end_x,
-        this.end_y,
+        end_x,
+        end_y,
         final
       );
     } else {
       this.sprite_editor.draw_line_matrix(
-        this.end_x,
-        this.end_y,
+        end_x,
+        end_y,
         this.start_x,
         this.start_y,
         final

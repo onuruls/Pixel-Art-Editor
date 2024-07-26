@@ -11,6 +11,8 @@ export class RectangleSelection extends SelectionTool {
     this.canvas.style.cursor = `crosshair`;
     this.is_moving = false;
     this.last_move_position = { x: -1, y: -1 };
+    this.start_x = 0;
+    this.start_y = 0;
   }
 
   /**
@@ -20,10 +22,10 @@ export class RectangleSelection extends SelectionTool {
   mouse_down(event) {
     if (!this.mouse_over_selected_area(event)) {
       this.is_drawing = true;
-      this.sprite_editor.set_selection_start_point(
-        this.get_mouse_position(event)
-      );
-      this.draw(event);
+      const position = this.get_mouse_position(event);
+      this.start_x = position.x;
+      this.start_y = position.y;
+      this.sprite_editor.set_selection_start_point(position);
     } else {
       this.sprite_editor.set_selection_move_start_point(
         this.get_mouse_position(event)
@@ -59,7 +61,14 @@ export class RectangleSelection extends SelectionTool {
    */
   draw(event, final = false) {
     const position = this.get_mouse_position(event);
-    this.sprite_editor.draw_rectangle_selection(position);
+    const { end_x, end_y } = this.sprite_editor.calculate_aspect_ratio(
+      this.start_x,
+      this.start_y,
+      position.x,
+      position.y,
+      event.shiftKey
+    );
+    this.sprite_editor.draw_rectangle_selection({ x: end_x, y: end_y });
   }
 
   /**
