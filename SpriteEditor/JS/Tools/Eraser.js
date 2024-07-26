@@ -1,6 +1,6 @@
 import { Tool } from "./Tool.js";
 
-export class Erazer extends Tool {
+export class Eraser extends Tool {
   /**
    *
    * @param {HTMLCanvasElement} canvas
@@ -41,6 +41,6 @@ export class Erazer extends Tool {
 
   draw(event) {
     const position = this.get_mouse_position(event);
-    this.sprite_editor.erazer_change_matrix(position.x, position.y);
+    this.sprite_editor.eraser_change_matrix(position.x, position.y);
   }
 }

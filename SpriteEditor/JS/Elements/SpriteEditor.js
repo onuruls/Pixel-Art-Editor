@@ -1,7 +1,7 @@
 import { SpritePreview } from "./SpritePreview.js";
 import { SpriteCanvas } from "./SpriteCanvas.js";
 import { SpriteTools } from "./SpriteTools.js";
-import { Erazer } from "../Tools/Erazer.js";
+import { Eraser } from "../Tools/Eraser.js";
 import { Pen } from "../Tools/Pen.js";
 import { MirrorPen } from "../Tools/MirrorPen.js";
 import { Bucket } from "../Tools/Bucket.js";
@@ -196,7 +196,7 @@ export class SpriteEditor extends HTMLElement {
     return matrix;
   }
   /**
-   * Starts gouping pen or erazer points for the action stack
+   * Starts gouping pen or eraser points for the action stack
    */
   start_action_buffer() {
     this.action_buffer = [];
@@ -266,7 +266,7 @@ export class SpriteEditor extends HTMLElement {
     switch (tool) {
       case "pen":
         return this.selected_color;
-      case "erazer":
+      case "eraser":
         return [0, 0, 0, 0];
       default:
         return this.selected_color;
@@ -359,7 +359,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {number} x
    * @param {number} y
    */
-  erazer_change_matrix(x, y) {
+  eraser_change_matrix(x, y) {
     const erase_color = [0, 0, 0, 0];
 
     this.apply_to_pixel_block(x, y, (xi, yj) => {
@@ -370,7 +370,7 @@ export class SpriteEditor extends HTMLElement {
           yj,
           prev_color,
           erase_color,
-          "erazer_matrix_changed"
+          "eraser_matrix_changed"
         );
       }
     });
@@ -378,8 +378,8 @@ export class SpriteEditor extends HTMLElement {
     if (this.valid_previous_point(this.previous_changed)) {
       this.update_line(
         [this.previous_changed, { x, y }],
-        "erazer",
-        "erazer_matrix_changed"
+        "eraser",
+        "eraser_matrix_changed"
       );
     }
 
@@ -808,7 +808,7 @@ export class SpriteEditor extends HTMLElement {
         });
         this.dispatchEvent(
           new CustomEvent(
-            is_draw ? "pen_matrix_changed" : "erazer_matrix_changed",
+            is_draw ? "pen_matrix_changed" : "eraser_matrix_changed",
             {
               detail: {
                 x: xi,
@@ -1287,7 +1287,7 @@ export class SpriteEditor extends HTMLElement {
       case "pen":
         return new Pen(this);
       case "eraser":
-        return new Erazer(this);
+        return new Eraser(this);
       case "mirror_pen":
         return new MirrorPen(this);
       case "bucket":

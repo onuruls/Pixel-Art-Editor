@@ -22,8 +22,8 @@ export class DrawingCanvas extends CanvasElement {
     this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
       this.draw_pen_canvas(event);
     });
-    this.sprite_editor.addEventListener("erazer_matrix_changed", (event) => {
-      this.draw_erazer_canvas(event);
+    this.sprite_editor.addEventListener("eraser_matrix_changed", (event) => {
+      this.draw_eraser_canvas(event);
     });
     this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
       this.fill_canvas(event);
@@ -66,7 +66,7 @@ export class DrawingCanvas extends CanvasElement {
    * Eraser tool
    * @param {Event} event
    */
-  draw_erazer_canvas(event) {
+  draw_eraser_canvas(event) {
     this.erase_single_pixel(event.detail.x, event.detail.y);
   }
 
