@@ -31,12 +31,15 @@ export class FileArea extends HTMLElement {
     this.appendChild(this.file_view);
     this.appendChild(this.file_tools_right);
     this.set_listeners();
+    this.set_global_click_listener();
   }
 
   /**
    * From HTMLElement - called when unmounted from DOM
    */
-  disconnectedCallback() {}
+  disconnectedCallback() {
+    document.removeEventListener("click", this.global_click_listener);
+  }
 
   /**
    * inits all EventListeners
@@ -49,6 +52,24 @@ export class FileArea extends HTMLElement {
     this.file_tools_left
       .querySelector("#delete_button")
       .addEventListener("click", () => this.delete_selected_folder());
+
+    this.file_tools_left
+      .querySelector("#rename_button")
+      .addEventListener("click", () => this.rename_selected_folder());
+  }
+  /**
+   * Sets a global click listener to deselect the folder
+   */
+  set_global_click_listener() {
+    this.global_click_listener = (event) => {
+      const isClickInside =
+        this.contains(event.target) && event.target.closest(".folder") !== null;
+      if (!isClickInside && this.selected_item) {
+        this.selected_item.classList.remove("selected-folder");
+        this.selected_item = null;
+      }
+    };
+    document.addEventListener("click", this.global_click_listener);
   }
   /**
    * Creates a new folder element in the file view.
@@ -78,18 +99,22 @@ export class FileArea extends HTMLElement {
     folder_name_input.classList.add("folder-name-input");
     folder_name_input.maxLength = 12;
 
+    const folder_name_text = document.createElement("span");
+    folder_name_text.classList.add("folder-name");
+    folder_name_text.textContent = "New Folder";
+
     folder_name_input.addEventListener("blur", () => {
-      const folder_name_text = document.createElement("span");
-      folder_name_text.classList.add("folder-name");
       folder_name_text.textContent = folder_name_input.value || "New Folder";
-      folder_div.appendChild(folder_name_text);
-      folder_name_input.remove();
+      folder_name_input.style.display = "none";
+      folder_name_text.style.display = "inline";
     });
 
     folder_div.appendChild(folder_img);
     folder_div.appendChild(folder_name_input);
+    folder_div.appendChild(folder_name_text);
     folder_container.appendChild(folder_div);
 
+    folder_name_text.style.display = "none";
     folder_name_input.focus();
   }
 
@@ -100,6 +125,20 @@ export class FileArea extends HTMLElement {
     if (this.selected_item) {
       this.selected_item.remove();
       this.selected_item = null;
+    }
+  }
+
+  rename_selected_folder() {
+    if (this.selected_item) {
+      const folder_name_text = this.selected_item.querySelector(".folder-name");
+      const folder_name_input =
+        this.selected_item.querySelector(".folder-name-input");
+      if (folder_name_text && folder_name_input) {
+        folder_name_input.value = folder_name_text.textContent;
+        folder_name_text.style.display = "none";
+        folder_name_input.style.display = "inline";
+        folder_name_input.focus();
+      }
     }
   }
 }
