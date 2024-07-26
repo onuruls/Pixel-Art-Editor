@@ -40,6 +40,7 @@ export class InputCanvas extends CanvasElement {
     });
     this.canvas.addEventListener("mouseleave", (event) => {
       this.sprite_editor.remove_hover();
+      this.sprite_editor.clear_changed_points();
     });
     window.addEventListener("mouseup", (event) => {
       this.sprite_editor.selected_tool.global_mouse_up(event);

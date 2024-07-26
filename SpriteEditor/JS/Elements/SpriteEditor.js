@@ -34,9 +34,9 @@ export class SpriteEditor extends HTMLElement {
     this.fill_visited = {};
     this.action_stack = new ActionStack();
     this.action_buffer = [];
-    this.changed_points = [];
-    this.changed_points_right = [];
-    this.changed_points_left = [];
+    this.previous_changed = { x: null, y: null };
+    this.previous_changed_first_half = { x: null, y: null };
+    this.previous_changed_second_half = { x: null, y: null };
     this.move_points = [];
     this.initialized = false;
     this.selected_points = [];
@@ -206,9 +206,7 @@ export class SpriteEditor extends HTMLElement {
    */
   end_action_buffer() {
     this.action_stack.push(this.action_buffer);
-    this.changed_points = [];
-    this.changed_points_right = [];
-    this.changed_points_left = [];
+    this.clear_changed_points();
   }
   /**
    * Reverts the last action done (STRG + Z)
@@ -249,6 +247,15 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
+   * clears the changed points
+   */
+  clear_changed_points() {
+    this.previous_changed = { x: null, y: null };
+    this.previous_changed_first_half = { x: null, y: null };
+    this.previous_changed_second_half = { x: null, y: null };
+  }
+
+  /**
    * Determines the color to use for a given pixel based on the tool.
    * @param {Number} x
    * @param {Number} y
@@ -267,7 +274,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   *
+   * Updates a single point on the canvas.
    * @param {Number} x
    * @param {Number} y
    * @param {Array<Number>} prev_color
@@ -291,7 +298,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   *
+   * Updates a line of points on the canvas.
    * @param {Array<{x: Number, y: Number}>} points
    * @param {String} tool
    * @param {String} event_name
@@ -318,9 +325,9 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   *
-   * @param {Number} x
-   * @param {Number} y
+   * Handles pen changes on the canvas matrix.
+   * @param {number} x
+   * @param {number} y
    */
   pen_change_matrix(x, y) {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
@@ -336,21 +343,27 @@ export class SpriteEditor extends HTMLElement {
       }
     });
 
-    this.changed_points.push({ x, y });
-    if (this.changed_points.length >= 2) {
-      this.update_line(this.changed_points, "pen", "pen_matrix_changed");
+    if (this.valid_previous_point(this.previous_changed)) {
+      this.update_line(
+        [this.previous_changed, { x, y }],
+        "pen",
+        "pen_matrix_changed"
+      );
     }
+
+    this.previous_changed = { x, y };
   }
 
   /**
-   *
-   * @param {Number} x
-   * @param {Number} y
+   * Handles eraser changes on the canvas matrix.
+   * @param {number} x
+   * @param {number} y
    */
   erazer_change_matrix(x, y) {
+    const erase_color = [0, 0, 0, 0];
+
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_color = this.canvas_matrix[xi][yj];
-      const erase_color = [0, 0, 0, 0];
       if (!this.compare_colors(prev_color, erase_color)) {
         this.update_point(
           xi,
@@ -362,45 +375,73 @@ export class SpriteEditor extends HTMLElement {
       }
     });
 
-    this.changed_points.push({ x, y });
-    if (this.changed_points.length >= 2) {
-      this.update_line(this.changed_points, "erazer", "erazer_matrix_changed");
+    if (this.valid_previous_point(this.previous_changed)) {
+      this.update_line(
+        [this.previous_changed, { x, y }],
+        "erazer",
+        "erazer_matrix_changed"
+      );
     }
+
+    this.previous_changed = { x, y };
   }
+
   /**
-   *
-   * @param {Number} x1
-   * @param {Number} x2
-   * @param {Number} y1
-   * @param {Number} y2
+   * Handles mirror pen changes on the canvas matrix.
+   * @param {number} x1
+   * @param {number} x2
+   * @param {number} y1
+   * @param {number} y2
+   * @param {boolean} switch_state
    */
-  mirror_pen_change_matrix(x1, x2, y1, y2) {
+  mirror_pen_change_matrix(x1, x2, y1, y2, switch_state) {
+    if (switch_state) {
+      this.clear_changed_points();
+    }
+
     const color = this.selected_color;
-    [x1, x2].forEach((x, index) => {
-      [y1, y2].forEach((y) => {
+    const points = [
+      { x: x1, y: y1, prev: this.previous_changed_first_half },
+      { x: x2, y: y2, prev: this.previous_changed_second_half },
+    ];
+
+    points.forEach(({ x, y, prev }) => {
+      if (this.coordinates_in_bounds(x, y)) {
         this.apply_to_pixel_block(x, y, (xi, yj) => {
-          const prev_color = this.canvas_matrix[xi][yj];
-          if (!this.compare_colors(prev_color, color)) {
+          const prev_color = this.canvas_matrix[xi]?.[yj];
+          if (
+            prev_color !== undefined &&
+            !this.compare_colors(prev_color, color)
+          ) {
             this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
-            if (index === 0) {
-              this.changed_points_left.push({ x: x, y: y });
-            } else {
-              this.changed_points_right.push({ x: x, y: y });
-            }
           }
         });
-      });
+
+        if (this.valid_previous_point(prev)) {
+          this.update_line(
+            [
+              { x: prev.x, y: prev.y },
+              { x, y },
+            ],
+            "pen",
+            "pen_matrix_changed"
+          );
+        }
+      }
     });
 
-    if (
-      this.changed_points_left.length >= 2 &&
-      this.changed_points_right.length >= 2
-    ) {
-      const [a, c] = this.changed_points_left.slice(-2);
-      const [b, d] = this.changed_points_right.slice(-2);
-      this.update_line([a, c], "pen", "pen_matrix_changed");
-      this.update_line([b, d], "pen", "pen_matrix_changed");
-    }
+    this.previous_changed_first_half = { x: x1, y: y1 };
+    this.previous_changed_second_half = { x: x2, y: y2 };
+  }
+
+  /**
+   * Checks if the coordinates aren't out of bound
+   */
+  valid_previous_point(prev) {
+    return (
+      ![prev.x, prev.y].some((coord) => coord === null) &&
+      this.coordinates_in_bounds(prev.x, prev.y)
+    );
   }
 
   /**
@@ -725,7 +766,7 @@ export class SpriteEditor extends HTMLElement {
       ];
       this.canvas_matrix[xi][yj] = new_color;
       if (
-        !this.changed_points.some((point) => point.x === xi && point.y === yj)
+        !this.action_buffer.some((action) => action.x === xi && action.y === yj)
       ) {
         this.action_buffer.push({
           x: xi,
@@ -733,7 +774,6 @@ export class SpriteEditor extends HTMLElement {
           prev_color: prev_color,
           color: new_color,
         });
-        this.changed_points.push({ x: xi, y: yj });
       }
       this.dispatchEvent(
         new CustomEvent("pen_matrix_changed", {
@@ -1304,7 +1344,7 @@ export class SpriteEditor extends HTMLElement {
       x >= 0 &&
       y >= 0 &&
       x < this.canvas_matrix.length &&
-      y < this.canvas_matrix.length
+      y < this.canvas_matrix[0].length
     );
   }
 
