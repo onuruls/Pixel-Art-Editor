@@ -53,9 +53,17 @@ export class Rectangle extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    this.sprite_editor.draw_rectangle_matrix(
+    const { end_x, end_y } = this.sprite_editor.calculate_aspect_ratio(
+      this.start_x,
+      this.start_y,
       this.end_x,
       this.end_y,
+      event.shiftKey
+    );
+
+    this.sprite_editor.draw_rectangle_matrix(
+      end_x,
+      end_y,
       this.start_x,
       this.start_y,
       final

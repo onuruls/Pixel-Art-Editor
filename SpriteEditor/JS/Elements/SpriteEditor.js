@@ -601,6 +601,35 @@ export class SpriteEditor extends HTMLElement {
     return points;
   }
   /**
+   * Adjusts the aspect ratio of a shape to maintain a 1:1 ratio if the Shift key is held.
+   * @param {number} start_x
+   * @param {number} start_y
+   * @param {number} end_x
+   * @param {number} end_y
+   * @param {boolean} shiftKey
+   * @returns {{ end_x: number, end_y: number }}
+   */
+  calculate_aspect_ratio(start_x, start_y, end_x, end_y, shiftKey) {
+    if (shiftKey) {
+      const width = Math.abs(end_x - start_x);
+      const height = Math.abs(end_y - start_y);
+      const size = Math.min(width, height);
+
+      if (end_x < start_x) {
+        end_x = start_x - size;
+      } else {
+        end_x = start_x + size;
+      }
+
+      if (end_y < start_y) {
+        end_y = start_y - size;
+      } else {
+        end_y = start_y + size;
+      }
+    }
+    return { end_x, end_y };
+  }
+  /**
    * Changes the brightness of the pixel
    * @param {Number} x
    * @param {Number} y
