@@ -28,11 +28,13 @@ export class SpriteEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.canvas_matrix = [];
     this.width = 64;
     this.height = 64;
+    this.canvas_matrix = this.create_canvas_matrix();
+    this.canvas_matrices = [this.canvas_matrix];
     this.fill_visited = {};
-    this.action_stack = new ActionStack();
+    this.action_stack = new ActionStack(this);
+    this.action_stacks = [this.action_stack];
     this.action_buffer = [];
     this.changed_points = [];
     this.move_points = [];
@@ -88,7 +90,6 @@ export class SpriteEditor extends HTMLElement {
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
-    this.canvas_matrix = this.create_canvas_matrix();
     this.initialized = true;
   }
 
@@ -217,6 +218,7 @@ export class SpriteEditor extends HTMLElement {
         })
       );
     }
+    this.update_frame_thumbnail();
   }
 
   /**
@@ -236,6 +238,7 @@ export class SpriteEditor extends HTMLElement {
         })
       );
     }
+    this.update_frame_thumbnail();
   }
   /**
    *
@@ -1309,7 +1312,7 @@ export class SpriteEditor extends HTMLElement {
     );
     this.canvas_matrix = loaded_canvas;
     this.end_action_buffer();
-    this.dispatchEvent(new CustomEvent("repaint_after_import"));
+    this.repaint_canvas();
   }
 
   /**
@@ -1367,6 +1370,55 @@ export class SpriteEditor extends HTMLElement {
       result[row][col][colorIndex] = color;
     });
     return result;
+  }
+
+  /**
+   * Creates a new Matrix for the new frame
+   */
+  add_matrix() {
+    this.canvas_matrices.push(this.create_canvas_matrix());
+    this.action_stacks.push(new ActionStack(this));
+  }
+
+  /**
+   * Removes the matrix of a frame
+   * @param {Number} index
+   */
+  remove_matrix(index) {
+    this.canvas_matrices.splice(index, 1);
+    this.action_stacks.splice(index, 1);
+  }
+
+  /**
+   * Switches the active matrix
+   * @param {Number} index
+   */
+  switch_active_matrix(index) {
+    this.canvas_matrix = this.canvas_matrices[index];
+    this.action_stack = this.action_stacks[index];
+    this.active_canvas_index = 0;
+    this.repaint_canvas();
+  }
+
+  /**
+   * Dispatches repaint event for the whole canvas
+   */
+  repaint_canvas() {
+    this.dispatchEvent(new CustomEvent("repaint_canvas"));
+  }
+
+  /**
+   * Called by the ActionStack fires event
+   * to update the frame thumbnail
+   */
+  update_frame_thumbnail() {
+    this.dispatchEvent(
+      new CustomEvent("update_frame_thumbnail", {
+        detail: {
+          img_url: this.sprite_canvas.drawing_canvas.canvas.toDataURL(),
+        },
+      })
+    );
   }
 }
 
