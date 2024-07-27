@@ -776,19 +776,30 @@ export class SpriteEditor extends HTMLElement {
     return { end_x, end_y };
   }
   /**
+   * Clamps a number between a minimum and a maximum value
+   * @param {Number} value
+   * @param {Number} min
+   * @param {Number} max
+   * @returns {Number}
+   */
+  clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  /**
    * Changes the brightness of the pixel
    * @param {Number} x
    * @param {Number} y
    * @param {Number} brightness
    */
-  change_brightness_matrix(x, y, brightness) {
+  change_brightness_matrix(x, y, brightness, darken) {
+    brightness = darken ? -brightness : brightness;
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_color = this.canvas_matrix[xi][yj];
       if (prev_color[3] == 0) return;
       const new_color = [
-        Math.min(prev_color[0] + brightness, 255),
-        Math.min(prev_color[1] + brightness, 255),
-        Math.min(prev_color[2] + brightness, 255),
+        this.clamp(prev_color[0] + brightness, 0, 255),
+        this.clamp(prev_color[1] + brightness, 0, 255),
+        this.clamp(prev_color[2] + brightness, 0, 255),
         prev_color[3],
       ];
       this.canvas_matrix[xi][yj] = new_color;

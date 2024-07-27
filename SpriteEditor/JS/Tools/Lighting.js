@@ -46,6 +46,12 @@ export class Lighting extends Tool {
    */
   draw(event) {
     const position = this.get_mouse_position(event);
-    this.sprite_editor.change_brightness_matrix(position.x, position.y, 5);
+    const darken = this.is_shift_pressed;
+    this.sprite_editor.change_brightness_matrix(
+      position.x,
+      position.y,
+      5,
+      darken
+    );
   }
 }
