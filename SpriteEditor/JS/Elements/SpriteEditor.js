@@ -1548,6 +1548,15 @@ export class SpriteEditor extends HTMLElement {
     this.action_stacks.splice(index, 1);
   }
 
+  copy_matrix(index) {
+    const matrix = this.canvas_matrices[index];
+    const copied_matrix = matrix.map((row) => row.map((color) => [...color]));
+    const action_stack = new ActionStack(this);
+    this.canvas_matrices.splice(index + 1, 0, copied_matrix);
+    this.action_stacks.splice(index + 1, 0, action_stack);
+    console.log("!");
+  }
+
   /**
    * Switches the active matrix
    * @param {Number} index
@@ -1555,7 +1564,6 @@ export class SpriteEditor extends HTMLElement {
   switch_active_matrix(index) {
     this.canvas_matrix = this.canvas_matrices[index];
     this.action_stack = this.action_stacks[index];
-    this.active_canvas_index = 0;
     this.repaint_canvas();
   }
 
@@ -1564,6 +1572,7 @@ export class SpriteEditor extends HTMLElement {
    */
   repaint_canvas() {
     this.dispatchEvent(new CustomEvent("repaint_canvas"));
+    this.update_frame_thumbnail();
   }
 
   /**
