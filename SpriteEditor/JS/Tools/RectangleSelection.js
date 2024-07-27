@@ -22,7 +22,10 @@ export class RectangleSelection extends SelectionTool {
    */
   mouse_down(event) {
     if (!this.mouse_over_selected_area(event)) {
-      this.stopped_drawing && this.destroy();
+      if (this.stopped_drawing) {
+        this.destroy();
+        this.stopped_drawing = false;
+      }
       this.is_drawing = true;
       const position = this.get_mouse_position(event);
       this.start_x = position.x;
