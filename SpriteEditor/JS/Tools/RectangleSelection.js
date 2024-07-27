@@ -10,6 +10,7 @@ export class RectangleSelection extends SelectionTool {
     super(sprite_editor);
     this.canvas.style.cursor = `crosshair`;
     this.is_moving = false;
+    this.stopped_drawing = false;
     this.last_move_position = { x: -1, y: -1 };
     this.start_x = 0;
     this.start_y = 0;
@@ -21,6 +22,7 @@ export class RectangleSelection extends SelectionTool {
    */
   mouse_down(event) {
     if (!this.mouse_over_selected_area(event)) {
+      this.stopped_drawing && this.destroy();
       this.is_drawing = true;
       const position = this.get_mouse_position(event);
       this.start_x = position.x;
@@ -52,6 +54,7 @@ export class RectangleSelection extends SelectionTool {
    */
   mouse_up(event) {
     this.is_drawing = false;
+    this.stopped_drawing = true;
     this.is_moving = false;
   }
 
