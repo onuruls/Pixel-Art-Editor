@@ -23,7 +23,7 @@ export class RectangleSelection extends SelectionTool {
   mouse_down(event) {
     if (!this.mouse_over_selected_area(event)) {
       if (this.stopped_drawing) {
-        this.destroy();
+        this.sprite_editor.destroy_selection();
         this.stopped_drawing = false;
       }
       this.is_drawing = true;
