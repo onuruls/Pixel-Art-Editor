@@ -8,6 +8,7 @@ export class MirrorPen extends Tool {
   constructor(canvas) {
     super(canvas);
     this.cursor_icon_url = "./img/cursors/mirror-pen.png";
+    this.current_mirror = "vertical";
   }
 
   /**
@@ -51,16 +52,18 @@ export class MirrorPen extends Tool {
     const y = Math.floor(mouseY / 10);
     const half_of_pixel = (this.sprite_editor.pixel_size * 10) / 2;
 
+    const desired_mirror = this.is_shift_pressed ? "horizontal" : "vertical";
+    const switch_state = this.current_mirror !== desired_mirror;
+    this.current_mirror = desired_mirror;
+
     if (this.is_shift_pressed) {
       const middleY = rect.height / 2 - half_of_pixel;
       const { y1, y2 } = this.calculateHorizontalMirrorCoords(mouseY, middleY);
-      this.sprite_editor.pen_change_matrix(x, y1);
-      this.sprite_editor.pen_change_matrix(x, y2);
+      this.sprite_editor.mirror_pen_change_matrix(x, x, y1, y2, switch_state);
     } else {
       const middleX = rect.width / 2 - half_of_pixel;
       const { x1, x2 } = this.calculateVerticalMirrorCoords(mouseX, middleX);
-      this.sprite_editor.pen_change_matrix(x1, y);
-      this.sprite_editor.pen_change_matrix(x2, y);
+      this.sprite_editor.mirror_pen_change_matrix(x1, x2, y, y, switch_state);
     }
   }
 
