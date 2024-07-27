@@ -19,7 +19,6 @@ sprite-preview {
             width: 100%;
 
             sprite-frame {
-                cursor: pointer;
                 position: relative;
                 align-self: center;
                 height: 100px;
@@ -28,12 +27,24 @@ sprite-preview {
                 border-radius: 3px;
                 border: 3px solid black;
                 margin: 3px;
+                
+                label {
+                    cursor: pointer;
+                    position: absolute;
+                    display: none;
+                    color: #222;
+                    height: 25px;
+                    width: 25px;
+                    justify-content: center;
+                    align-items: center;
+                }
 
                 .thumbnail_wrapper {
                     height: 100%;
                     width: 100%;
                     background-size: 10px 10px;
                     background-color: #222;
+                    cursor: pointer;
                     
                     img {
                         height: 100%;
@@ -42,15 +53,34 @@ sprite-preview {
                 }
 
                 .index_label {
-                    position: absolute;
+                    display: flex;
                     top: 0;
                     left: 0;
                     background-color: gold;
-                    color: #222;
-                    height: 25px;
-                    width: 25px;
-                    font-size: larger;
-                    text-align: center;
+                    border-bottom-right-radius: 3px;
+                    font-weight: bold;
+                }
+
+                .delete_label {
+                    background-color: red;
+                    border-top-left-radius: 3px;
+                    top: 75px;
+                    left: 75px;
+                }
+
+                .delete_label:hover {
+                    font-size: 20px;
+                }
+
+                .copy_label {
+                    border-top-right-radius: 3px;
+                    background-color: grey;
+                    top: 75px;
+                    left: 0px;
+                }
+
+                .copy_label:hover {
+                    font-size: 20px;
                 }
             }
 
@@ -58,7 +88,10 @@ sprite-preview {
                 border-color: #777;
 
                 .delete_label{
-                    display: block;
+                    display: flex;
+                }
+                .copy_label {
+                    display: flex;
                 }
             }
 
@@ -66,34 +99,19 @@ sprite-preview {
                 border-color: gold;
 
                 .delete_label{
-                    display: block;
+                    display: flex;
                 }
-            }
 
-            .delete_label {
-                display:  none;
-                position: absolute;
-                background-color: red;
-                color: #222;
-                top: 75px;
-                left: 75px;
-                height: 25px;
-                width: 25px;
-                font-family:Verdana, Geneva, Tahoma, sans-serif;
-                font-size: 20px;
-                font-weight:normal;
-                text-align: center;
-            }
-
-            .delete_label:hover {
-                font-weight:bolder;
+                .copy_label {
+                    display: flex;
+                }
             }
         }
 
         .new_frame_container {
             cursor: pointer;
             display: flex;
-            font-size: larger;
+            font-size: 30px;
             border: 3px solid #888;
             margin: 3px;
             align-self: center;

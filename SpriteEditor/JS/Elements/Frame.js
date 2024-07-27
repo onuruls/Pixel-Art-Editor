@@ -10,8 +10,9 @@ export class Frame extends HTMLElement {
     this.sprite_frames = sprite_frames;
     this.index = index;
     this.thumbnail = this.create_thumbnail();
-    this.label = this.create_label();
+    this.label = this.create_index_label();
     this.delete_label = this.create_delete_label();
+    this.copy_label = this.create_copy_label();
     this.thumbnail_wrapper = this.create_thumbnail_wrapper();
     this.init();
   }
@@ -27,21 +28,36 @@ export class Frame extends HTMLElement {
 
   /**
    * Creates the delete label for the bottom right corner
-   * @returns {HTMLDivElement}
+   * @returns {HTMLLabelElement}
    */
   create_delete_label() {
-    const delete_label = document.createElement("div");
+    const delete_label = document.createElement("label");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-solid", "fa-trash");
     delete_label.classList.add("delete_label");
-    delete_label.appendChild(document.createTextNode("X"));
+    delete_label.appendChild(icon);
     return delete_label;
   }
 
   /**
-   * Creates the label for the top left corner
-   * @returns {HTMLDivElement}
+   * Creates the copy label for the bottom left corner
+   * @returns {HTMLLabelElement}
    */
-  create_label() {
-    const label = document.createElement("div");
+  create_copy_label() {
+    const copy_label = document.createElement("label");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-regular", "fa-copy");
+    copy_label.classList.add("copy_label");
+    copy_label.appendChild(icon);
+    return copy_label;
+  }
+
+  /**
+   * Creates the label for the top left corner
+   * @returns {HTMLLabelElement}
+   */
+  create_index_label() {
+    const label = document.createElement("label");
     label.classList.add("index_label");
     label.appendChild(document.createTextNode(this.index));
     return label;
@@ -62,8 +78,10 @@ export class Frame extends HTMLElement {
     this.appendChild(this.thumbnail_wrapper);
     this.appendChild(this.label);
     this.appendChild(this.delete_label);
-    this.addEventListener("click", this.frame_clicked);
+    this.appendChild(this.copy_label);
+    this.thumbnail.addEventListener("click", this.frame_clicked.bind(this));
     this.delete_label.addEventListener("click", this.delete_clicked.bind(this));
+    this.copy_label.addEventListener("click", this.copy_clicked.bind(this));
   }
 
   /**
@@ -75,11 +93,18 @@ export class Frame extends HTMLElement {
   }
 
   /**
-   * Triggered when a delete label is clicked
+   * Triggered when the delete label is clicked
    * @param {Event} event
    */
   delete_clicked(event) {
     this.sprite_frames.remove_frame(this.index);
+  }
+  /**
+   * Triggered when the copy label is clicked
+   * @param {Event} event
+   */
+  copy_clicked(event) {
+    this.sprite_frames.copy_frame(this.index);
   }
 
   /**
@@ -123,11 +148,12 @@ export class Frame extends HTMLElement {
    * Removes all listeners before removing element from DOM
    */
   disconnectedCallback() {
-    this.removeEventListener("click", this.frame_clicked);
+    this.thumbnail.removeEventListener("click", this.frame_clicked);
     this.delete_label.removeEventListener(
       "click",
       this.delete_clicked.bind(this)
     );
+    this.copy_label.removeEventListener("click", this.copy_clicked.bind(this));
   }
 }
 

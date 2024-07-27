@@ -33,8 +33,10 @@ export class SpriteFrames extends HTMLElement {
    */
   create_new_frame_container() {
     const new_frame_container = document.createElement("div");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-regular", "fa-square-plus");
     new_frame_container.classList.add("new_frame_container");
-    new_frame_container.appendChild(document.createTextNode("Add Frame"));
+    new_frame_container.appendChild(icon);
     return new_frame_container;
   }
 
@@ -89,6 +91,20 @@ export class SpriteFrames extends HTMLElement {
     } catch (error) {
       this.switch_active_frame(index);
     }
+  }
+
+  /**
+   * Copies the frame on the index position
+   * @param {Number} index
+   */
+  copy_frame(index) {
+    const frame = this.frames[index];
+    const new_frame = new Frame(this, frame.index + 1);
+    this.frames.splice(index + 1, 0, new_frame);
+    frame.after(new_frame);
+    this.update_frame_information();
+    this.sprite_editor.copy_matrix(index);
+    this.switch_active_frame(index + 1);
   }
 
   /**
