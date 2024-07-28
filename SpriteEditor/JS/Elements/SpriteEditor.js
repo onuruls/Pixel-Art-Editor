@@ -133,7 +133,7 @@ export class SpriteEditor extends HTMLElement {
       return;
     }
     const key = event.key;
-    const toolShortcuts = {
+    const tool_shortcuts = {
       p: "pen",
       m: "mirror_pen",
       b: "bucket",
@@ -151,25 +151,25 @@ export class SpriteEditor extends HTMLElement {
       k: "color_picker",
     };
 
-    const tool = toolShortcuts[key];
+    const tool = tool_shortcuts[key];
     if (tool) {
       this.remove_hover();
-      const clickedElement = this.sprite_tools.querySelector(
+      const clicked_element = this.sprite_tools.querySelector(
         `[data-tool="${tool}"]`
       );
-      if (clickedElement) {
+      if (clicked_element) {
         this.selected_tool.destroy();
         this.selected_tool = this.select_tool_from_string(tool);
         const tool_buttons = this.sprite_tools.querySelectorAll(".tool-button");
         tool_buttons.forEach((btn) => btn.classList.remove("active"));
-        clickedElement.classList.add("active");
+        clicked_element.classList.add("active");
       }
     }
   }
 
   /**
    *
-   * @param {Number} size - The new pixel size to set
+   * @param {Number} size
    */
   set_pixel_size(size) {
     this.pixel_size = size;
@@ -195,7 +195,7 @@ export class SpriteEditor extends HTMLElement {
 
   /**
    *
-   * @param {String} hexString
+   * @param {String} hex_string
    * @returns {Array<Numbers>}
    */
   hex_to_rgb_array(hex_string) {
