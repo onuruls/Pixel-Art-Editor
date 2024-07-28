@@ -1358,6 +1358,7 @@ export class SpriteEditor extends HTMLElement {
       this.selected_color = color;
       const hex_color = this.rgb_array_to_hex(color);
       this.sprite_tools.querySelector("#color_input").value = hex_color;
+      this.sprite_tools.change_title_color(hex_color);
     }
   }
 
