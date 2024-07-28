@@ -12,6 +12,12 @@ sprite-preview {
         flex-direction: column;
         width: 130px;
         height: 100%;
+        user-select: none;
+        
+        .dragging {
+            position: absolute !important;
+            z-index: 25
+        }
 
         .frame_container {
             display: flex;
@@ -26,8 +32,8 @@ sprite-preview {
                 background-color: yellow;
                 border-radius: 3px;
                 border: 3px solid black;
-                margin: 3px;
-                
+                margin: 3px;   
+
                 label {
                     cursor: pointer;
                     position: absolute;
@@ -37,6 +43,7 @@ sprite-preview {
                     width: 25px;
                     justify-content: center;
                     align-items: center;
+                    background-color: grey;
                 }
 
                 .thumbnail_wrapper {
@@ -45,7 +52,7 @@ sprite-preview {
                     background-size: 10px 10px;
                     background-color: #222;
                     cursor: pointer;
-                    
+
                     img {
                         height: 100%;
                         width: 100%;
@@ -62,7 +69,6 @@ sprite-preview {
                 }
 
                 .delete_label {
-                    background-color: red;
                     border-top-left-radius: 3px;
                     top: 75px;
                     left: 75px;
@@ -74,12 +80,21 @@ sprite-preview {
 
                 .copy_label {
                     border-top-right-radius: 3px;
-                    background-color: grey;
                     top: 75px;
                     left: 0px;
                 }
 
                 .copy_label:hover {
+                    font-size: 20px;
+                }
+
+                .move_label {
+                    border-bottom-left-radius: 3px;
+                    top: 0px;
+                    left: 75px;
+                }
+
+                .move_label:hover {
                     font-size: 20px;
                 }
             }
@@ -105,6 +120,10 @@ sprite-preview {
                 .copy_label {
                     display: flex;
                 }
+
+                .move_label {
+                    display: flex;
+                }
             }
         }
 
@@ -126,6 +145,17 @@ sprite-preview {
         .new_frame_container:hover {
             border-color: gold;
             color: gold;
+        }
+
+        .frame_dummy {
+            position: relative;
+            align-self: center;
+            height: 100px;
+            width: 100px;
+            background-color: #222;
+            border-radius: 3px;
+            border: 3px dashed gold;
+            margin: 3px;   
         }
     }
 }
