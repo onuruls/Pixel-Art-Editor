@@ -632,7 +632,6 @@ export class SpriteEditor extends HTMLElement {
           this.canvas_matrix[point.x][point.y] = this.selected_color;
         }
       });
-      this.end_action_buffer();
       this.dispatchEvent(
         new CustomEvent("draw_shape", {
           detail: {
@@ -642,6 +641,7 @@ export class SpriteEditor extends HTMLElement {
           },
         })
       );
+      this.end_action_buffer();
     } else {
       this.dispatchEvent(
         new CustomEvent("draw_temp_shape", {
