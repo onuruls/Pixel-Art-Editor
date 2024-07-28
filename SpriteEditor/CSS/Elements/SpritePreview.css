@@ -43,6 +43,7 @@ sprite-preview {
                     width: 25px;
                     justify-content: center;
                     align-items: center;
+                    background-color: grey;
                 }
 
                 .thumbnail_wrapper {
@@ -68,7 +69,6 @@ sprite-preview {
                 }
 
                 .delete_label {
-                    background-color: red;
                     border-top-left-radius: 3px;
                     top: 75px;
                     left: 75px;
@@ -80,7 +80,6 @@ sprite-preview {
 
                 .copy_label {
                     border-top-right-radius: 3px;
-                    background-color: grey;
                     top: 75px;
                     left: 0px;
                 }
@@ -90,8 +89,7 @@ sprite-preview {
                 }
 
                 .move_label {
-                    border-bottom-right-radius: 3px;
-                    background-color: grey;
+                    border-bottom-left-radius: 3px;
                     top: 0px;
                     left: 75px;
                 }
