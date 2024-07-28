@@ -42,6 +42,9 @@ export class AnimationPreviewControls extends HTMLElement {
     return input;
   }
 
+  /**
+   * initializes the element
+   */
   init() {
     this.appendChild(this.play_button);
     this.appendChild(this.fps_input);
@@ -72,6 +75,14 @@ export class AnimationPreviewControls extends HTMLElement {
   fps_input_changed(event) {
     this.fps_count = event.target.value;
     this.animation_preview.frame_duration = 1000 / this.fps_count;
+  }
+
+  disconnectedCallback() {
+    this.play_button.removeEventListener("click", this.play_clicked.bind(this));
+    this.fps_input.removeEventListener(
+      "change",
+      this.fps_input_changed.bind(this)
+    );
   }
 }
 

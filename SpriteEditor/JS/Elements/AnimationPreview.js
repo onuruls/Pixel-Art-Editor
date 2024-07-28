@@ -38,7 +38,7 @@ export class AnimationPreview extends HTMLElement {
 
   /**
    * Animation loop always running, but only animated
-   * when play is toggled
+   * when play is toggled. Stops when Element is not connected to DOM
    * @param {Number} timestamp
    */
   animation_loop(timestamp) {
@@ -54,7 +54,9 @@ export class AnimationPreview extends HTMLElement {
       );
       this.last_frame_time = timestamp;
     }
-    requestAnimationFrame(this.animation_loop.bind(this));
+    if (this.isConnected) {
+      requestAnimationFrame(this.animation_loop.bind(this));
+    }
   }
 }
 

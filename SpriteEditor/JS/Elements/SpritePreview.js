@@ -13,6 +13,9 @@ export class SpritePreview extends SpriteEditorPart {
     return ``;
   }
 
+  /**
+   * initializes the element
+   */
   init() {
     this.appendChild(this.preview);
     this.appendChild(this.sprite_frames);
