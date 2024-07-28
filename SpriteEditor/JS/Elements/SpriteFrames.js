@@ -133,13 +133,20 @@ export class SpriteFrames extends HTMLElement {
    */
   update_frame_img(event) {
     const img_url = event.detail.img_url;
-    console.log(img_url);
     this.selected_frame.update_thumbnail(img_url);
   }
 
   /**
    * from HTMLElement
-   * called when removed to DOM
+   * called when attached to DOM
+   */
+  connectedCallback() {
+    this.sprite_editor.update_frame_thumbnail();
+  }
+
+  /**
+   * from HTMLElement
+   * called when removed from DOM
    */
   disconnnectedCallback() {
     this.new_frame_container.removeEventListener(
