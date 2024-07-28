@@ -276,7 +276,7 @@ export class SpriteEditor extends HTMLElement {
     if (!this.action_stack.redo_is_empty()) {
       const points = this.action_stack.pop_last_redo();
       points.forEach((point) => {
-        this.canvas_matrix[point.x][point.y] = point.prev_color;
+        this.canvas_matrix[point.x][point.y] = point.color;
       });
       this.dispatchEvent(
         new CustomEvent("revert_redo", {
