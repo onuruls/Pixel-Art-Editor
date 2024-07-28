@@ -103,7 +103,6 @@ export class Frame extends HTMLElement {
     this.move_label.addEventListener("mousedown", this.drag_start.bind(this));
     document.addEventListener("mousemove", this.drag_move.bind(this));
     document.addEventListener("mouseup", this.drag_end.bind(this));
-    // this.addEventListener("dragstart", () => console.log("dragstart"));
   }
 
   /**
@@ -210,6 +209,12 @@ export class Frame extends HTMLElement {
       this.delete_clicked.bind(this)
     );
     this.copy_label.removeEventListener("click", this.copy_clicked.bind(this));
+    this.move_label.removeEventListener(
+      "mousedown",
+      this.drag_start.bind(this)
+    );
+    document.removeEventListener("mousemove", this.drag_move.bind(this));
+    document.removeEventListener("mouseup", this.drag_end.bind(this));
   }
 }
 
