@@ -219,7 +219,15 @@ export class SpriteFrames extends HTMLElement {
 
   /**
    * from HTMLElement
-   * called when removed to DOM
+   * called when attached to DOM
+   */
+  connectedCallback() {
+    this.sprite_editor.update_frame_thumbnail();
+  }
+
+  /**
+   * from HTMLElement
+   * called when removed from DOM
    */
   disconnnectedCallback() {
     this.new_frame_container.removeEventListener(
