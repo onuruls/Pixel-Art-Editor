@@ -1,25 +1,16 @@
 import { MapEditorCanvas } from "../MapEditorCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class DrawingCanvas extends HTMLElement {
+export class DrawingCanvas extends CanvasElement {
   /**
    * Bottom level Canvas
    * Shows the drawing (canvas_matrix)
    * @param {MapEditorCanvas} map_canvas
    */
   constructor(map_canvas) {
-    super();
+    super(map_canvas);
     this.map_canvas = map_canvas;
-    this.map_editor = map_canvas.map_editor;
-    this.canvas = null;
-  }
-
-  /**
-   * From HTMLElement called when element is mounted
-   */
-  connectedCallback() {
-    this.innerHTML = this.render();
-    this.canvas = this.querySelector("canvas");
-    this.init();
+    this.context = null;
   }
 
   /**
@@ -34,9 +25,6 @@ export class DrawingCanvas extends HTMLElement {
    * Initializes the Canvas
    */
   init() {
-    this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.map_editor.addEventListener("pen_matrix_changed", (event) => {
       this.draw_pen_canvas(event);
     });
@@ -57,29 +45,6 @@ export class DrawingCanvas extends HTMLElement {
     const x = event.detail.x;
     const y = event.detail.y;
     this.context.drawImage(asset, x * 10, y * 10, 10, 10);
-  }
-
-  /**
-   * Paints a pixel with the selected asset
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Array<Number>} asset
-   */
-  paint_single_pixel(x, y, asset) {
-    const img = new Image();
-    img.src = asset;
-    img.onload = () => {
-      this.context.drawImage(img, x * 10, y * 10, 10, 10);
-    };
-  }
-
-  /**
-   * Clears a pixel from the canvas
-   * @param {Number} x
-   * @param {Number} y
-   */
-  erase_single_pixel(x, y) {
-    this.context.clearRect(x * 10, y * 10, 10, 10);
   }
 
   /**
