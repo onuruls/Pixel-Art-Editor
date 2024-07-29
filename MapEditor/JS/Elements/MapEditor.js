@@ -1,6 +1,7 @@
 import { MapEditorCanvas } from "./MapEditorCanvas.js";
 import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
+import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
 import { Pen } from "../Tools/Pen.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
@@ -20,6 +21,8 @@ export class MapEditor extends HTMLElement {
     this.selected_points = [];
     this.pixel_size = 1;
     this.selected_asset = null;
+    this.action_stack = new ActionStack();
+    this.action_buffer = [];
   }
 
   /**
@@ -65,6 +68,12 @@ export class MapEditor extends HTMLElement {
         this.selected_tool = this.select_tool_from_string(tool);
       }
     });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.key === "z") {
+        this.revert_last_action();
+      }
+    });
   }
 
   /**
@@ -95,10 +104,42 @@ export class MapEditor extends HTMLElement {
       matrix[i] = new Array(64);
 
       for (var j = 0; j < this.width; j++) {
-        matrix[i][j] = [0, 0, 0, 0];
+        matrix[i][j] = "";
       }
     }
     return matrix;
+  }
+
+  /**
+   * Starts gouping pen points for the action stack
+   */
+  start_action_buffer() {
+    this.action_buffer = [];
+  }
+  /**
+   * Ends grouping and pushes to stack
+   */
+  end_action_buffer() {
+    this.action_stack.push(this.action_buffer);
+  }
+
+  /**
+   * Reverts the last action done (STRG + Z)
+   */
+  revert_last_action() {
+    if (!this.action_stack.actions_is_empty()) {
+      const points = this.action_stack.pop_last_action();
+      points.forEach((point) => {
+        this.canvas_matrix[point.x][point.y] = point.prev_asset;
+      });
+      this.dispatchEvent(
+        new CustomEvent("revert_undo", {
+          detail: {
+            points: points,
+          },
+        })
+      );
+    }
   }
 
   /**
@@ -112,7 +153,15 @@ export class MapEditor extends HTMLElement {
       img.src = this.selected_asset;
       img.onload = () => {
         this.apply_to_pixel_block(x, y, (xi, yj) => {
+          const prev_asset = this.canvas_matrix[xi][yj];
+          if (prev_asset === this.selected_asset) return;
           this.canvas_matrix[xi][yj] = this.selected_asset;
+          this.action_buffer.push({
+            x: xi,
+            y: yj,
+            prev_asset: prev_asset,
+            asset: this.selected_asset,
+          });
           this.dispatchEvent(
             new CustomEvent("pen_matrix_changed", {
               detail: {

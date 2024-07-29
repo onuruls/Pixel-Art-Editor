@@ -40,6 +40,9 @@ export class DrawingCanvas extends HTMLElement {
     this.map_editor.addEventListener("pen_matrix_changed", (event) => {
       this.draw_pen_canvas(event);
     });
+    this.map_editor.addEventListener("revert_undo", (event) => {
+      this.revert_undo(event);
+    });
   }
 
   /**
@@ -60,7 +63,32 @@ export class DrawingCanvas extends HTMLElement {
    * @param {Array<Number>} asset
    */
   paint_single_pixel(x, y, asset) {
-    this.context.drawImage(asset, x * 10, y * 10, 10, 10);
+    const img = new Image();
+    img.src = asset;
+    img.onload = () => {
+      this.context.drawImage(img, x * 10, y * 10, 10, 10);
+    };
+  }
+
+  /**
+   * Clears a pixel from the canvas
+   * @param {Number} x
+   * @param {Number} y
+   */
+  erase_single_pixel(x, y) {
+    this.context.clearRect(x * 10, y * 10, 10, 10);
+  }
+
+  /**
+   * Reverts the last action from the action_stack in the map_editor
+   * @param {Event} event
+   */
+  revert_undo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.prev_asset);
+    });
   }
 }
 
