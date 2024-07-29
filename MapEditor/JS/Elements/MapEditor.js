@@ -73,6 +73,9 @@ export class MapEditor extends HTMLElement {
       if (event.ctrlKey && event.key === "z") {
         this.revert_last_action();
       }
+      if (event.ctrlKey && event.key === "y") {
+        this.redo_last_action();
+      }
     });
   }
 
@@ -116,6 +119,7 @@ export class MapEditor extends HTMLElement {
   start_action_buffer() {
     this.action_buffer = [];
   }
+
   /**
    * Ends grouping and pushes to stack
    */
@@ -134,6 +138,25 @@ export class MapEditor extends HTMLElement {
       });
       this.dispatchEvent(
         new CustomEvent("revert_undo", {
+          detail: {
+            points: points,
+          },
+        })
+      );
+    }
+  }
+
+  /**
+   * Redoing the last reverted action
+   */
+  redo_last_action() {
+    if (!this.action_stack.redo_is_empty()) {
+      const points = this.action_stack.pop_last_redo();
+      points.forEach((point) => {
+        this.canvas_matrix[point.x][point.y] = point.asset;
+      });
+      this.dispatchEvent(
+        new CustomEvent("revert_redo", {
           detail: {
             points: points,
           },

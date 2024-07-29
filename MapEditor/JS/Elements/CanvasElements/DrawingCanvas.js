@@ -43,6 +43,9 @@ export class DrawingCanvas extends HTMLElement {
     this.map_editor.addEventListener("revert_undo", (event) => {
       this.revert_undo(event);
     });
+    this.map_editor.addEventListener("revert_redo", (event) => {
+      this.revert_redo(event);
+    });
   }
 
   /**
@@ -88,6 +91,18 @@ export class DrawingCanvas extends HTMLElement {
     points.forEach((point) => {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.prev_asset);
+    });
+  }
+
+  /**
+   * Redoing the last undo-action from the action stack
+   * @param {Event} event
+   */
+  revert_redo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.asset);
     });
   }
 }
