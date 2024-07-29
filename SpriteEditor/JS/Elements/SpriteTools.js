@@ -153,11 +153,6 @@ export class SpriteTools extends SpriteEditorPart {
   }
 
   init() {
-    const color_input = document.getElementById("color_input");
-    color_input.addEventListener("input", () => {
-      this.change_title_color(color_input.value);
-    });
-
     const tool_buttons = document.querySelectorAll(".tool-button");
     tool_buttons.forEach((button) => {
       button.addEventListener("click", () => {
@@ -192,13 +187,6 @@ export class SpriteTools extends SpriteEditorPart {
         this.change_title_color(color);
       });
     });
-  }
-
-  change_title_color(color) {
-    const title = document.getElementById("title");
-    if (title) {
-      title.style.webkitTextStrokeColor = color;
-    }
   }
 }
 
