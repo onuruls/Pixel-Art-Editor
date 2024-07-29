@@ -1599,7 +1599,6 @@ export class SpriteEditor extends HTMLElement {
     const action_stack = new ActionStack(this);
     this.canvas_matrices.splice(index + 1, 0, copied_matrix);
     this.action_stacks.splice(index + 1, 0, action_stack);
-    console.log("!");
   }
 
   /**
@@ -1632,6 +1631,18 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
+  }
+
+  /**
+   * Updates the array positions after swapping frames
+   * @param {Number} old_index
+   * @param {Number} new_index
+   */
+  update_frame_arrays(old_index, new_index) {
+    const [matrix] = this.canvas_matrices.splice(old_index, 1);
+    this.canvas_matrices.splice(new_index, 0, matrix);
+    const [action_stack] = this.action_stacks.splice(old_index, 1);
+    this.action_stacks.splice(new_index, 0, action_stack);
   }
 }
 
