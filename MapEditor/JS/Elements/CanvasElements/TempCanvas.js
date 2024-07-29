@@ -1,6 +1,7 @@
 import { MapEditorCanvas } from "../MapEditorCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class TempCanvas extends HTMLElement {
+export class TempCanvas extends CanvasElement {
   /**
    * Intermediate level Canvas
    * Shows temporary pixel like the selection area
@@ -8,19 +9,8 @@ export class TempCanvas extends HTMLElement {
    * @param {MapEditorCanvas} map_canvas
    */
   constructor(map_canvas) {
-    super();
-    this.map_canvas = map_canvas;
-    this.map_editor = map_canvas.map_editor;
-    this.canvas = null;
-  }
-
-  /**
-   * From HTMLElement called when element is mounted
-   */
-  connectedCallback() {
-    this.innerHTML = this.render();
-    this.canvas = this.querySelector("canvas");
-    this.init();
+    super(map_canvas);
+    this.context = null;
   }
 
   /**
