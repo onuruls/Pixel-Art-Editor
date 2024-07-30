@@ -14,7 +14,19 @@ export class SpriteTools extends SpriteEditorPart {
       )
       .join("");
     return `
-          <h1 id="title">Sprite Editor</h1>
+    <h1 id="title">Sprite Editor</h1>
+    <div class="pixel-size-options" title="Pixel size">
+      <button class="pixel-size-option active" data-size="1">
+        1x
+      </button>
+      <button class="pixel-size-option" data-size="2">
+        2x
+      </button>
+      <button class="pixel-size-option" data-size="4">
+        4x
+      </button>
+    </div>
+
     <div class="toolbox">
       <button
         id="pen"
@@ -110,7 +122,10 @@ export class SpriteTools extends SpriteEditorPart {
         data-tool="irregular_selection"
         title="Irregular Selection (I)"
       >
-        <img src="img/icons/irregular_selection.svg" alt="Irregular Selection" />
+        <img
+          src="img/icons/irregular_selection.svg"
+          alt="Irregular Selection"
+        />
       </button>
       <button
         id="lighting"
@@ -136,17 +151,14 @@ export class SpriteTools extends SpriteEditorPart {
       >
         <img src="img/icons/color_picker.svg" alt="Color Picker" />
       </button>
+      <input
+        type="color"
+        id="color_input"
+        name="color_input"
+        value="#000000"
+      />
     </div>
-    <div class="pixel-size">
-      <div id="pixel-size-options">
-        <button class="pixel-size-option active" data-size="1">1x</button>
-        <button class="pixel-size-option" data-size="2">2x</button>
-        <button class="pixel-size-option" data-size="4">4x</button>
-      </div>
-    </div>
-    <input type="color" id="color_input" name="color_input" value="#000000" />
-    <div id="palettes" class="palettes">
-      <h3>Palettes (Double click to use color)</h3>
+    <div class="palettes" title="Color palettes (double click to use color)">
       ${palette_html}
     </div>
     `;
@@ -169,6 +181,7 @@ export class SpriteTools extends SpriteEditorPart {
         this.sprite_editor.set_pixel_size(button.dataset.size);
       });
     });
+
     const palette_colors = this.querySelectorAll(".palette-color");
     palette_colors.forEach((palette) => {
       palette.addEventListener("click", () => {
@@ -184,7 +197,6 @@ export class SpriteTools extends SpriteEditorPart {
         color_input.value = color;
         this.sprite_editor.selected_color =
           this.sprite_editor.hex_to_rgb_array(color);
-        this.change_title_color(color);
       });
     });
   }
