@@ -1,25 +1,16 @@
 import { MapEditorCanvas } from "../MapEditorCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class DrawingCanvas extends HTMLElement {
+export class DrawingCanvas extends CanvasElement {
   /**
    * Bottom level Canvas
    * Shows the drawing (canvas_matrix)
    * @param {MapEditorCanvas} map_canvas
    */
   constructor(map_canvas) {
-    super();
+    super(map_canvas);
     this.map_canvas = map_canvas;
-    this.map_editor = map_canvas.map_editor;
-    this.canvas = null;
-  }
-
-  /**
-   * From HTMLElement called when element is mounted
-   */
-  connectedCallback() {
-    this.innerHTML = this.render();
-    this.canvas = this.querySelector("canvas");
-    this.init();
+    this.context = null;
   }
 
   /**
@@ -34,11 +25,14 @@ export class DrawingCanvas extends HTMLElement {
    * Initializes the Canvas
    */
   init() {
-    this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.map_editor.addEventListener("pen_matrix_changed", (event) => {
       this.draw_pen_canvas(event);
+    });
+    this.map_editor.addEventListener("revert_undo", (event) => {
+      this.revert_undo(event);
+    });
+    this.map_editor.addEventListener("revert_redo", (event) => {
+      this.revert_redo(event);
     });
   }
 
@@ -54,13 +48,27 @@ export class DrawingCanvas extends HTMLElement {
   }
 
   /**
-   * Paints a pixel with the selected asset
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Array<Number>} asset
+   * Reverts the last action from the action_stack in the map_editor
+   * @param {Event} event
    */
-  paint_single_pixel(x, y, asset) {
-    this.context.drawImage(asset, x * 10, y * 10, 10, 10);
+  revert_undo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.prev_asset);
+    });
+  }
+
+  /**
+   * Redoing the last undo-action from the action stack
+   * @param {Event} event
+   */
+  revert_redo(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, point.asset);
+    });
   }
 }
 

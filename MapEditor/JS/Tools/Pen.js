@@ -16,6 +16,7 @@ export class Pen extends Tool {
    */
   mouse_down(event) {
     this.is_drawing = true;
+    this.map_editor.start_action_buffer();
     this.draw(event);
   }
 
@@ -37,6 +38,7 @@ export class Pen extends Tool {
    */
   mouse_up(event) {
     this.is_drawing = false;
+    this.map_editor.end_action_buffer();
   }
 
   /**
