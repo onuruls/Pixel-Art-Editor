@@ -1,8 +1,9 @@
 body {
-    margin: 0; /* Entfernt den Standardabstand des Body-Elements */
-    overflow: hidden; /* Verhindert das Scrollen der Seite */
-    background-color: black; /*Setzt die Hintergrundfarbe auf Schwarz */
-
+    margin: 0px;
+    overflow: hidden;
+    background-color: black;
+    padding: 0px;
+    
     #editor_container {
         height: 85%; 
         width: 100%;
