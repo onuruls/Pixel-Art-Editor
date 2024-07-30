@@ -11,7 +11,9 @@ title-screen {
     background-size: 50px 50px;
     align-items: center;
     justify-content: center;
+
     .button_container {
+        
         button {
             height: 50px;
             width: 150px;

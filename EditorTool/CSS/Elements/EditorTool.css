@@ -3,6 +3,7 @@ body {
     overflow: hidden;
     background-color: black;
     padding: 0px;
+    
     #editor_container {
         height: 85%; 
         width: 100%;
