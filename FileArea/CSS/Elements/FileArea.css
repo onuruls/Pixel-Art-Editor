@@ -6,16 +6,3 @@ file-area {
   height: 15%;
   border-top: 1px solid white;
 }
-
-.left-panel,
-.right-panel {
-  display: flex;
-  flex-direction: column;
-
-  img {
-    width: 20px;
-    height: 20px;
-    margin-right: 5px;
-    margin-left: 5px;
-  }
-}

@@ -1,4 +1,5 @@
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
+import { FileSystemHandler } from "./Classes/FileSystemHandler.js";
 import { FileAreaToolsLeft } from "./FileAreaToolsLeft.js";
 import { FileAreaToolsRight } from "./FileAreaToolsRight.js";
 import { FileAreaView } from "./FileAreaView.js";
@@ -12,24 +13,51 @@ export class FileArea extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_item = null;
+    this.css = this.create_css_link();
+    this.file_tools_left = new FileAreaToolsLeft(this);
+    this.file_view = new FileAreaView(this);
+    this.file_tools_right = new FileAreaToolsRight(this);
+    this.appendChild(this.css);
+    this.appendChild(this.file_tools_left);
+    this.appendChild(this.file_view);
+    this.appendChild(this.file_tools_right);
+    this.init();
     //this.sprite_db_request = window.indexedDB.open("sprite_db", 1);
+  }
+
+  /**
+   *
+   * @returns {HTMLLinkElement}
+   */
+  create_css_link() {
+    const css = document.createElement("link");
+    css.setAttribute("href", "../FileArea/CSS/Elements/FileArea.css");
+    css.setAttribute("rel", "stylesheet");
+    css.setAttribute("type", "text/css");
+    return css;
+  }
+
+  /**
+   * initializes the tool listeners
+   */
+  init() {
+    this.file_tools_left
+      .querySelector("#create_folder_button")
+      .addEventListener("click", () => this.create_new_folder());
+
+    this.file_tools_left
+      .querySelector("#delete_button")
+      .addEventListener("click", () => this.delete_selected_folder());
+
+    this.file_tools_left
+      .querySelector("#rename_button")
+      .addEventListener("click", () => this.rename_selected_folder());
   }
 
   /**
    * From HTMLElement - called when mounted to DOM
    */
   connectedCallback() {
-    this.css = document.createElement("link");
-    this.css.setAttribute("href", "../FileArea/CSS/Elements/FileArea.css");
-    this.css.setAttribute("rel", "stylesheet");
-    this.css.setAttribute("type", "text/css");
-    this.appendChild(this.css);
-    this.file_tools_left = new FileAreaToolsLeft(this);
-    this.file_view = new FileAreaView(this);
-    this.file_tools_right = new FileAreaToolsRight(this);
-    this.appendChild(this.file_tools_left);
-    this.appendChild(this.file_view);
-    this.appendChild(this.file_tools_right);
     this.set_listeners();
     this.set_global_click_listener();
   }
@@ -44,19 +72,7 @@ export class FileArea extends HTMLElement {
   /**
    * inits all EventListeners
    */
-  set_listeners() {
-    this.file_tools_left
-      .querySelector("#create_folder_button")
-      .addEventListener("click", () => this.create_new_folder());
-
-    this.file_tools_left
-      .querySelector("#delete_button")
-      .addEventListener("click", () => this.delete_selected_folder());
-
-    this.file_tools_left
-      .querySelector("#rename_button")
-      .addEventListener("click", () => this.rename_selected_folder());
-  }
+  set_listeners() {}
   /**
    * Sets a global click listener to deselect the folder
    */
