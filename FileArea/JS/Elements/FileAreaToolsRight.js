@@ -7,13 +7,12 @@ export class FileAreaToolsRight extends HTMLElement {
    */
   constructor(file_area) {
     super();
+    this.classList.add("file-area-tools");
     this.file_area = file_area;
-    this.css = this.create_css_link();
     this.settings_button = this.create_settings_button();
     this.save_button = this.create_save_button();
     this.import_button = this.create_import_button();
     this.export_button = this.create_export_button();
-    this.appendChild(this.css);
     this.appendChild(this.settings_button);
     this.appendChild(this.save_button);
     this.appendChild(this.import_button);
@@ -22,28 +21,16 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 
   /**
-   *
-   * @returns {HTMLLinkElement}
-   */
-  create_css_link() {
-    const css = document.createElement("link");
-    css.setAttribute("href", `../FileArea/CSS/Elements/FileAreaToolsRight.css`);
-    css.setAttribute("rel", "stylesheet");
-    css.setAttribute("type", "text/css");
-    return css;
-  }
-
-  /**
    * Erzeugt den "Settings"-Button.
    * @returns {HTMLButtonElement}
    */
   create_settings_button() {
     const settings_button = document.createElement("button");
-    const img = document.createElement("img");
-    img.setAttribute("src", "img/settings.svg");
-    img.setAttribute("alt", "Settings");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-solid", "fa-gear", "fa-fw");
+    icon.setAttribute("alt", "Settings");
     settings_button.setAttribute("id", "settings");
-    settings_button.appendChild(img);
+    settings_button.appendChild(icon);
     settings_button.appendChild(document.createTextNode("Settings"));
     return settings_button;
   }
@@ -54,11 +41,11 @@ export class FileAreaToolsRight extends HTMLElement {
    */
   create_save_button() {
     const save_button = document.createElement("button");
-    const img = document.createElement("img");
-    img.setAttribute("src", "img/save.svg");
-    img.setAttribute("alt", "Save");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-solid", "fa-floppy-disk", "fa-fw");
+    icon.setAttribute("alt", "Save");
     save_button.setAttribute("id", "resize");
-    save_button.appendChild(img);
+    save_button.appendChild(icon);
     save_button.appendChild(document.createTextNode("Save"));
     return save_button;
   }
@@ -69,11 +56,11 @@ export class FileAreaToolsRight extends HTMLElement {
    */
   create_import_button() {
     const import_button = document.createElement("button");
-    const img = document.createElement("img");
-    img.setAttribute("src", "img/import.svg");
-    img.setAttribute("alt", "Import");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-solid", "fa-file-import", "fa-fw");
+    icon.setAttribute("alt", "Import");
     import_button.setAttribute("id", "import");
-    import_button.appendChild(img);
+    import_button.appendChild(icon);
     import_button.appendChild(document.createTextNode("Import"));
     return import_button;
   }
@@ -84,11 +71,11 @@ export class FileAreaToolsRight extends HTMLElement {
    */
   create_export_button() {
     const export_button = document.createElement("button");
-    const img = document.createElement("img");
-    img.setAttribute("src", "img/export.svg");
-    img.setAttribute("alt", "Export");
+    const icon = document.createElement("i");
+    icon.classList.add("fa-solid", "fa-file-export", "fa-fw");
+    icon.setAttribute("alt", "Export");
     export_button.setAttribute("id", "export");
-    export_button.appendChild(img);
+    export_button.appendChild(icon);
     export_button.appendChild(document.createTextNode("Export"));
     return export_button;
   }

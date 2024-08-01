@@ -1,8 +1,9 @@
 file-area-view {
   flex: 1;
   height: 95%;
-  background-color: grey;
-  border: solid 1px;
+  background-color: #888;
+  border-left: solid 1px white;
+  border-right: solid 1px white;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -10,24 +11,24 @@ file-area-view {
   width: 100%;
   height: 100%;
   overflow-y: auto;
-
+  scrollbar-width: thin;
+  scrollbar-color: #222 #888;
 
   .item {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 80px;
-    margin: 5px;
-    position: relative;
-    overflow: hidden;
+    margin: 0.5rem;
     text-overflow: ellipsis;
+    padding-top: 0.5rem;
 
     i {
-      font-size: 40px;
+      font-size: 2.5rem;
     }
 
     p {
-      font-size: 13px;
+      font-size: 0.9rem;
       text-align: center;
 
       input {
