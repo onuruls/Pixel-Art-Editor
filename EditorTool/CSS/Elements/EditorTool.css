@@ -1,11 +1,11 @@
 body {
-    margin: 0px;
-    overflow: hidden;
-    background-color: black;
-    padding: 0px;
-    
-    #editor_container {
-        height: 85%; 
-        width: 100%;
-    }
+  margin: 0px;
+  overflow: hidden;
+  background-color: black;
+  padding: 0px;
+
+  #editor_container {
+    height: 84vh;
+    width: 100%;
+  }
 }

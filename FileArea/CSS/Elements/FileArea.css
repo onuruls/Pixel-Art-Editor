@@ -1,21 +1,44 @@
 file-area {
+  height: 16vh;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: 15%;
   border-top: 1px solid white;
-}
 
-.left-panel,
-.right-panel {
-  display: flex;
-  flex-direction: column;
+  .file-area-tools {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    background-color: #333;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
-  img {
-    width: 20px;
-    height: 20px;
-    margin-right: 5px;
-    margin-left: 5px;
+    button {
+      display: flex;
+      align-items: center;
+      background-color: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 138px;
+      text-align: left;
+      border: #555 solid 1px;
+
+      &:hover {
+        background-color: #555;
+
+        i {
+          transform: scale(1.1);
+        }
+      }
+
+      i {
+        width: 20px;
+        height: 20px;
+        font-size: large;
+        margin-right: 10px;
+        transition: transform 0.3s;
+      }
+    }
   }
 }
