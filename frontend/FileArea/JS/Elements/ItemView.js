@@ -1,6 +1,6 @@
 import { FileAreaView } from "./FileAreaView.js";
 
-export class Item extends HTMLElement {
+export class ItemView extends HTMLElement {
   /**
    *
    * @param {String} name

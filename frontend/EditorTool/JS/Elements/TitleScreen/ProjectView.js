@@ -9,7 +9,7 @@ export class ProjectView extends HTMLElement {
    */
   constructor(title_screen, project) {
     super();
-    this.title_screen = this.title_screen;
+    this.title_screen = title_screen;
     this.project = project;
     this.project_name = this.create_project_name();
     this.created_at = this.create_created_at();
@@ -43,7 +43,25 @@ export class ProjectView extends HTMLElement {
     );
   }
 
-  init() {}
+  init() {
+    this.addEventListener(
+      "click",
+      this.title_screen.editor_tool.set_project.bind(
+        this.title_screen.editor_tool,
+        this.project
+      )
+    );
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener(
+      "click",
+      this.title_screen.editor_tool.set_project.bind(
+        this.title_screen.editor_tool,
+        this.project
+      )
+    );
+  }
 }
 
 customElements.define("project-view", ProjectView);

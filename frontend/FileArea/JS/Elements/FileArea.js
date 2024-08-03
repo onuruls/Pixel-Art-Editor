@@ -1,4 +1,5 @@
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
+import { FileSystemHandler } from "./Classes/FileSystemHandler.js";
 import { FileAreaToolsLeft } from "./FileAreaToolsLeft.js";
 import { FileAreaToolsRight } from "./FileAreaToolsRight.js";
 import { FileAreaView } from "./FileAreaView.js";
@@ -16,6 +17,7 @@ export class FileArea extends HTMLElement {
     this.file_tools_left = new FileAreaToolsLeft(this);
     this.file_view = new FileAreaView(this);
     this.file_tools_right = new FileAreaToolsRight(this);
+    this.file_system_handler = null;
     this.appendChild(this.css);
     this.appendChild(this.file_tools_left);
     this.appendChild(this.file_view);
@@ -39,24 +41,16 @@ export class FileArea extends HTMLElement {
   /**
    * initializes the tool listeners
    */
-  init() {
-    this.file_tools_left
-      .querySelector("#create_folder_button")
-      .addEventListener("click", () => this.create_new_folder());
-
-    this.file_tools_left
-      .querySelector("#delete_button")
-      .addEventListener("click", () => this.delete_selected_folder());
-
-    this.file_tools_left
-      .querySelector("#rename_button")
-      .addEventListener("click", () => this.rename_selected_folder());
-  }
+  init() {}
 
   /**
    * From HTMLElement - called when mounted to DOM
    */
   connectedCallback() {
+    this.file_system_handler = new FileSystemHandler(
+      this.file_view,
+      this.editor_tool.project
+    );
     this.set_listeners();
     this.set_global_click_listener();
   }
@@ -91,71 +85,17 @@ export class FileArea extends HTMLElement {
    * The folder includes an image, and an input field for the folder name.
    */
   create_new_folder() {
-    const folder_container = this.file_view.querySelector(".center-panel");
-
-    const folder_div = document.createElement("div");
-    folder_div.classList.add("folder");
-    folder_div.addEventListener("click", () => {
-      if (this.selected_item) {
-        this.selected_item.classList.remove("selected-folder");
-      }
-      this.selected_item = folder_div;
-      this.selected_item.classList.add("selected-folder");
-    });
-
-    const folder_img = document.createElement("img");
-    folder_img.src = "img/folder-empty.svg";
-    folder_img.alt = "Folder Icon";
-    folder_img.classList.add("folder-icon");
-
-    const folder_name_input = document.createElement("input");
-    folder_name_input.type = "text";
-    folder_name_input.placeholder = "New Folder";
-    folder_name_input.classList.add("folder-name-input");
-    folder_name_input.maxLength = 12;
-
-    const folder_name_text = document.createElement("span");
-    folder_name_text.classList.add("folder-name");
-    folder_name_text.textContent = "New Folder";
-
-    folder_name_input.addEventListener("blur", () => {
-      folder_name_text.textContent = folder_name_input.value || "New Folder";
-      folder_name_input.style.display = "none";
-      folder_name_text.style.display = "inline";
-    });
-
-    folder_div.appendChild(folder_img);
-    folder_div.appendChild(folder_name_input);
-    folder_div.appendChild(folder_name_text);
-    folder_container.appendChild(folder_div);
-
-    folder_name_text.style.display = "none";
-    folder_name_input.focus();
+    this.file_system_handler.create_folder();
   }
 
   /**
    * Deletes the selected folder.
    */
   delete_selected_folder() {
-    if (this.selected_item) {
-      this.selected_item.remove();
-      this.selected_item = null;
-    }
+    this.file_system_handler.active_folder.delete_item(this.selected_item);
   }
 
-  rename_selected_folder() {
-    if (this.selected_item) {
-      const folder_name_text = this.selected_item.querySelector(".folder-name");
-      const folder_name_input =
-        this.selected_item.querySelector(".folder-name-input");
-      if (folder_name_text && folder_name_input) {
-        folder_name_input.value = folder_name_text.textContent;
-        folder_name_text.style.display = "none";
-        folder_name_input.style.display = "inline";
-        folder_name_input.focus();
-      }
-    }
-  }
+  rename_selected_folder() {}
 }
 
 customElements.define("file-area", FileArea);

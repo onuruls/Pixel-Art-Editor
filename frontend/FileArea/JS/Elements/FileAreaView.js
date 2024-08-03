@@ -1,14 +1,13 @@
 import { FileSystemHandler } from "./Classes/FileSystemHandler.js";
 import { FileArea } from "./FileArea.js";
-import { FileItem } from "./FileItem.js";
-import { FolderItem } from "./FolderItem.js";
-import { Item } from "./Item.js";
+import { FileItemView } from "./FileItemView.js";
+import { FolderItemView } from "./FolderItemView.js";
+import { ItemView } from "./ItemView.js";
 
 export class FileAreaView extends HTMLElement {
   /**
    *
    * @param {FileArea} file_area
-   * @param {FileSystemHandler} file_system_handler
    */
   constructor(file_area) {
     super();
@@ -35,43 +34,32 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   *
-   * @param {Array<Object>} dir_content
-   */
-  update_view(dir_content) {
-    dir_content.forEach((entry) => console.log(entry));
-  }
-
-  /**
    * Called by upper class
    */
   init() {}
 
   connectedCallback() {
-    this.file_system_handler = new FileSystemHandler(
-      this,
-      this.file_area.editor_tool.dir_handler
-    );
+    this.file_system_handler = this.file_area.file_system_handler;
+    this.file_system_handler.read_directory_content();
   }
 
   /**
-   * Called form the file_system_handler when Promises are resolved
+   * Called form the file_system_handler
    * Updates the view
    */
   rebuild_view() {
     this.clear_old_items();
     this.items = this.file_system_handler.entries.map((item) => {
-      if (item.kind === "file") {
-        return new FileItem(item.name, this);
-      } else if (item.kind === "directory") {
-        return new FolderItem(item.name, this);
+      if (item.type === "file") {
+        return new FileItemView(item.name, this);
+      } else if (item.type === "folder") {
+        return new FolderItemView(item.name, this);
       }
     });
-    if (this.file_system_handler.fsd_histroy.length > 1) {
-      this.items.unshift(new FolderItem("..", this));
+    if (this.file_system_handler.folder_history.length > 1) {
+      this.items.unshift(new FolderItemView("..", this));
     }
     this.items.forEach((item) => {
-      item.addEventListener("click", this.select_item.bind(this));
       this.appendChild(item);
     });
   }
@@ -91,7 +79,7 @@ export class FileAreaView extends HTMLElement {
    */
   select_item(event) {
     const target =
-      event.target instanceof Item ? event.target : event.target.parentNode;
+      event.target instanceof ItemView ? event.target : event.target.parentNode;
     this.selected_item?.classList.remove("selected");
     this.selected_item = target;
     this.selected_item.classList.add("selected");

@@ -1,33 +1,28 @@
+import { Project } from "../../../../EditorTool/JS/Classes/Project.js";
 import { FileAreaView } from "../FileAreaView.js";
 
 export class FileSystemHandler {
   /**
    *
    * @param {FileAreaView} file_area_view
-   * @param {FileSystemDirectoryHandle} fsd_handle
+   * @param {Project} project
    */
-  constructor(file_area_view, fsd_handle) {
+  constructor(file_area_view, project) {
     this.file_area_view = file_area_view;
-    this.fsd_handle = fsd_handle;
-    this.fsd_histroy = [this.fsd_handle];
-    this.entries = [];
-    this.read_directory_content().then((entries) => {
-      this.entries = entries;
-      this.file_area_view.rebuild_view();
-    });
+    this.file_area_view.file_system_handler = this;
+    this.project = project;
+    this.active_folder = project.root_folder;
+    this.entries = [...this.active_folder.children];
+    this.folder_history = [this.active_folder];
   }
 
   /**
-   * Reads the content of the current
-   * FileSystemDirectoryHandle
-   * @returns {Promise}
+   * Reads the content of the current Folder
+   * and updates the UI
    */
-  async read_directory_content() {
-    const entries = [];
-    for await (const entry of this.fsd_handle.values()) {
-      entries.push({ kind: entry.kind, name: entry.name });
-    }
-    return entries;
+  read_directory_content() {
+    this.entries = this.active_folder.children;
+    this.file_area_view.rebuild_view();
   }
 
   /**
@@ -43,37 +38,33 @@ export class FileSystemHandler {
   }
 
   /**
-   * Reloads the prev fsd_handle and updates UI
+   * Loads prev folder and reads the content
    */
   load_prev_directory() {
-    this.fsd_histroy.pop();
-    this.fsd_handle = this.fsd_histroy[this.fsd_histroy.length - 1];
-    this.read_directory_content()
-      .then((entries) => {
-        this.entries = entries;
-        this.file_area_view.rebuild_view();
-      })
-      .catch((error) => console.log("Error retrieving handle data"));
+    this.folder_history.pop();
+    this.active_folder = this.folder_history[this.folder_history.length - 1];
+    this.read_directory_content();
   }
 
   /**
-   * Gets new FileSystemDirectoryHandle,
-   * fetches directory data and command file_area_view to rebuild
+   * Loads new Folder and reads the content
    * @param {String} name
    */
   load_new_directory(name) {
-    this.fsd_handle
-      .getDirectoryHandle(name)
-      .then((new_handle) => {
-        this.fsd_handle = new_handle;
-        this.fsd_histroy.push(new_handle);
-        this.read_directory_content()
-          .then((entries) => {
-            this.entries = entries;
-            this.file_area_view.rebuild_view();
-          })
-          .catch((error) => console.log("Error retrieving handle data"));
-      })
-      .catch((error) => console.log("Error getting new handle"));
+    this.active_folder = this.entries.find(
+      (item) => item.type === "folder" && item.name === name
+    );
+    this.folder_history.push(this.active_folder);
+    this.read_directory_content();
   }
+
+  create_folder() {
+    this.active_folder.create_folder();
+    this.read_directory_content();
+    this.project.update_project();
+  }
+
+  rename_folder() {}
+
+  delete_folder() {}
 }

@@ -65,20 +65,6 @@ export class TitleScreen extends HTMLElement {
   }
 
   /**
-   *
-   * @param {String} project_id
-   */
-  async project_card_clicked(project_id) {
-    const response = await fetch(
-      `http://localhost:3000/projects/${project_id}`
-    );
-    if (!response.ok) {
-      throw new Error("Error fetching projects.");
-    }
-    console.log(`PROJEKTE: ${projects}`);
-  }
-
-  /**
    * Opens existing project
    * @param {Event} event
    */
@@ -109,6 +95,16 @@ export class TitleScreen extends HTMLElement {
   new_project(event) {
     this.initial_buttons.remove();
     this.appendChild(this.add_project_inputs);
+  }
+
+  /**
+   *
+   * @param {Object} project
+   * @param {Event} event
+   */
+  project_chosen(project, event) {
+    console.log(project);
+    this.editor_tool.set_project(project);
   }
 
   disconnectedCallback() {}

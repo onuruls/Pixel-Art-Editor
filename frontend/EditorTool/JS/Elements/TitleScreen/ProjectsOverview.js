@@ -46,10 +46,6 @@ export class ProjectsOverview extends HTMLElement {
   init() {
     this.project_views.forEach((view) => {
       this.views_container.appendChild(view);
-      view.addEventListener(
-        "click",
-        this.title_screen.project_card_clicked.bind(this.title_screen, view.id)
-      );
     });
     this.appendChild(this.views_container);
     this.appendChild(this.back_button);

@@ -25,7 +25,24 @@ app.post("/projects", (req, res) => {
     root_folder: {
       name: name || "root",
       type: "folder",
-      children: [],
+      children: [
+        {
+          name: "Sprites",
+          type: "folder",
+          children: [
+            { name: "test_sprite1", type: "file", editor: "sprite" },
+            { name: "test_sprite2", type: "file", editor: "sprite" },
+          ],
+        },
+        {
+          name: "Maps",
+          type: "folder",
+          children: [
+            { name: "test_map1", type: "file", editor: "map" },
+            { name: "test_map2", type: "file", editor: "map" },
+          ],
+        },
+      ],
     },
   };
 
@@ -63,6 +80,28 @@ app.get("/projects/:id", (req, res) => {
     }
     res.send(200).json(project);
   });
+});
+
+app.put("/projects/:id", (req, res) => {
+  const project_id = req.params.id;
+  const project = req.body;
+
+  console.log("Updating project with ID:", project_id);
+
+  db.update(
+    { _id: project_id },
+    { $set: { root_folder: project.root_folder } },
+    {},
+    (err, numReplaced) => {
+      if (err) {
+        return res.status(500).send("Error updating project");
+      }
+      if (numReplaced === 0) {
+        return res.status(404).send("Project not found");
+      }
+      res.status(200).json({ message: "Project updated successfully" });
+    }
+  );
 });
 
 app.listen(3000, () => {

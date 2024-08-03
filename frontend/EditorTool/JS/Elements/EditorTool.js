@@ -2,6 +2,8 @@ import { SpriteEditor } from "../../../SpriteEditor/JS/Elements/SpriteEditor.js"
 import { FileArea } from "../../../FileArea/JS/Elements/FileArea.js";
 import { MapEditor } from "../../../MapEditor/JS/Elements/MapEditor.js";
 import { TitleScreen } from "./TitleScreen.js";
+import { Folder } from "../Classes/Folder.js";
+import { Project } from "../Classes/Project.js";
 
 export class EditorTool extends HTMLElement {
   constructor() {
@@ -50,7 +52,17 @@ export class EditorTool extends HTMLElement {
    * @param {Object} project
    */
   set_project(project) {
-    this.project = project;
+    const root_folder = new Folder(
+      project.root_folder.name,
+      project.root_folder.type,
+      project.root_folder.children
+    );
+    this.project = new Project(
+      project.name,
+      project.created_at,
+      root_folder,
+      project._id
+    );
     this.title_screen.remove();
     this.editor_container.appendChild(this.sprite_editor);
     this.appendChild(this.editor_container);

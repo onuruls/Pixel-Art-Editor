@@ -1,2 +1,1 @@
-{"name":"Test1","created_at":{"$$date":1722533781016},"root_folder":{"name":"Test1","type":"folder","children":[]},"_id":"jExnzZf2VIUHU8EC"}
-{"name":"Test2","created_at":{"$$date":1722535033740},"root_folder":{"name":"Test2","type":"folder","children":[]},"_id":"bHgfaqz8zI93qZj0"}
+{"name":"Test","created_at":{"$$date":1722706908275},"root_folder":{"name":"Test","type":"folder","children":[{"name":"Sprites","type":"folder","children":[{"name":"test_sprite1","type":"file","editor":"sprite"},{"name":"test_sprite2","type":"file","editor":"sprite"}]},{"name":"Maps","type":"folder","children":[{"name":"test_map1","type":"file","editor":"map"},{"name":"test_map2","type":"file","editor":"map"}]}]},"_id":"l8IvzHhe30QPhyiY"}

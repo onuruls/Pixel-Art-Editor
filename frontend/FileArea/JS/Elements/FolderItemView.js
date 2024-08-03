@@ -1,6 +1,6 @@
-import { Item } from "./Item.js";
+import { ItemView } from "./ItemView.js";
 
-export class FolderItem extends Item {
+export class FolderItemView extends ItemView {
   constructor(name, file_area_view) {
     super(name, file_area_view);
   }
@@ -25,4 +25,4 @@ export class FolderItem extends Item {
   }
 }
 
-customElements.define("folder-item", FolderItem);
+customElements.define("folder-item", FolderItemView);
