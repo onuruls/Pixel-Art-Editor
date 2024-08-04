@@ -1,11 +1,13 @@
 export class Item {
   /**
    *
+   * @param {Number} id
    * @param {String} name
-   * @param {String} type
+   * @param {Number} folder_id
    */
-  constructor(name, type) {
+  constructor(id, name, folder_id) {
+    this.id = id;
     this.name = name;
-    this.type = type;
+    this.folder_id = folder_id;
   }
 }

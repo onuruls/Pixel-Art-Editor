@@ -1,11 +1,12 @@
 import { Util } from "../../../../Util/Util.js";
+import { Project } from "../../Classes/Project.js";
 import { TitleScreen } from "../TitleScreen.js";
 
 export class ProjectView extends HTMLElement {
   /**
    *
    * @param {TitleScreen} title_screen
-   * @param {Object} project
+   * @param {Project} project
    */
   constructor(title_screen, project) {
     super();

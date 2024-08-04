@@ -3,12 +3,13 @@ import { Item } from "./Item.js";
 export class File extends Item {
   /**
    *
+   * @param {Number} id
    * @param {String} name
+   * @param {Number} folder_id
    * @param {String} type
-   * @param {String} editor
    */
-  constructor(name, type, editor) {
-    super(name, type);
-    this.editor = editor;
+  constructor(id, name, folder_id, type) {
+    super(id, name, folder_id);
+    this.type = type;
   }
 }

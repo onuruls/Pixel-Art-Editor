@@ -1,4 +1,5 @@
-import { FileSystemHandler } from "./Classes/FileSystemHandler.js";
+import { File } from "../../../EditorTool/JS/Classes/File.js";
+import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
 import { FileArea } from "./FileArea.js";
 import { FileItemView } from "./FileItemView.js";
 import { FolderItemView } from "./FolderItemView.js";
@@ -50,9 +51,9 @@ export class FileAreaView extends HTMLElement {
   rebuild_view() {
     this.clear_old_items();
     this.items = this.file_system_handler.entries.map((item) => {
-      if (item.type === "file") {
+      if (item instanceof File) {
         return new FileItemView(item.name, this);
-      } else if (item.type === "folder") {
+      } else if (item instanceof Folder) {
         return new FolderItemView(item.name, this);
       }
     });

@@ -6,7 +6,7 @@ export class ProjectsOverview extends HTMLElement {
   /**
    *
    * @param {TitleScreen} title_screen
-   * @param {String} projects
+   * @param {Array<Project>} projects
    */
   constructor(title_screen, projects) {
     super();

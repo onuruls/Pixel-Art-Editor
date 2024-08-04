@@ -1,3 +1,4 @@
+import { Project } from "../Classes/Project.js";
 import { EditorTool } from "./EditorTool.js";
 import { AddProjectInputs } from "./TitleScreen/AddProjectInputs.js";
 import { InitialButtons } from "./TitleScreen/InitialButtons.js";
@@ -74,7 +75,15 @@ export class TitleScreen extends HTMLElement {
       throw new Error("Error fetching projects.");
     }
 
-    const projects = await response.json();
+    let projects = await response.json();
+    projects = projects.map((project) => {
+      return new Project(
+        project.id,
+        project.name,
+        project.created_at,
+        project.root_folder_id
+      );
+    });
     this.render_loaded_projects(projects);
   }
 
@@ -95,16 +104,6 @@ export class TitleScreen extends HTMLElement {
   new_project(event) {
     this.initial_buttons.remove();
     this.appendChild(this.add_project_inputs);
-  }
-
-  /**
-   *
-   * @param {Object} project
-   * @param {Event} event
-   */
-  project_chosen(project, event) {
-    console.log(project);
-    this.editor_tool.set_project(project);
   }
 
   disconnectedCallback() {}

@@ -49,20 +49,16 @@ export class EditorTool extends HTMLElement {
 
   /**
    * Called when directory is chosen in the title screen
-   * @param {Object} project
+   * @param {Project} project
    */
-  set_project(project) {
-    const root_folder = new Folder(
-      project.root_folder.name,
-      project.root_folder.type,
-      project.root_folder.children
+  async set_project(project) {
+    const response = await fetch(
+      `http://localhost:3000/projects/${project.id}`
     );
-    this.project = new Project(
-      project.name,
-      project.created_at,
-      root_folder,
-      project._id
-    );
+    const resp_project = await response.json();
+    console.log(resp_project);
+    project.build_project_structure(resp_project.root_folder);
+    this.project = project;
     this.title_screen.remove();
     this.editor_container.appendChild(this.sprite_editor);
     this.appendChild(this.editor_container);
