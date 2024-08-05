@@ -4,7 +4,7 @@ import { ProjectView } from "./ProjectView.js";
 
 export class ProjectsOverview extends HTMLElement {
   /**
-   *
+   * Overview over all projects in the database
    * @param {TitleScreen} title_screen
    * @param {Array<Project>} projects
    */

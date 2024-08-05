@@ -6,7 +6,7 @@ import { ProjectsOverview } from "./TitleScreen/ProjectsOverview.js";
 
 export class TitleScreen extends HTMLElement {
   /**
-   *
+   * Landing screen of the Application
    * @param {EditorTool} editor_tool
    */
   constructor(editor_tool) {
@@ -45,7 +45,8 @@ export class TitleScreen extends HTMLElement {
   }
 
   /**
-   *
+   * Called from AddPojectInputs
+   * Makes call to the backend to create a new project
    * @param {String} project_name
    */
   async submit_button_clicked(project_name) {
@@ -66,7 +67,7 @@ export class TitleScreen extends HTMLElement {
   }
 
   /**
-   * Opens existing project
+   * Fetches all projects and shows them
    * @param {Event} event
    */
   async load_project_clicked(event) {
@@ -88,7 +89,7 @@ export class TitleScreen extends HTMLElement {
   }
 
   /**
-   *
+   * Creates a ProjectsOverView from the fetched projects
    * @param {Array<Object>} projects
    */
   render_loaded_projects(projects) {
@@ -101,7 +102,7 @@ export class TitleScreen extends HTMLElement {
    * Creates existing project
    * @param {Event} event
    */
-  new_project(event) {
+  new_project_clicked(event) {
     this.initial_buttons.remove();
     this.appendChild(this.add_project_inputs);
   }

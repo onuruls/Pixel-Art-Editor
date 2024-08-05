@@ -2,7 +2,7 @@ import { FileAreaView } from "./FileAreaView.js";
 
 export class ItemView extends HTMLElement {
   /**
-   *
+   * Parent-View-Class for the views in the FileAreaView
    * @param {String} name
    * @param {FileAreaView} file_area_view
    */

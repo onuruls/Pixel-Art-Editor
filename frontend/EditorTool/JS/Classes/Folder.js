@@ -3,7 +3,7 @@ import { Item } from "./Item.js";
 
 export class Folder extends Item {
   /**
-   *
+   * Represents a folder in the FileArea
    * @param {Number} id
    * @param {String} name
    * @param {Number} folder_id

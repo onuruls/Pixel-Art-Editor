@@ -3,7 +3,7 @@ import { TitleScreen } from "../TitleScreen.js";
 
 export class InitialButtons extends HTMLElement {
   /**
-   *
+   * The initial buttons of the TitleScreen
    * @param {TitleScreen} title_screen
    */
   constructor(title_screen) {
@@ -49,7 +49,7 @@ export class InitialButtons extends HTMLElement {
     );
     this.new_button.addEventListener(
       "click",
-      this.title_screen.new_project.bind(this.title_screen)
+      this.title_screen.new_project_clicked.bind(this.title_screen)
     );
   }
 
@@ -60,7 +60,7 @@ export class InitialButtons extends HTMLElement {
     );
     this.new_button.removeEventListener(
       "click",
-      this.title_screen.new_project.bind(this.title_screen)
+      this.title_screen.new_project_clicked.bind(this.title_screen)
     );
   }
 }

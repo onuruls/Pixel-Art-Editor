@@ -2,7 +2,7 @@ import { FileArea } from "./FileArea.js";
 
 export class FileAreaToolsLeft extends HTMLElement {
   /**
-   *
+   * Left Toolbar in the FileArea
    * @param {FileArea} file_area
    */
   constructor(file_area) {
@@ -22,7 +22,7 @@ export class FileAreaToolsLeft extends HTMLElement {
   }
 
   /**
-   *
+   * Creates the editor button
    * @returns {HTMLButtonElement}
    */
   create_editor_button() {
@@ -37,7 +37,7 @@ export class FileAreaToolsLeft extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Create Folder"-Button.
+   * Creates the create folder button
    * @returns {HTMLButtonElement}
    */
   create_create_folder_button() {
@@ -52,7 +52,7 @@ export class FileAreaToolsLeft extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Delete"-Button.
+   * Creates the delete button
    * @returns {HTMLButtonElement}
    */
   create_delete_button() {
@@ -67,7 +67,7 @@ export class FileAreaToolsLeft extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Rename"-Button.
+   * Create the rename button
    * @returns {HTMLButtonElement}
    */
   create_rename_button() {

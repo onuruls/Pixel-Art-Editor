@@ -7,7 +7,7 @@ class DbClient {
   constructor() {}
 
   /**
-   * Fetch
+   * Fetch all projects
    * @returns {Promise}
    */
   get_projects() {
@@ -22,9 +22,14 @@ class DbClient {
     });
   }
 
+  /**
+   * Gets a project form the database
+   * @param {Number} id
+   * @returns
+   */
   get_project(id) {
     return new Promise((res, rej) => {
-      // Schritt 1: Projekt und Root-Ordner abrufen
+      // Project and root folder
       db.get(
         `SELECT projects.id AS project_id, projects.name AS project_name, projects.created_at, folders.id AS root_folder_id, folders.name AS root_folder_name
          FROM projects
@@ -32,7 +37,7 @@ class DbClient {
          WHERE projects.id = ?`,
         [id],
         (err, project) => {
-          // Schritt 2: Rekursive Abfrage für Ordner und Dateien
+          // recursive query for all the folder and files
           db.all(
             `WITH RECURSIVE folder_hierarchy AS (
                SELECT id, name, folder_id
@@ -57,6 +62,12 @@ class DbClient {
     });
   }
 
+  /**
+   * Turns the data from the database to a project struture
+   * @param {any} project
+   * @param {any} rows
+   * @returns
+   */
   structure_project_data(project, rows) {
     const folderMap = {};
     const rootFolder = {
@@ -100,6 +111,10 @@ class DbClient {
     };
   }
 
+  /**
+   * Creates a new Project
+   * @param {String} name
+   */
   new_project(name) {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
@@ -160,8 +175,20 @@ class DbClient {
     });
   }
 
-  update_project(id) {}
+  /**
+   * Updates the project
+   * @param {Number} id
+   */
+  update_project(id) {
+    console.log("Not implementes yet");
+  }
 
+  /**
+   * Adds a new folder to the parent_folder
+   * @param {Number} parent_folder_id
+   * @param {String} folder_name
+   * @returns
+   */
   add_folder(parent_folder_id, folder_name = "New Folder") {
     return new Promise((res, rej) => {
       // Führe die SQL-Anweisung aus
@@ -186,9 +213,21 @@ class DbClient {
     });
   }
 
-  update_folder(id) {}
+  /**
+   * Updates a folder
+   * @param {Number} id
+   */
+  update_folder(id) {
+    console.log("Not implemented yet");
+  }
 
-  update_file(id) {}
+  /**
+   *
+   * @param {Number} id
+   */
+  update_file(id) {
+    console.log("Not implemented yet");
+  }
 }
 
 module.exports = DbClient;

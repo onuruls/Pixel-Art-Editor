@@ -7,7 +7,7 @@ import { ItemView } from "./ItemView.js";
 
 export class FileAreaView extends HTMLElement {
   /**
-   *
+   * The view of the folders and files in the FileArea
    * @param {FileArea} file_area
    */
   constructor(file_area) {

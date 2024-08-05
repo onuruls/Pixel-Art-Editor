@@ -2,6 +2,7 @@ import { Folder } from "./Folder.js";
 
 export class Project {
   /**
+   * Represents a whole projects with all his folders and files
    * @param {Number} id
    * @param {String} name
    * @param {String} created_at

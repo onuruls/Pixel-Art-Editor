@@ -4,7 +4,7 @@ import { TitleScreen } from "../TitleScreen.js";
 
 export class ProjectView extends HTMLElement {
   /**
-   *
+   * View of a project in the ProjctOverView
    * @param {TitleScreen} title_screen
    * @param {Project} project
    */

@@ -3,7 +3,7 @@ import { TitleScreen } from "../TitleScreen.js";
 
 export class AddProjectInputs extends HTMLElement {
   /**
-   *
+   * Shown when InitialButton "New Project" is clicked
    * @param {TitleScreen} title_screen
    */
   constructor(title_screen) {

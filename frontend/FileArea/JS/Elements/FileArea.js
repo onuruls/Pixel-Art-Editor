@@ -23,7 +23,6 @@ export class FileArea extends HTMLElement {
     this.appendChild(this.file_view);
     this.appendChild(this.file_tools_right);
     this.init();
-    //this.sprite_db_request = window.indexedDB.open("sprite_db", 1);
   }
 
   /**
@@ -66,6 +65,7 @@ export class FileArea extends HTMLElement {
    * inits all EventListeners
    */
   set_listeners() {}
+
   /**
    * Sets a global click listener to deselect the folder
    */
@@ -80,6 +80,7 @@ export class FileArea extends HTMLElement {
     };
     document.addEventListener("click", this.global_click_listener);
   }
+
   /**
    * Creates a new folder element in the file view.
    * The folder includes an image, and an input field for the folder name.

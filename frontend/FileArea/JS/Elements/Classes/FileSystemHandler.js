@@ -4,7 +4,7 @@ import { FileAreaView } from "../FileAreaView.js";
 
 export class FileSystemHandler {
   /**
-   *
+   * Handles the "FileSystem" in the FileAreaView
    * @param {FileAreaView} file_area_view
    * @param {Project} project
    */
@@ -59,6 +59,9 @@ export class FileSystemHandler {
     this.read_directory_content();
   }
 
+  /**
+   * Creates a new Folder in the Database
+   */
   async create_folder() {
     const response = await fetch("http://localhost:3000/projects/folders", {
       method: "POST",

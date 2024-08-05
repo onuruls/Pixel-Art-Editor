@@ -12,6 +12,9 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+/**
+ * Creates the necessarty tables
+ */
 function init_db() {
   const projects_table = `
     CREATE TABLE IF NOT EXISTS projects (

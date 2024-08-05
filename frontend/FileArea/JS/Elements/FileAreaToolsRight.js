@@ -2,7 +2,7 @@ import { FileArea } from "./FileArea.js";
 
 export class FileAreaToolsRight extends HTMLElement {
   /**
-   *
+   * Right toolbar in FileArea
    * @param {FileArea} file_area
    */
   constructor(file_area) {

@@ -69,7 +69,7 @@ export class EditorTool extends HTMLElement {
    * Changes Sprite- and MapEditor
    */
   change_editor() {
-    if (this.sprite_editor.parentNode) {
+    if (this.sprite_editor.isConnected) {
       this.sprite_editor.remove();
       this.editor_container.appendChild(this.map_editor);
       this.file_area.file_tools_left.set_editor_name("Sprite Editor");
