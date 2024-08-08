@@ -16,9 +16,14 @@ export class CanvasElement extends HTMLElement {
     this.innerHTML = this.render();
     this.canvas = this.querySelector("canvas");
     this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.init();
+    this.update_canvas_size();
+  }
+
+  update_canvas_size() {
+    const scale = this.map_editor.scale;
+    this.canvas.width = 640 * scale;
+    this.canvas.height = 640 * scale;
   }
 
   /**

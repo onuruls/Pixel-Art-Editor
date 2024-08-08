@@ -45,7 +45,8 @@ export class Pen extends Tool {
    * @param {Event} event
    */
   draw(event) {
-    const position = this.get_mouse_position(event);
-    this.map_editor.pen_change_matrix(position.x, position.y);
+    const { x, y } = this.get_mouse_position(event);
+    this.map_editor.pen_change_matrix(x, y);
+    console.log(x, y);
   }
 }

@@ -37,11 +37,12 @@ export class ZoomOut extends Tool {
    * @param {Event} event
    */
   zoom(event) {
-    const { x: mouseX, y: mouseY } = this.get_mouse_position(event);
+    const { x, y } = this.get_mouse_position(event);
     this.map_editor.apply_zoom(
       -0.5,
-      mouseX * 10 * this.map_editor.scale,
-      mouseY * 10 * this.map_editor.scale
+      x * 10 * this.map_editor.scale,
+      y * 10 * this.map_editor.scale
     );
+    console.log(x, y);
   }
 }

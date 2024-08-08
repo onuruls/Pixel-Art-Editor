@@ -45,12 +45,8 @@ export class DrawingCanvas extends CanvasElement {
   draw_pen_canvas(event) {
     const scale = this.map_editor.scale;
     const asset = event.detail.asset;
-    const x =
-      event.detail.x * 10 * this.map_editor.scale -
-      this.map_editor.map_canvas.querySelector(".canvas-wrapper").scrollLeft;
-    const y =
-      event.detail.y * 10 * this.map_editor.scale -
-      this.map_editor.map_canvas.querySelector(".canvas-wrapper").scrollTop;
+    const x = event.detail.x * 10 * scale;
+    const y = event.detail.y * 10 * scale;
     this.context.drawImage(asset, x, y, 10 * scale, 10 * scale);
   }
 

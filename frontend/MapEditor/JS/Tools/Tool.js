@@ -113,13 +113,10 @@ export class Tool {
    */
   get_mouse_position(event) {
     const rect = this.map_canvas.getBoundingClientRect();
-    const scale = this.map_editor.scale;
-    const canvasWrapper =
-      this.map_editor.map_canvas.querySelector(".canvas-wrapper");
-    const mouse_x =
-      (event.clientX - rect.left + canvasWrapper.scrollLeft) / scale;
-    const mouse_y =
-      (event.clientY - rect.top + canvasWrapper.scrollTop) / scale;
-    return { x: Math.floor(mouse_x / 10), y: Math.floor(mouse_y / 10) };
+    const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
+    const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);
+    const x = Math.floor(mouseX);
+    const y = Math.floor(mouseY);
+    return { x, y };
   }
 }

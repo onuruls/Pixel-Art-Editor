@@ -102,7 +102,6 @@ export class MapEditor extends HTMLElement {
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
     const canvasWrapper = this.map_canvas.querySelector(".canvas-wrapper");
-    const rect = this.map_canvas.getBoundingClientRect();
     const currentMouseX = (mouseX + canvasWrapper.scrollLeft) / this.scale;
     const currentMouseY = (mouseY + canvasWrapper.scrollTop) / this.scale;
 
