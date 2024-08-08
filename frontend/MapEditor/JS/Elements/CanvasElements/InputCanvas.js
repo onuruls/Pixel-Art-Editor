@@ -50,12 +50,12 @@ export class InputCanvas extends CanvasElement {
     this.canvas.addEventListener("mouseup", (event) => {
       this.map_editor.selected_tool.mouse_up(event);
     });
-    this.canvas.addEventListener("mouseleave", (event) => {
-      this.map_editor.remove_hover();
-    });
-    window.addEventListener("mouseup", (event) => {
-      this.map_editor.selected_tool.global_mouse_up(event);
-    });
+    this.canvas.addEventListener("mouseleave", () =>
+      this.map_editor.remove_hover()
+    );
+    window.addEventListener("mouseup", (event) =>
+      this.map_editor.selected_tool.global_mouse_up(event)
+    );
   }
 }
 

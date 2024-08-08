@@ -10,7 +10,6 @@ export class TempCanvas extends CanvasElement {
    */
   constructor(canvas) {
     super(canvas);
-    this.context = null;
   }
 
   /**

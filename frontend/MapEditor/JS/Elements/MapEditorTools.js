@@ -18,18 +18,44 @@ export class MapEditorTools extends MapEditorPart {
         <button id="zoom-out" class="tool-button zoom-tool" data-tool="zoom-out" title="Zoom Out tool"><img src="img/icons/zoom_out.svg" alt="Zoom Out"></button>
       </div>
       <div class="assetbox">
-        <button class="asset-button" data-asset="dummy_dirt" title="Dirt asset"><img src="img/assets/dummy_dirt.png" alt="Dummy Dirt"></button>
-        <button class="asset-button" data-asset="dummy_foliage" title="Foliage asset"><img src="img/assets/dummy_foliage.png" alt="Dummy Foliage"></button>
-        <button class="asset-button" data-asset="dummy_lava" title="Lava asset"><img src="img/assets/dummy_lava.png" alt="Dummy Lava"></button>
-        <button class="asset-button" data-asset="dummy_sand" title="Sand asset"><img src="img/assets/dummy_sand.png" alt="Dummy Sand"></button>
-        <button class="asset-button" data-asset="dummy_stone" title="Stone asset"><img src="img/assets/dummy_stone.png" alt="Dummy Stone"></button>
-        <button class="asset-button" data-asset="dummy_water" title="Water asset"><img src="img/assets/dummy_water.png" alt="Dummy Water"></button>
-        <button class="asset-button" data-asset="dummy_tree" title="Tree asset"><img src="img/assets/dummy_tree.png" alt="Dummy Tree"></button>
+        ${this.renderAssetButtons()}
       </div>
     `;
   }
 
+  renderAssetButtons() {
+    const assets = [
+      "dummy_dirt",
+      "dummy_foliage",
+      "dummy_lava",
+      "dummy_sand",
+      "dummy_stone",
+      "dummy_water",
+      "dummy_tree",
+    ];
+
+    return assets
+      .map(
+        (asset) =>
+          `<button class="asset-button" data-asset="${asset}" title="${this.capitalize(
+            asset.replace("_", " ")
+          )} asset"><img src="img/assets/${asset}.png" alt="${this.capitalize(
+            asset.replace("_", " ")
+          )}"></button>`
+      )
+      .join("");
+  }
+
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   init() {
+    this.initToolButtons();
+    this.initAssetButtons();
+  }
+
+  initToolButtons() {
     const tool_buttons = document.querySelectorAll(".tool-button");
     tool_buttons.forEach((button) => {
       button.addEventListener("click", () => {
@@ -37,7 +63,9 @@ export class MapEditorTools extends MapEditorPart {
         button.classList.add("active");
       });
     });
+  }
 
+  initAssetButtons() {
     const asset_buttons = document.querySelectorAll(".asset-button");
     asset_buttons.forEach((button) => {
       button.addEventListener("click", () => {

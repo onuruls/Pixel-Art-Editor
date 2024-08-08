@@ -9,8 +9,6 @@ export class DrawingCanvas extends CanvasElement {
    */
   constructor(canvas) {
     super(canvas);
-    this.canvas = canvas;
-    this.context = null;
   }
 
   /**
@@ -25,15 +23,15 @@ export class DrawingCanvas extends CanvasElement {
    * Initializes the Canvas
    */
   init() {
-    this.map_editor.addEventListener("pen_matrix_changed", (event) => {
-      this.draw_pen_canvas(event);
-    });
-    this.map_editor.addEventListener("revert_undo", (event) => {
-      this.revert_undo(event);
-    });
-    this.map_editor.addEventListener("revert_redo", (event) => {
-      this.revert_redo(event);
-    });
+    this.map_editor.addEventListener("pen_matrix_changed", (event) =>
+      this.draw_pen_canvas(event)
+    );
+    this.map_editor.addEventListener("revert_undo", (event) =>
+      this.revert_undo(event)
+    );
+    this.map_editor.addEventListener("revert_redo", (event) =>
+      this.revert_redo(event)
+    );
     this.map_editor.addEventListener("zoom_changed", () => {
       this.revert_canvas();
       this.redraw_canvas();

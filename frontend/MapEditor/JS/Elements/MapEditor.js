@@ -16,7 +16,9 @@ export class MapEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.canvas_matrix = [];
+    this.canvas_matrix = Array(64)
+      .fill("")
+      .map(() => Array(64).fill(""));
     this.width = 64;
     this.height = 64;
     this.initialized = false;
@@ -41,36 +43,48 @@ export class MapEditor extends HTMLElement {
    * Initializes the MapEditor with its Parts
    */
   init() {
-    this.css = document.createElement("link");
-    this.css.setAttribute("href", "../MapEditor/CSS/Elements/MapEditor.css");
-    this.css.setAttribute("rel", "stylesheet");
-    this.css.setAttribute("type", "text/css");
-    this.appendChild(this.css);
+    this.appendCSS();
+    this.appendComponents();
+    this.set_listeners();
+    this.selected_tool = new Pen(this);
+    this.initialized = true;
+  }
+
+  /**
+   * Appends CSS to the MapEditor
+   */
+  appendCSS() {
+    const css = document.createElement("link");
+    css.setAttribute("href", "../MapEditor/CSS/Elements/MapEditor.css");
+    css.setAttribute("rel", "stylesheet");
+    css.setAttribute("type", "text/css");
+    this.appendChild(css);
+  }
+
+  /**
+   * Appends the necessary components to the MapEditor
+   */
+  appendComponents() {
     this.map_tools = new MapEditorTools(this);
     this.map_canvas = new MapEditorCanvas(this);
     this.map_selection_area = new MapEditorSelectionArea(this);
-    this.appendChild(this.map_tools);
-    this.appendChild(this.map_canvas);
-    this.appendChild(this.map_selection_area);
-    this.set_listeners();
-    this.selected_tool = new Pen(this);
-    this.canvas_matrix = this.create_canvas_matrix();
-    this.initialized = true;
+    this.append(this.map_tools, this.map_canvas, this.map_selection_area);
   }
 
   /**
    * Sets the necessary eventlisteners
    */
   set_listeners() {
-    const toolbox = this.map_tools.querySelector(".toolbox");
-    toolbox.addEventListener("click", (event) => {
-      const clickedElement = event.target.closest(".tool-button");
-      if (clickedElement) {
-        const tool = clickedElement.dataset.tool;
-        this.selected_tool.destroy();
-        this.selected_tool = this.select_tool_from_string(tool);
-      }
-    });
+    this.map_tools
+      .querySelector(".toolbox")
+      .addEventListener("click", (event) => {
+        const clickedElement = event.target.closest(".tool-button");
+        if (clickedElement) {
+          const tool = clickedElement.dataset.tool;
+          this.selected_tool.destroy();
+          this.selected_tool = this.select_tool_from_string(tool);
+        }
+      });
 
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey && event.key === "z") {
@@ -142,22 +156,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Creates the pixel matrix
-   * @returns {Array<Array<Array<Number>>>}
-   */
-  create_canvas_matrix() {
-    const matrix = new Array(64);
-    for (var i = 0; i < this.height; i++) {
-      matrix[i] = new Array(64);
-
-      for (var j = 0; j < this.width; j++) {
-        matrix[i][j] = "";
-      }
-    }
-    return matrix;
-  }
-
-  /**
    * Starts gouping pen points for the action stack
    */
   start_action_buffer() {
@@ -181,11 +179,7 @@ export class MapEditor extends HTMLElement {
         this.canvas_matrix[point.x][point.y] = point.prev_asset;
       });
       this.dispatchEvent(
-        new CustomEvent("revert_undo", {
-          detail: {
-            points: points,
-          },
-        })
+        new CustomEvent("revert_undo", { detail: { points: points } })
       );
     }
   }
@@ -200,11 +194,7 @@ export class MapEditor extends HTMLElement {
         this.canvas_matrix[point.x][point.y] = point.asset;
       });
       this.dispatchEvent(
-        new CustomEvent("revert_redo", {
-          detail: {
-            points: points,
-          },
-        })
+        new CustomEvent("revert_redo", { detail: { points: points } })
       );
     }
   }

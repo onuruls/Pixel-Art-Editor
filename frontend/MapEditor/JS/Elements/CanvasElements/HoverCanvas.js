@@ -10,7 +10,6 @@ export class HoverCanvas extends CanvasElement {
    */
   constructor(canvas) {
     super(canvas);
-    this.context = null;
     this.hover_color = "rgba(180,240,213,0.5)";
   }
 
@@ -26,19 +25,12 @@ export class HoverCanvas extends CanvasElement {
    * Initializes the Canvas
    */
   init() {
-    this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
-    this.map_editor.addEventListener("hover_matrix_changed", (event) => {
-      if (event.detail) {
-        this.draw_hover(event);
-      }
-    });
-    this.map_editor.addEventListener("remove_hover", (event) => {
-      this.remove_hover(event);
-    });
+    this.map_editor.addEventListener("hover_matrix_changed", (event) =>
+      this.draw_hover(event)
+    );
+    this.map_editor.addEventListener("remove_hover", () => this.remove_hover());
     this.map_editor.addEventListener("zoom_changed", (event) => {
-      this.remove_hover(event);
+      this.remove_hover();
       this.draw_hover(event);
     });
   }
@@ -58,9 +50,8 @@ export class HoverCanvas extends CanvasElement {
 
   /**
    * Removes the hover effect
-   * @param {Event} event
    */
-  remove_hover(event) {
+  remove_hover() {
     this.revert_canvas();
   }
 }
