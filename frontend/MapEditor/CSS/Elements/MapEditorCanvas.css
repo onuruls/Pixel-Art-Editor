@@ -30,7 +30,6 @@ map-editor-canvas {
     left: 0;
     min-width: 640px;
     min-height: 640px;
-    cursor: crosshair;
   }
 
   map-drawing-canvas {

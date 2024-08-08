@@ -7,7 +7,7 @@ export class Tool {
    */
   constructor(map_editor) {
     this.map_editor = map_editor;
-    this.canvas = map_editor.map_canvas.drawing_canvas;
+    this.map_canvas = map_editor.map_canvas.drawing_canvas;
     this.is_drawing = false;
     this.hover_position = {
       x: 0,
@@ -136,7 +136,7 @@ export class Tool {
    * @returns {{x: Number, y: Number}}
    */
   get_mouse_position(event) {
-    var rect = this.canvas.getBoundingClientRect();
+    var rect = this.map_canvas.getBoundingClientRect();
     var scale = this.map_editor.scale;
     var canvasWrapper =
       this.map_editor.map_canvas.querySelector(".canvas-wrapper");
@@ -146,13 +146,6 @@ export class Tool {
     const x = Math.floor(mouse_x / 10);
     const y = Math.floor(mouse_y / 10);
     return { x: x, y: y };
-  }
-  /**
-   * Sets the cursor-icon on the canvas element.
-   */
-  activate_cursor_icon() {
-    const canvas = this.canvas;
-    canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
   }
 
   /**

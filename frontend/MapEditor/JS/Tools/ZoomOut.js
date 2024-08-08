@@ -7,6 +7,7 @@ export class ZoomOut extends Tool {
    */
   constructor(canvas) {
     super(canvas);
+    this.map_editor.style.cursor = `zoom-out`;
   }
 
   /**
@@ -23,9 +24,7 @@ export class ZoomOut extends Tool {
    *
    * @param {Event} event
    */
-  mouse_move(event) {
-    this.hover(event);
-  }
+  mouse_move(event) {}
 
   /**
    *
@@ -38,7 +37,7 @@ export class ZoomOut extends Tool {
    * @param {Event} event
    */
   zoom(event) {
-    const rect = this.canvas.getBoundingClientRect();
+    const rect = this.map_canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
     this.map_editor.apply_zoom(-0.5, mouseX, mouseY);
