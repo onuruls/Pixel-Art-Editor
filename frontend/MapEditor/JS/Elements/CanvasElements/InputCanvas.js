@@ -37,7 +37,6 @@ export class InputCanvas extends CanvasElement {
         (event.clientY - rect.top) / (10 * this.map_editor.scale)
       );
       this.map_editor.hover_canvas_matrix(x, y);
-      console.log(x, y);
     };
 
     this.canvas.addEventListener("mousedown", (event) => {

@@ -43,6 +43,5 @@ export class ZoomOut extends Tool {
       x * 10 * this.map_editor.scale,
       y * 10 * this.map_editor.scale
     );
-    console.log(x, y);
   }
 }

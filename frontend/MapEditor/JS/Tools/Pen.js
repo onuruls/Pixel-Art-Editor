@@ -47,6 +47,5 @@ export class Pen extends Tool {
   draw(event) {
     const { x, y } = this.get_mouse_position(event);
     this.map_editor.pen_change_matrix(x, y);
-    console.log(x, y);
   }
 }

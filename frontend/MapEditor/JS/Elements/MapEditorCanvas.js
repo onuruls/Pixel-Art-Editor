@@ -43,6 +43,10 @@ export class MapEditorCanvas extends MapEditorPart {
         new CustomEvent("canvas_resized", { detail: { height, width } })
       );
     });
+    this.canvas_wrapper.style.backgroundSize = `${
+      10 * this.map_editor.scale
+    }px ${10 * this.map_editor.scale}px`;
+    this.canvas_wrapper.style.backgroundPosition = `0px 0px`;
   }
 }
 

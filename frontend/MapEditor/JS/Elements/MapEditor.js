@@ -69,6 +69,7 @@ export class MapEditor extends HTMLElement {
     this.map_canvas = new MapEditorCanvas(this);
     this.map_selection_area = new MapEditorSelectionArea(this);
     this.append(this.map_tools, this.map_canvas, this.map_selection_area);
+    this.canvas_wrapper = this.map_canvas.querySelector(".canvas-wrapper");
   }
 
   /**
@@ -94,6 +95,11 @@ export class MapEditor extends HTMLElement {
         this.redo_last_action();
       }
     });
+
+    this.canvas_wrapper.addEventListener("scroll", () => {
+      this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
+        .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
+    });
   }
 
   /**
@@ -101,28 +107,31 @@ export class MapEditor extends HTMLElement {
    * @param {Number} zoom_level
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
-    const canvasWrapper = this.map_canvas.querySelector(".canvas-wrapper");
-    const currentMouseX = (mouseX + canvasWrapper.scrollLeft) / this.scale;
-    const currentMouseY = (mouseY + canvasWrapper.scrollTop) / this.scale;
+    const current_mouseX =
+      (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
+    const current_mouseY =
+      (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
 
     this.scale = Math.min(Math.max(this.scale + zoom_level, 1.0), 2.0);
 
-    const newMouseX = (mouseX + canvasWrapper.scrollLeft) / this.scale;
-    const newMouseY = (mouseY + canvasWrapper.scrollTop) / this.scale;
-
-    canvasWrapper.style.backgroundSize = `${10 * this.scale}px ${
-      10 * this.scale
-    }px`;
+    const new_mouseX = (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
+    const new_mouseY = (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
     this.map_canvas.querySelectorAll("canvas").forEach((canvas) => {
       canvas.width = 640 * this.scale;
       canvas.height = 640 * this.scale;
     });
 
-    const deltaX = (currentMouseX - newMouseX) * this.scale;
-    const deltaY = (currentMouseY - newMouseY) * this.scale;
+    this.canvas_wrapper.style.backgroundSize = `${10 * this.scale}px ${
+      10 * this.scale
+    }px`;
+    this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
+      .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
 
-    canvasWrapper.scrollLeft += deltaX;
-    canvasWrapper.scrollTop += deltaY;
+    const deltaX = (current_mouseX - new_mouseX) * this.scale;
+    const deltaY = (current_mouseY - new_mouseY) * this.scale;
+
+    this.canvas_wrapper.scrollLeft += deltaX;
+    this.canvas_wrapper.scrollTop += deltaY;
 
     this.dispatchEvent(
       new CustomEvent("zoom_changed", {
