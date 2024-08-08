@@ -37,9 +37,11 @@ export class ZoomIn extends Tool {
    * @param {Event} event
    */
   zoom(event) {
-    const rect = this.map_canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    this.map_editor.apply_zoom(0.5, mouseX, mouseY);
+    const { x: mouseX, y: mouseY } = this.get_mouse_position(event);
+    this.map_editor.apply_zoom(
+      0.5,
+      mouseX * 10 * this.map_editor.scale,
+      mouseY * 10 * this.map_editor.scale
+    );
   }
 }

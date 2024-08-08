@@ -9,14 +9,8 @@ export class Tool {
     this.map_editor = map_editor;
     this.map_canvas = map_editor.map_canvas.drawing_canvas;
     this.is_drawing = false;
-    this.hover_position = {
-      x: 0,
-      y: 0,
-    };
-    this.last_position = {
-      x: 0,
-      y: 0,
-    };
+    this.hover_position = { x: 0, y: 0 };
+    this.last_position = { x: 0, y: 0 };
     this.init();
   }
 
@@ -37,9 +31,7 @@ export class Tool {
   /**
    * Handles all the keydown-Events of a tool e.g. CTRL + C
    */
-  handle_key_events(e) {
-    console.log("Key events in tool class");
-  }
+  handle_key_events(e) {}
 
   /**
    *
@@ -97,17 +89,11 @@ export class Tool {
    * @param {Event} event
    */
   hover(event) {
-    const position = this.get_mouse_position(event);
-    const x = position.x;
-    const y = position.y;
-    const position_changed = this.has_hover_position_changed(x, y);
-    if (position_changed) {
-      this.hover_position = {
-        x: Math.abs(x),
-        y: Math.abs(y),
-      };
+    const { x, y } = this.get_mouse_position(event);
+    if (this.has_hover_position_changed(x, y)) {
+      this.hover_position = { x: Math.abs(x), y: Math.abs(y) };
+      this.map_editor.hover_canvas_matrix(x, y);
     }
-    this.map_editor.hover_canvas_matrix(x, y);
   }
 
   /**
@@ -119,16 +105,6 @@ export class Tool {
   has_hover_position_changed(x, y) {
     return !(x === this.hover_position.x && y === this.hover_position.y);
   }
-  /**
-   *
-   * @param {Number} r
-   * @param {Number} g
-   * @param {Number} b
-   * @param {Number} a
-   */
-  build_rgba_string(r, g, b, a) {
-    return `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-  }
 
   /**
    * Calculates mouse position from event.
@@ -136,25 +112,14 @@ export class Tool {
    * @returns {{x: Number, y: Number}}
    */
   get_mouse_position(event) {
-    var rect = this.map_canvas.getBoundingClientRect();
-    var scale = this.map_editor.scale;
-    var canvasWrapper =
+    const rect = this.map_canvas.getBoundingClientRect();
+    const scale = this.map_editor.scale;
+    const canvasWrapper =
       this.map_editor.map_canvas.querySelector(".canvas-wrapper");
-    var mouse_x =
+    const mouse_x =
       (event.clientX - rect.left + canvasWrapper.scrollLeft) / scale;
-    var mouse_y = (event.clientY - rect.top + canvasWrapper.scrollTop) / scale;
-    const x = Math.floor(mouse_x / 10);
-    const y = Math.floor(mouse_y / 10);
-    return { x: x, y: y };
-  }
-
-  /**
-   *
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Boolean}
-   */
-  has_mouse_position_changed(x, y) {
-    return !(x === this.last_position.x && y === this.last_position.y);
+    const mouse_y =
+      (event.clientY - rect.top + canvasWrapper.scrollTop) / scale;
+    return { x: Math.floor(mouse_x / 10), y: Math.floor(mouse_y / 10) };
   }
 }
