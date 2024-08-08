@@ -97,11 +97,9 @@ export class Tool {
    * @param {Event} event
    */
   hover(event) {
-    var rect = this.canvas.getBoundingClientRect();
-    var mouseX = event.clientX - rect.left;
-    var mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
+    const position = this.get_mouse_position(event);
+    const x = position.x;
+    const y = position.y;
     const position_changed = this.has_hover_position_changed(x, y);
     if (position_changed) {
       this.hover_position = {
@@ -139,8 +137,12 @@ export class Tool {
    */
   get_mouse_position(event) {
     var rect = this.canvas.getBoundingClientRect();
-    var mouse_x = event.clientX - rect.left;
-    var mouse_y = event.clientY - rect.top;
+    var scale = this.map_editor.scale;
+    var canvasWrapper =
+      this.map_editor.map_canvas.querySelector(".canvas-wrapper");
+    var mouse_x =
+      (event.clientX - rect.left + canvasWrapper.scrollLeft) / scale;
+    var mouse_y = (event.clientY - rect.top + canvasWrapper.scrollTop) / scale;
     const x = Math.floor(mouse_x / 10);
     const y = Math.floor(mouse_y / 10);
     return { x: x, y: y };

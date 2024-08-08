@@ -3,12 +3,12 @@ import { MapEditorCanvas } from "../MapEditorCanvas.js";
 export class CanvasElement extends HTMLElement {
   /**
    * Parent-Class for the different canvas elements
-   * @param {MapEditorCanvas} map_canvas
+   * @param {MapEditorCanvas} canvas
    */
-  constructor(map_canvas) {
+  constructor(canvas) {
     super();
-    this.map_canvas = map_canvas;
-    this.map_editor = map_canvas.map_editor;
+    this.canvas = canvas;
+    this.map_editor = canvas.map_editor;
     this.canvas = null;
   }
 
@@ -28,10 +28,17 @@ export class CanvasElement extends HTMLElement {
    * @param {Array<Number>} asset
    */
   paint_single_pixel(x, y, asset) {
+    const scale = this.map_editor.scale;
     const img = new Image();
     img.src = asset;
     img.onload = () => {
-      this.context.drawImage(img, x * 10, y * 10, 10, 10);
+      this.context.drawImage(
+        img,
+        x * 10 * scale,
+        y * 10 * scale,
+        10 * scale,
+        10 * scale
+      );
     };
   }
 
@@ -41,7 +48,13 @@ export class CanvasElement extends HTMLElement {
    * @param {Number} y
    */
   erase_single_pixel(x, y) {
-    this.context.clearRect(x * 10, y * 10, 10, 10);
+    const scale = this.map_editor.scale;
+    this.context.clearRect(
+      x * 10 * scale,
+      y * 10 * scale,
+      10 * scale,
+      10 * scale
+    );
   }
 
   /**

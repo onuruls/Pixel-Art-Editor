@@ -3,6 +3,8 @@ import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
 import { Pen } from "../Tools/Pen.js";
+import { ZoomIn } from "../Tools/ZoomIn.js";
+import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
 export class MapEditor extends HTMLElement {
@@ -23,6 +25,7 @@ export class MapEditor extends HTMLElement {
     this.selected_asset = null;
     this.action_stack = new ActionStack();
     this.action_buffer = [];
+    this.scale = 1;
   }
 
   /**
@@ -77,6 +80,47 @@ export class MapEditor extends HTMLElement {
         this.redo_last_action();
       }
     });
+  }
+
+  /**
+   * Adjusts the zoom level and location
+   * @param {Number} zoom_level
+   */
+  apply_zoom(zoom_level, mouseX, mouseY) {
+    const canvasWrapper = this.map_canvas.querySelector(".canvas-wrapper");
+    const rect = this.map_canvas.getBoundingClientRect();
+    const currentMouseX = (mouseX + canvasWrapper.scrollLeft) / this.scale;
+    const currentMouseY = (mouseY + canvasWrapper.scrollTop) / this.scale;
+
+    this.scale = Math.min(Math.max(this.scale + zoom_level, 1.0), 2.0);
+
+    const newMouseX = (mouseX + canvasWrapper.scrollLeft) / this.scale;
+    const newMouseY = (mouseY + canvasWrapper.scrollTop) / this.scale;
+
+    canvasWrapper.style.backgroundSize = `${10 * this.scale}px ${
+      10 * this.scale
+    }px`;
+    this.map_canvas.querySelectorAll("canvas").forEach((canvas) => {
+      canvas.width = 640 * this.scale;
+      canvas.height = 640 * this.scale;
+    });
+
+    const deltaX = (currentMouseX - newMouseX) * this.scale;
+    const deltaY = (currentMouseY - newMouseY) * this.scale;
+
+    canvasWrapper.scrollLeft += deltaX;
+    canvasWrapper.scrollTop += deltaY;
+
+    this.dispatchEvent(
+      new CustomEvent("zoom_changed", {
+        detail: {
+          scale: this.scale,
+          mouseX,
+          mouseY,
+          size: this.pixel_size * 10,
+        },
+      })
+    );
   }
 
   /**
@@ -234,6 +278,10 @@ export class MapEditor extends HTMLElement {
     switch (string) {
       case "pen":
         return new Pen(this);
+      case "zoom-in":
+        return new ZoomIn(this);
+      case "zoom-out":
+        return new ZoomOut(this);
       default:
         return new Pen(this);
     }

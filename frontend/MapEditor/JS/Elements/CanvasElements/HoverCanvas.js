@@ -6,10 +6,10 @@ export class HoverCanvas extends CanvasElement {
    * Intermediate level Canvas
    * Shows the hover effect of the tools
    * Could be implemented into the TempCanvas
-   * @param {MapEditorCanvas} map_canvas
+   * @param {MapEditorCanvas} canvas
    */
-  constructor(map_canvas) {
-    super(map_canvas);
+  constructor(canvas) {
+    super(canvas);
     this.context = null;
     this.hover_color = "rgba(180,240,213,0.5)";
   }
@@ -30,10 +30,16 @@ export class HoverCanvas extends CanvasElement {
     this.canvas.height = 640;
     this.canvas.width = 640;
     this.map_editor.addEventListener("hover_matrix_changed", (event) => {
-      this.draw_hover(event);
+      if (event.detail) {
+        this.draw_hover(event);
+      }
     });
     this.map_editor.addEventListener("remove_hover", (event) => {
       this.remove_hover(event);
+    });
+    this.map_editor.addEventListener("zoom_changed", (event) => {
+      this.remove_hover(event);
+      this.draw_hover(event);
     });
   }
 
@@ -43,9 +49,9 @@ export class HoverCanvas extends CanvasElement {
    */
   draw_hover(event) {
     this.revert_canvas();
-    const size = event.detail.size;
-    const x = event.detail.x * 10;
-    const y = event.detail.y * 10;
+    const size = event.detail.size * this.map_editor.scale;
+    const x = event.detail.x * 10 * this.map_editor.scale;
+    const y = event.detail.y * 10 * this.map_editor.scale;
     this.context.fillStyle = this.hover_color;
     this.context.fillRect(x, y, size, size);
   }
