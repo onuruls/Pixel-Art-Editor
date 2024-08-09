@@ -6,11 +6,10 @@ export class TempCanvas extends CanvasElement {
    * Intermediate level Canvas
    * Shows temporary pixel like the selection area
    * or shapes when they are not finished
-   * @param {MapEditorCanvas} map_canvas
+   * @param {MapEditorCanvas} canvas
    */
-  constructor(map_canvas) {
-    super(map_canvas);
-    this.context = null;
+  constructor(canvas) {
+    super(canvas);
   }
 
   /**
@@ -26,8 +25,6 @@ export class TempCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
   }
 }
 

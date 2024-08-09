@@ -7,7 +7,7 @@ export class Pen extends Tool {
    */
   constructor(canvas) {
     super(canvas);
-    this.cursor_icon_url = "./img/cursors/pen.png";
+    this.map_editor.style.cursor = `crosshair`;
   }
 
   /**
@@ -26,7 +26,6 @@ export class Pen extends Tool {
    */
   mouse_move(event) {
     this.hover(event);
-    this.activate_cursor_icon();
     if (this.is_drawing) {
       this.draw(event);
     }
@@ -46,7 +45,7 @@ export class Pen extends Tool {
    * @param {Event} event
    */
   draw(event) {
-    const position = this.get_mouse_position(event);
-    this.map_editor.pen_change_matrix(position.x, position.y);
+    const { x, y } = this.get_mouse_position(event);
+    this.map_editor.pen_change_matrix(x, y);
   }
 }

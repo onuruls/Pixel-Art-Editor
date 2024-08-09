@@ -3,6 +3,8 @@ import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
 import { Pen } from "../Tools/Pen.js";
+import { ZoomIn } from "../Tools/ZoomIn.js";
+import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
 export class MapEditor extends HTMLElement {
@@ -14,7 +16,9 @@ export class MapEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.canvas_matrix = [];
+    this.canvas_matrix = Array(64)
+      .fill("")
+      .map(() => Array(64).fill(""));
     this.width = 64;
     this.height = 64;
     this.initialized = false;
@@ -23,6 +27,7 @@ export class MapEditor extends HTMLElement {
     this.selected_asset = null;
     this.action_stack = new ActionStack();
     this.action_buffer = [];
+    this.scale = 1;
   }
 
   /**
@@ -38,36 +43,49 @@ export class MapEditor extends HTMLElement {
    * Initializes the MapEditor with its Parts
    */
   init() {
-    this.css = document.createElement("link");
-    this.css.setAttribute("href", "../MapEditor/CSS/Elements/MapEditor.css");
-    this.css.setAttribute("rel", "stylesheet");
-    this.css.setAttribute("type", "text/css");
-    this.appendChild(this.css);
+    this.appendCSS();
+    this.appendComponents();
+    this.set_listeners();
+    this.selected_tool = new Pen(this);
+    this.initialized = true;
+  }
+
+  /**
+   * Appends CSS to the MapEditor
+   */
+  appendCSS() {
+    const css = document.createElement("link");
+    css.setAttribute("href", "../MapEditor/CSS/Elements/MapEditor.css");
+    css.setAttribute("rel", "stylesheet");
+    css.setAttribute("type", "text/css");
+    this.appendChild(css);
+  }
+
+  /**
+   * Appends the necessary components to the MapEditor
+   */
+  appendComponents() {
     this.map_tools = new MapEditorTools(this);
     this.map_canvas = new MapEditorCanvas(this);
     this.map_selection_area = new MapEditorSelectionArea(this);
-    this.appendChild(this.map_tools);
-    this.appendChild(this.map_canvas);
-    this.appendChild(this.map_selection_area);
-    this.set_listeners();
-    this.selected_tool = new Pen(this);
-    this.canvas_matrix = this.create_canvas_matrix();
-    this.initialized = true;
+    this.append(this.map_tools, this.map_canvas, this.map_selection_area);
+    this.canvas_wrapper = this.map_canvas.querySelector(".canvas-wrapper");
   }
 
   /**
    * Sets the necessary eventlisteners
    */
   set_listeners() {
-    const toolbox = this.map_tools.querySelector(".toolbox");
-    toolbox.addEventListener("click", (event) => {
-      const clickedElement = event.target.closest(".tool-button");
-      if (clickedElement) {
-        const tool = clickedElement.dataset.tool;
-        this.selected_tool.destroy();
-        this.selected_tool = this.select_tool_from_string(tool);
-      }
-    });
+    this.map_tools
+      .querySelector(".toolbox")
+      .addEventListener("click", (event) => {
+        const clickedElement = event.target.closest(".tool-button");
+        if (clickedElement) {
+          const tool = clickedElement.dataset.tool;
+          this.selected_tool.destroy();
+          this.selected_tool = this.select_tool_from_string(tool);
+        }
+      });
 
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey && event.key === "z") {
@@ -77,6 +95,54 @@ export class MapEditor extends HTMLElement {
         this.redo_last_action();
       }
     });
+
+    this.canvas_wrapper.addEventListener("scroll", () => {
+      this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
+        .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
+    });
+  }
+
+  /**
+   * Adjusts the zoom level and location
+   * @param {Number} zoom_level
+   */
+  apply_zoom(zoom_level, mouseX, mouseY) {
+    const current_mouseX =
+      (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
+    const current_mouseY =
+      (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
+
+    this.scale = Math.min(Math.max(this.scale + zoom_level, 1.0), 2.0);
+
+    const new_mouseX = (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
+    const new_mouseY = (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
+    this.map_canvas.querySelectorAll("canvas").forEach((canvas) => {
+      canvas.width = 640 * this.scale;
+      canvas.height = 640 * this.scale;
+    });
+
+    this.canvas_wrapper.style.backgroundSize = `${10 * this.scale}px ${
+      10 * this.scale
+    }px`;
+    this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
+      .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
+
+    const deltaX = (current_mouseX - new_mouseX) * this.scale;
+    const deltaY = (current_mouseY - new_mouseY) * this.scale;
+
+    this.canvas_wrapper.scrollLeft += deltaX;
+    this.canvas_wrapper.scrollTop += deltaY;
+
+    this.dispatchEvent(
+      new CustomEvent("zoom_changed", {
+        detail: {
+          scale: this.scale,
+          mouseX,
+          mouseY,
+          size: this.pixel_size * 10,
+        },
+      })
+    );
   }
 
   /**
@@ -95,22 +161,6 @@ export class MapEditor extends HTMLElement {
         }
       }
     }
-  }
-
-  /**
-   * Creates the pixel matrix
-   * @returns {Array<Array<Array<Number>>>}
-   */
-  create_canvas_matrix() {
-    const matrix = new Array(64);
-    for (var i = 0; i < this.height; i++) {
-      matrix[i] = new Array(64);
-
-      for (var j = 0; j < this.width; j++) {
-        matrix[i][j] = "";
-      }
-    }
-    return matrix;
   }
 
   /**
@@ -137,11 +187,7 @@ export class MapEditor extends HTMLElement {
         this.canvas_matrix[point.x][point.y] = point.prev_asset;
       });
       this.dispatchEvent(
-        new CustomEvent("revert_undo", {
-          detail: {
-            points: points,
-          },
-        })
+        new CustomEvent("revert_undo", { detail: { points: points } })
       );
     }
   }
@@ -156,11 +202,7 @@ export class MapEditor extends HTMLElement {
         this.canvas_matrix[point.x][point.y] = point.asset;
       });
       this.dispatchEvent(
-        new CustomEvent("revert_redo", {
-          detail: {
-            points: points,
-          },
-        })
+        new CustomEvent("revert_redo", { detail: { points: points } })
       );
     }
   }
@@ -234,6 +276,10 @@ export class MapEditor extends HTMLElement {
     switch (string) {
       case "pen":
         return new Pen(this);
+      case "zoom-in":
+        return new ZoomIn(this);
+      case "zoom-out":
+        return new ZoomOut(this);
       default:
         return new Pen(this);
     }

@@ -9,7 +9,6 @@ export class ActionStack {
    * @param {Array<{x: Number, y: Number, prev_asset: Array<Number>, asset: Array<Number>}} points_array
    */
   push(points_array) {
-    console.log(points_array);
     this.actions.push(points_array);
     this.redo_actions = [];
   }

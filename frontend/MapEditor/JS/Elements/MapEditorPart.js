@@ -20,13 +20,13 @@ export class MapEditorPart extends HTMLElement {
   }
 
   initCSS() {
-    this.css = document.createElement("link");
-    this.css.setAttribute(
+    const css = document.createElement("link");
+    css.setAttribute(
       "href",
-      `http://127.0.0.1:5500/frontend/MapEditor/CSS/Elements/${this.constructor.name}.css`
+      `../MapEditor/CSS/Elements/${this.constructor.name}.css`
     );
-    this.css.setAttribute("rel", "stylesheet");
-    this.css.setAttribute("type", "text/css");
-    this.appendChild(this.css);
+    css.setAttribute("rel", "stylesheet");
+    css.setAttribute("type", "text/css");
+    this.appendChild(css);
   }
 }

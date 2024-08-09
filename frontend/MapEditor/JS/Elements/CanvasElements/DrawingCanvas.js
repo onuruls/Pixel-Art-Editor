@@ -5,12 +5,10 @@ export class DrawingCanvas extends CanvasElement {
   /**
    * Bottom level Canvas
    * Shows the drawing (canvas_matrix)
-   * @param {MapEditorCanvas} map_canvas
+   * @param {MapEditorCanvas} canvas
    */
-  constructor(map_canvas) {
-    super(map_canvas);
-    this.map_canvas = map_canvas;
-    this.context = null;
+  constructor(canvas) {
+    super(canvas);
   }
 
   /**
@@ -25,14 +23,18 @@ export class DrawingCanvas extends CanvasElement {
    * Initializes the Canvas
    */
   init() {
-    this.map_editor.addEventListener("pen_matrix_changed", (event) => {
-      this.draw_pen_canvas(event);
-    });
-    this.map_editor.addEventListener("revert_undo", (event) => {
-      this.revert_undo(event);
-    });
-    this.map_editor.addEventListener("revert_redo", (event) => {
-      this.revert_redo(event);
+    this.map_editor.addEventListener("pen_matrix_changed", (event) =>
+      this.draw_pen_canvas(event)
+    );
+    this.map_editor.addEventListener("revert_undo", (event) =>
+      this.revert_undo(event)
+    );
+    this.map_editor.addEventListener("revert_redo", (event) =>
+      this.revert_redo(event)
+    );
+    this.map_editor.addEventListener("zoom_changed", () => {
+      this.revert_canvas();
+      this.redraw_canvas();
     });
   }
 
@@ -41,10 +43,11 @@ export class DrawingCanvas extends CanvasElement {
    * @param {Event} event
    */
   draw_pen_canvas(event) {
+    const scale = this.map_editor.scale;
     const asset = event.detail.asset;
-    const x = event.detail.x;
-    const y = event.detail.y;
-    this.context.drawImage(asset, x * 10, y * 10, 10, 10);
+    const x = event.detail.x * 10 * scale;
+    const y = event.detail.y * 10 * scale;
+    this.context.drawImage(asset, x, y, 10 * scale, 10 * scale);
   }
 
   /**
@@ -69,6 +72,18 @@ export class DrawingCanvas extends CanvasElement {
       this.erase_single_pixel(point.x, point.y);
       this.paint_single_pixel(point.x, point.y, point.asset);
     });
+  }
+
+  /**
+   * Redraws the whole canvas
+   */
+  redraw_canvas() {
+    this.map_editor.canvas_matrix.forEach((row, x) =>
+      row.forEach((pixel, y) => {
+        this.erase_single_pixel(x, y);
+        this.paint_single_pixel(x, y, pixel);
+      })
+    );
   }
 }
 
