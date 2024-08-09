@@ -3,6 +3,7 @@ import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
 import { Pen } from "../Tools/Pen.js";
+import { Eraser } from "../Tools/Eraser.js";
 import { ZoomIn } from "../Tools/ZoomIn.js";
 import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
@@ -208,7 +209,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   *
    * @param {Number} x
    * @param {Number} y
    */
@@ -242,7 +242,33 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   *
+   * @param {Number} x
+   * @param {Number} y
+   */
+  eraser_change_matrix(x, y) {
+    this.apply_to_pixel_block(x, y, (xi, yj) => {
+      const prev_asset = this.canvas_matrix[xi][yj];
+      if (prev_asset !== "") {
+        this.canvas_matrix[xi][yj] = "";
+        this.action_buffer.push({
+          x: xi,
+          y: yj,
+          prev_asset: prev_asset,
+          asset: "",
+        });
+        this.dispatchEvent(
+          new CustomEvent("eraser_matrix_changed", {
+            detail: {
+              x: xi,
+              y: yj,
+            },
+          })
+        );
+      }
+    });
+  }
+
+  /**
    * @param {Number} x
    * @param {Number} y
    */
@@ -276,6 +302,8 @@ export class MapEditor extends HTMLElement {
     switch (string) {
       case "pen":
         return new Pen(this);
+      case "eraser":
+        return new Eraser(this);
       case "zoom-in":
         return new ZoomIn(this);
       case "zoom-out":

@@ -26,6 +26,9 @@ export class DrawingCanvas extends CanvasElement {
     this.map_editor.addEventListener("pen_matrix_changed", (event) =>
       this.draw_pen_canvas(event)
     );
+    this.map_editor.addEventListener("eraser_matrix_changed", (event) =>
+      this.erase_canvas(event)
+    );
     this.map_editor.addEventListener("revert_undo", (event) =>
       this.revert_undo(event)
     );
@@ -48,6 +51,17 @@ export class DrawingCanvas extends CanvasElement {
     const x = event.detail.x * 10 * scale;
     const y = event.detail.y * 10 * scale;
     this.context.drawImage(asset, x, y, 10 * scale, 10 * scale);
+  }
+
+  /**
+   * Eraser tool
+   * @param {Event} event
+   */
+  erase_canvas(event) {
+    const scale = this.map_editor.scale;
+    const x = event.detail.x * 10 * scale;
+    const y = event.detail.y * 10 * scale;
+    this.context.clearRect(x, y, 10 * scale, 10 * scale);
   }
 
   /**
