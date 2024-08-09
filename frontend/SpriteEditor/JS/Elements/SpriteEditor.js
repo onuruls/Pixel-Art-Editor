@@ -39,6 +39,7 @@ export class SpriteEditor extends HTMLElement {
     this.previous_changed = { x: null, y: null };
     this.previous_changed_first_half = { x: null, y: null };
     this.previous_changed_second_half = { x: null, y: null };
+    this.current_frame_index = 0;
     this.move_points = [];
     this.initialized = false;
     this.selected_points = [];
@@ -1520,7 +1521,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Exportiert das Bild als PNG-File
+   * Exports the image as a PNG file
    */
   export_as_png() {
     const canvas = document.createElement("canvas");
@@ -1540,7 +1541,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Wandelt einen Array-Eintrag in einen Farbstring um
+   * Converts an array entry into a color string
    * @param {Array<Number>} pixel
    * @returns {String}
    */
@@ -1593,6 +1594,10 @@ export class SpriteEditor extends HTMLElement {
     this.action_stacks.splice(index, 1);
   }
 
+  /**
+   * Copies the matrix of a frame
+   * @param {Number} index
+   */
   copy_matrix(index) {
     const matrix = this.canvas_matrices[index];
     const copied_matrix = matrix.map((row) => row.map((color) => [...color]));
@@ -1606,6 +1611,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} index
    */
   switch_active_matrix(index) {
+    this.current_frame_index = index;
     this.canvas_matrix = this.canvas_matrices[index];
     this.action_stack = this.action_stacks[index];
     this.repaint_canvas();
