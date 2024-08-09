@@ -4,6 +4,7 @@ import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 import { TempCanvas } from "./CanvasElements/TempCanvas.js";
 import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
 import { InputCanvas } from "./CanvasElements/InputCanvas.js";
+import { OnionSkinCanvas } from "./CanvasElements/OnionSkinCanvas.js";
 
 export class SpriteCanvas extends SpriteEditorPart {
   /**
@@ -14,6 +15,7 @@ export class SpriteCanvas extends SpriteEditorPart {
     super(sprite_editor);
     this.shape_holder = [];
     this.selected_points_holder = [];
+    this.onion_skin_canvas = new OnionSkinCanvas(this);
     this.drawing_canvas = new DrawingCanvas(this);
     this.temp_canvas = new TempCanvas(this);
     this.hover_canvas = new HoverCanvas(this);
@@ -34,6 +36,7 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   init() {
     this.canvas_wrapper = this.querySelector(".canvas-wrapper");
+    this.canvas_wrapper.append(this.onion_skin_canvas);
     this.canvas_wrapper.append(this.drawing_canvas);
     this.canvas_wrapper.append(this.temp_canvas);
     this.canvas_wrapper.append(this.hover_canvas);
