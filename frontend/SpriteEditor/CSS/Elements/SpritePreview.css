@@ -183,13 +183,29 @@ sprite-preview {
       display: flex;
       flex-direction: row;
       align-items: center;
+      justify-content: space-between;
       background-color: #444;
+      padding: 5px;
 
       button {
         margin-left: 3px;
       }
 
-      button.running {
+      button.running,
+      #onion_skin_button.active {
+        background-color: gold;
+      }
+
+      #onion_skin_button {
+        background-color: #444;
+        color: white;
+        border: none;
+        padding: 5px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      #onion_skin_button:hover {
         background-color: gold;
       }
     }

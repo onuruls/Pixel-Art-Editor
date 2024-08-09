@@ -12,6 +12,8 @@ export class OnionSkinCanvas extends CanvasElement {
     super(sprite_canvas);
     this.context = null;
     this.opacity = 0.25;
+    this.is_onion_skin_active = false;
+    this.onion_skin_button = this.create_onion_skin_button();
   }
 
   /**
@@ -23,14 +25,22 @@ export class OnionSkinCanvas extends CanvasElement {
 
   /**
    * Initializes the canvas and sets up event listeners.
+   * Also sets up a MutationObserver to lazily add the onion skin toggle button.
    */
   init() {
     this.context = this.canvas.getContext("2d");
     this.canvas.height = 640;
     this.canvas.width = 640;
 
+    const observer = new MutationObserver(() => {
+      this.add_onion_skin_button(observer);
+    });
+    observer.observe(this.sprite_editor, { childList: true, subtree: true });
+
     this.sprite_editor.addEventListener("repaint_canvas", () => {
-      this.update_onion_skin();
+      if (this.is_onion_skin_active) {
+        this.update_onion_skin();
+      }
     });
 
     this.sprite_editor.addEventListener("remove_selection", () => {
@@ -44,7 +54,6 @@ export class OnionSkinCanvas extends CanvasElement {
   update_onion_skin() {
     this.clear_canvas();
     const currentFrameIndex = this.sprite_editor.current_frame_index;
-    console.log(currentFrameIndex);
 
     if (currentFrameIndex > 0) {
       this.draw_frame(
@@ -92,6 +101,57 @@ export class OnionSkinCanvas extends CanvasElement {
       color[3] / 255
     })`;
     this.context.fillRect(x * 10, y * 10, 10, 10);
+  }
+
+  /**
+   * Toggles the Onion Skin functionality.
+   */
+  toggle_onion_skin() {
+    this.is_onion_skin_active = !this.is_onion_skin_active;
+    if (this.is_onion_skin_active) {
+      this.update_onion_skin();
+    } else {
+      this.clear_canvas();
+    }
+    this.onion_skin_button.classList.toggle(
+      "active",
+      this.is_onion_skin_active
+    );
+  }
+
+  /**
+   * Button to toggle onion skin
+   * @returns {HTMLButtonElement}
+   */
+  create_onion_skin_button() {
+    const button = document.createElement("button");
+    button.setAttribute("id", "onion_skin_button");
+
+    const icon = document.createElement("i");
+    icon.classList.add("fas", "fa-circle");
+
+    button.appendChild(icon);
+    return button;
+  }
+
+  /**
+   * Attempts to add the onion skin toggle button to the animation preview controls.
+   * Disconnects the observer once the button is added.
+   *
+   * @param {MutationObserver} observer
+   */
+  add_onion_skin_button(observer) {
+    const animationPreviewControls = this.sprite_editor.querySelector(
+      "animation-preview-controls"
+    );
+    if (animationPreviewControls) {
+      animationPreviewControls.appendChild(this.onion_skin_button);
+      this.onion_skin_button.addEventListener(
+        "click",
+        this.toggle_onion_skin.bind(this)
+      );
+      observer.disconnect();
+    }
   }
 }
 
