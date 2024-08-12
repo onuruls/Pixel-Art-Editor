@@ -8,6 +8,7 @@ import { Project } from "../Classes/Project.js";
 export class EditorTool extends HTMLElement {
   constructor() {
     super();
+    this.global_css = this.create_global_css_link();
     this.css = this.create_css_link();
     this.editor_container = this.create_editor_container();
     this.title_screen = new TitleScreen(this);
@@ -27,6 +28,18 @@ export class EditorTool extends HTMLElement {
   create_css_link() {
     const css = document.createElement("link");
     css.setAttribute("href", "../EditorTool/CSS/Elements/EditorTool.css");
+    css.setAttribute("rel", "stylesheet");
+    css.setAttribute("type", "text/css");
+    return css;
+  }
+
+  /**
+   * Global CSS
+   * @returns {HTMLLinkElement}
+   */
+  create_global_css_link() {
+    const css = document.createElement("link");
+    css.setAttribute("href", "../EditorTool/CSS/Global.css");
     css.setAttribute("rel", "stylesheet");
     css.setAttribute("type", "text/css");
     return css;

@@ -8,13 +8,13 @@ file-area {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    background-color: #333;
+    background-color: var(--primary-background-color);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     button {
       display: flex;
       align-items: center;
-      background-color: #444;
+      background-color: var(--primary-background-color);
       color: white;
       border: none;
       padding: 0.5rem 1rem;
@@ -22,10 +22,10 @@ file-area {
       transition: background-color 0.3s;
       width: 138px;
       text-align: left;
-      border: #555 solid 1px;
+      border: var(--sprite-hover-color) solid 1px;
 
       &:hover {
-        background-color: #555;
+        background-color: var(--sprite-hover-color);
 
         i {
           transform: scale(1.1);
