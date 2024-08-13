@@ -2,25 +2,32 @@ sprite-canvas {
   flex: 5;
   display: flex;
   align-items: center;
-  background-color: #222;
-  border-left: 1px solid white;
-  border-right: 1px solid white;
+  background-color: var(--primary-bg);
+  border-left: 1px solid var(--primary-border);
+  border-right: 1px solid var(--primary-border);
 
   > .canvas-wrapper {
     position: relative;
     padding: 0px;
     margin: auto;
-    background-image: linear-gradient(90deg, #444 1px, transparent 1px),
-      linear-gradient(90deg, #444 1px, transparent 1px),
-      linear-gradient(0deg, #444 1px, transparent 1px),
-      linear-gradient(0deg, #444 1px, transparent 1px);
+    background-image: linear-gradient(
+        90deg,
+        var(--canvas-grid-line) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, var(--canvas-grid-line) 1px, transparent 1px),
+      linear-gradient(0deg, var(--canvas-grid-line) 1px, transparent 1px),
+      linear-gradient(0deg, var(--canvas-grid-line) 1px, transparent 1px);
     background-size: 10px 10px;
     background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
-    border: 1cap solid #bbb;
+    border: 1cap solid var(--canvas-border);
     width: 640px;
     height: 640px;
+    overflow: auto;
+    scrollbar-color: var(--canvas-grid-line) var(--primary-bg);
+    scrollbar-width: thin;
   }
-  
+
   canvas {
     position: absolute;
     top: 0;
@@ -33,15 +40,15 @@ sprite-canvas {
   drawing-canvas {
     z-index: 5;
   }
-  
+
   temp-canvas {
     z-index: 6;
   }
-  
+
   hover-canvas {
     z-index: 7;
   }
-  
+
   input-canvas {
     z-index: 8;
   }

@@ -1,7 +1,23 @@
-/*
-Hier können wir unsere globalen Farben speichern
-*/
-
 body {
-    margin: 0px;
+  margin: 0px;
+}
+
+:root {
+  --primary-bg: #222;
+  --secondary-bg: #333;
+  --container-bg: #444;
+
+  --primary-border: white;
+
+  --canvas-grid-line: #444;
+  --canvas-border: #bbb;
+
+  --active-accent: gold;
+  --neutral-accent: #777;
+
+  --title: whitesmoke;
+  --title-stroke: black;
+
+  --tool-button-inactive-background-color: black;
+  --tool-button-inactive-color: white;
 }

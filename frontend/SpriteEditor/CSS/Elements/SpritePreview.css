@@ -1,7 +1,7 @@
 sprite-preview {
   flex: 1;
   padding: 5px 10px;
-  background-color: #333;
+  background-color: var(--secondary-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,8 +19,8 @@ sprite-preview {
     overflow-y: scroll;
     margin: 1rem 0;
     padding: 1rem;
-    background-color: #444;
-    scrollbar-color: #222 #444;
+    background-color: var(--container-bg);
+    scrollbar-color: var(--primary-bg) var(--container-bg);
 
     .dragging {
       position: absolute !important;
@@ -37,7 +37,7 @@ sprite-preview {
         align-self: center;
         height: 100px;
         width: 100px;
-        background-color: yellow;
+        background-color: var(--active-accent);
         border-radius: 3px;
         border: 3px solid black;
         margin: 3px;
@@ -46,19 +46,19 @@ sprite-preview {
           cursor: pointer;
           position: absolute;
           display: none;
-          color: #222;
+          color: var(--primary-bg);
           height: 25px;
           width: 25px;
           justify-content: center;
           align-items: center;
-          background-color: grey;
+          background-color: var(--neutral-accent);
         }
 
         .thumbnail_wrapper {
           height: 100%;
           width: 100%;
           background-size: 10px 10px;
-          background-color: #222;
+          background-color: var(--primary-bg);
           cursor: pointer;
 
           img {
@@ -71,7 +71,7 @@ sprite-preview {
           display: flex;
           top: 0;
           left: 0;
-          background-color: gold;
+          background-color: var(--active-accent);
           border-bottom-right-radius: 3px;
           font-weight: bold;
         }
@@ -108,7 +108,7 @@ sprite-preview {
       }
 
       sprite-frame:hover {
-        border-color: #777;
+        border-color: var(--neutral-accent);
 
         .delete_label {
           display: flex;
@@ -119,7 +119,7 @@ sprite-preview {
       }
 
       sprite-frame.selected {
-        border-color: gold;
+        border-color: var(--active-accent);
 
         .delete_label {
           display: flex;
@@ -139,20 +139,20 @@ sprite-preview {
       cursor: pointer;
       display: flex;
       font-size: 30px;
-      border: 3px solid #888;
+      border: 3px solid var(--neutral-accent);
       margin: 3px;
       align-self: center;
       justify-content: center;
       align-items: center;
-      background-color: #222;
+      background-color: var(--primary-bg);
       height: 40px;
       width: 100px;
-      color: #888;
+      color: var(--neutral-accent);
     }
 
     .new_frame_container:hover {
-      border-color: gold;
-      color: gold;
+      border-color: var(--active-accent);
+      color: var(--active-accent);
     }
 
     .frame_dummy {
@@ -160,9 +160,9 @@ sprite-preview {
       align-self: center;
       height: 100px;
       width: 100px;
-      background-color: #222;
+      background-color: var(--primary-bg);
       border-radius: 3px;
-      border: 3px dashed gold;
+      border: 3px dashed var(--active-accent);
       margin: 3px;
     }
   }
@@ -176,7 +176,7 @@ sprite-preview {
 
     img {
       height: 200px;
-      border: 4px solid #444;
+      border: 4px solid var(--container-bg);
     }
 
     animation-preview-controls {
@@ -184,29 +184,26 @@ sprite-preview {
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      background-color: #444;
+      background-color: var(--container-bg);
       padding: 5px;
 
       button {
-        margin-left: 3px;
-      }
-
-      button.running,
-      #onion_skin_button.active {
-        background-color: gold;
-      }
-
-      #onion_skin_button {
-        background-color: #444;
-        color: white;
+        background-color: var(--neutral-accent);
+        color: var(--primary-bg);
         border: none;
         padding: 5px;
         border-radius: 3px;
         cursor: pointer;
       }
 
-      #onion_skin_button:hover {
-        background-color: gold;
+      button.running,
+      #onion_skin_button.active {
+        background-color: var(--active-accent);
+      }
+
+      #onion_skin_button {
+        background-color: var(--neutral-accent);
+        color: var(--primary-bg);
       }
     }
   }

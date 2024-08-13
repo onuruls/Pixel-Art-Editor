@@ -1,11 +1,11 @@
 map-editor-sprite-preview {
   padding: 5px 5px;
-  background-color: #333;
+  background-color: var(--secondary-bg);
 }
 
 .placeholder-sprite-preview-box {
   width: 150px;
   height: 150px;
-  background-color: gray;
+  background-color: var(--container-bg);
   margin: auto;
 }

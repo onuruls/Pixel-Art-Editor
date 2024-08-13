@@ -1,9 +1,9 @@
 file-area-view {
   flex: 1;
   height: 95%;
-  background-color: #888;
-  border-left: solid 1px white;
-  border-right: solid 1px white;
+  background-color: var(--container-bg);
+  border-left: solid 1px var(--primary-border);
+  border-right: solid 1px var(--primary-border);
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -12,7 +12,7 @@ file-area-view {
   height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #222 #888;
+  scrollbar-color: var(--primary-bg) var(--neutral-accent);
 
   .item {
     display: flex;
