@@ -1,5 +1,5 @@
 map-editor-selection-area {
   flex: 2;
   padding: 5px 10px;
-  background-color: var(--primary-background-color);
+  background-color: var(--secondary-bg);
 }

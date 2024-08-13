@@ -1,20 +1,20 @@
 file-area {
   height: 16vh;
   display: flex;
-  border-top: 1px solid white;
+  border-top: 1px solid var(--primary-border);
 
   .file-area-tools {
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    background-color: var(--primary-background-color);
+    background-color: var(--secondary-bg);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     button {
       display: flex;
       align-items: center;
-      background-color: var(--primary-background-color);
+      background-color: var(--secondary-bg);
       color: white;
       border: none;
       padding: 0.5rem 1rem;
@@ -22,10 +22,10 @@ file-area {
       transition: background-color 0.3s;
       width: 138px;
       text-align: left;
-      border: var(--sprite-hover-color) solid 1px;
+      border: var(--neutral-accent) solid 1px;
 
       &:hover {
-        background-color: var(--sprite-hover-color);
+        background-color: var(--neutral-accent);
 
         i {
           transform: scale(1.1);

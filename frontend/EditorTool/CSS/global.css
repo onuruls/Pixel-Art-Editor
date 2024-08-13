@@ -7,19 +7,20 @@ body {
 }
 
 :root {
-  --primary-background-color: #333;
-  --container-color: #444;
+  --primary-bg: #222;
+  --secondary-bg: #333;
+  --container-bg: #444;
 
-  --canvas-background-color: #222;
-  --canvas-grid-color: #444;
-  --canvas-border-color: #bbb;
+  --primary-border: white;
 
-  --sprite-hover-color: #777;
+  --canvas-grid-line: #444;
+  --canvas-border: #bbb;
 
-  --preview-highlight-color: gold;
+  --active-accent: gold;
+  --neutral-accent: #777;
 
-  --title-color: whitesmoke;
-  --title-stroke-color: black;
+  --title: whitesmoke;
+  --title-stroke: black;
 
   --tool-button-inactive-background-color: black;
   --tool-button-inactive-color: white;
