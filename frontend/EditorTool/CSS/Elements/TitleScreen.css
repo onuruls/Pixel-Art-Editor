@@ -37,6 +37,45 @@ title-screen {
     }
   }
 
+  add-project-inputs {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+    justify-content: center;
+
+    #new_project_name {
+      width: 100%;
+      font-size: 20px;
+      background-color: var(--button-bg);
+      color: var(--button-color);
+      border: var(--button-border);
+      border-radius: 5px;
+      padding: 10px;
+    }
+    .button_div {
+      display: flex;
+      width: 100%;
+      column-gap: 20px;
+
+      .btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 20px;
+        background-color: var(--button-bg);
+        color: var(--button-color);
+        border: var(--button-border);
+        cursor: pointer;
+        border-radius: 5px;
+
+        &:hover {
+          background-color: var(--button-hover-bg);
+        }
+      }
+    }
+  }
+
   projects-overview {
     display: flex;
     flex-direction: column;
