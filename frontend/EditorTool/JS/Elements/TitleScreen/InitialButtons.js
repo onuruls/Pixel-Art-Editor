@@ -35,7 +35,7 @@ export class InitialButtons extends HTMLElement {
   create_open_button() {
     return Util.create_button(
       "open_button",
-      ["btn", "title-btn"],
+      ["btn"],
       "Open Project",
       this.title_screen.load_project_clicked.bind(this.title_screen)
     );

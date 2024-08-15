@@ -7,6 +7,11 @@ body {
   --secondary-bg: #333;
   --container-bg: #444;
 
+  --button-bg: #ddd;
+  --button-color: black;
+  --button-hover-bg: #ccc;
+  --button-border: #bbb;
+
   --primary-border: white;
 
   --canvas-grid-line: #444;
