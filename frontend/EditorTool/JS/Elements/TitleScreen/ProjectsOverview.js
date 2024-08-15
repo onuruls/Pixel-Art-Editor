@@ -110,16 +110,59 @@ export class ProjectsOverview extends HTMLElement {
    * Handles renaming of the project
    * @param {Project} project
    */
-  rename_project(project) {
-    console.log(`Renaming project ${project.id}`);
+  async rename_project(project) {
+    const new_name = prompt(`Enter new name for project ${project.name}:`);
+    if (new_name) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/projects/${project.id}/rename`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ new_name }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to rename project.");
+        }
+
+        console.log(`Project ${project.id} renamed to ${new_name}`);
+        project.name = new_name;
+        this.render_loaded_projects(this.projects); // Refresh the view
+      } catch (error) {
+        console.error("Error renaming project:", error);
+      }
+    }
   }
 
   /**
    * Handles deletion of the project
    * @param {Project} project
    */
-  delete_project(project) {
-    console.log(`Deleting project ${project.id}`);
+  async delete_project(project) {
+    if (confirm(`Are you sure you want to delete project ${project.name}?`)) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/projects/${project.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete project.");
+        }
+
+        console.log(`Project ${project.id} deleted.`);
+        this.projects = this.projects.filter((p) => p.id !== project.id);
+        this.render_loaded_projects(this.projects);
+      } catch (error) {
+        console.error("Error deleting project:", error);
+      }
+    }
   }
 }
 
