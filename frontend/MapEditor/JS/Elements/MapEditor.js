@@ -10,7 +10,7 @@ import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
 export class MapEditor extends HTMLElement {
   /**
-   *
+   * Creates an instance of MapEditor
    * @param {EditorTool} editor_tool
    */
   constructor(editor_tool) {
@@ -30,11 +30,11 @@ export class MapEditor extends HTMLElement {
     this.scale = 1;
     this.image_cache = {};
 
-    this.add_layer();
+    this.add_layer(); // Adds the first layer and sets it as active
   }
 
   /**
-   * From HTMLElement called when element is mounted
+   * Called when the element is added to the DOM
    */
   connectedCallback() {
     if (!this.initialized) {
@@ -43,7 +43,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Initializes the MapEditor with its Parts
+   * Initializes the MapEditor with its components
    */
   init() {
     this.appendCSS();
@@ -51,10 +51,11 @@ export class MapEditor extends HTMLElement {
     this.set_listeners();
     this.selected_tool = new Pen(this);
     this.initialized = true;
+    this.dispatchEvent(new CustomEvent("layers-updated")); // Initial UI update
   }
 
   /**
-   * Appends CSS to the MapEditor
+   * Appends the CSS file to the MapEditor
    */
   appendCSS() {
     const css = document.createElement("link");
@@ -76,7 +77,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Sets the necessary eventlisteners
+   * Sets the necessary event listeners
    */
   set_listeners() {
     this.map_tools
@@ -106,47 +107,58 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Gets the currently active layer.
-   * @returns {Array}
+   * Gets the currently active layer
+   * @returns {Array} The active layer
    */
   get active_layer() {
     return this.layers[this.active_layer_index];
   }
 
   /**
-   * Adds a new layer to the layers array.
+   * Adds a new layer to the layers array
    */
   add_layer() {
     const new_layer = Array.from({ length: this.width }, () =>
       Array(this.height).fill("")
     );
     this.layers.push(new_layer);
+
+    // If this is the first layer, make it active
+    if (this.layers.length === 1) {
+      this.active_layer_index = 0;
+    }
+
+    this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
   /**
-   * Removes a layer at the specified index.
+   * Removes a layer at the specified index
    * @param {number} index
    */
   remove_layer(index) {
     if (this.layers.length > 1) {
       this.layers.splice(index, 1);
       this.active_layer_index = Math.max(0, this.active_layer_index - 1);
+      this.dispatchEvent(new CustomEvent("layers-updated"));
     }
   }
 
   /**
-   * Switches to the layer at the specified index.
-   * @param {number} index
+   * Switches to the layer at the specified index
+   * @param {number} index - The index of the layer to activate
    */
   switch_layer(index) {
     if (index >= 0 && index < this.layers.length) {
       this.active_layer_index = index;
+      this.dispatchEvent(new CustomEvent("layers-updated"));
     }
   }
 
   /**
-   * Adjusts the zoom level and location
+   * Adjusts the zoom level and position
    * @param {Number} zoom_level
+   * @param {Number} mouseX
+   * @param {Number} mouseY
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
     const current_mouseX =
@@ -188,7 +200,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Applies the given action to a block of pixels defined by this.pixel_size
+   * Applies a given action to a block of pixels defined by this.pixel_size
    * @param {Number} x
    * @param {Number} y
    * @param {Function} action
@@ -206,28 +218,27 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Starts gouping pen points for the action stack
+   * Starts grouping pen points for the action stack
    */
   start_action_buffer() {
     this.action_buffer = [];
   }
 
   /**
-   * Ends grouping and pushes to stack
+   * Ends grouping and pushes the action buffer to the stack
    */
   end_action_buffer() {
     this.action_stack.push(this.action_buffer);
   }
 
   /**
-   * Reverts the last action done (STRG + Z)
+   * Reverts the last action (CTRL + Z)
    */
   revert_last_action() {
     if (!this.action_stack.actions_is_empty()) {
       const points = this.action_stack.pop_last_action();
       points.forEach((point) => {
         const { x, y, layer, prev_asset } = point;
-        console.log(point);
         this.layers[layer][x][y] = prev_asset;
       });
       this.dispatchEvent(
@@ -237,14 +248,13 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Redoing the last reverted action
+   * Redoes the last reverted action
    */
   redo_last_action() {
     if (!this.action_stack.redo_is_empty()) {
       const points = this.action_stack.pop_last_redo();
       points.forEach((point) => {
         const { x, y, layer, asset } = point;
-        console.log(point);
         this.layers[layer][x][y] = asset;
       });
       this.dispatchEvent(
@@ -254,6 +264,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Handles changes to the matrix when using the pen tool
    * @param {Number} x
    * @param {Number} y
    */
@@ -311,6 +322,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Handles changes to the matrix when using the eraser tool
    * @param {Number} x
    * @param {Number} y
    */
@@ -339,6 +351,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Handles hover events over the canvas
    * @param {Number} x
    * @param {Number} y
    */
@@ -358,15 +371,16 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Removes the hover-effect, when mouse leaves the canvas
+   * Removes the hover effect when the mouse leaves the canvas
    */
   remove_hover() {
     this.dispatchEvent(new CustomEvent("remove_hover"));
   }
 
   /**
-   * Gets the fitting tool, when clicked
+   * Selects a tool based on the provided string identifier
    * @param {String} string
+   * @returns {Pen|Eraser|ZoomIn|ZoomOut}
    */
   select_tool_from_string(string) {
     switch (string) {
@@ -384,7 +398,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Returns true if the x and y coordinate are in the canvas bounds
+   * Checks if the given x and y coordinates are within the canvas bounds
    * @param {Number} x
    * @param {Number} y
    * @returns {Boolean}
