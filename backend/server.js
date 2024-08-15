@@ -71,6 +71,39 @@ app.put("/projects/:id", (req, res) => {
 });
 
 /**
+ * Renames a project
+ */
+app.put("/projects/:id/rename", (req, res) => {
+  const project_id = req.params.id;
+  const { new_name } = req.body;
+  console.log("Renaming project with ID:", project_id);
+  db_client
+    .rename_project(project_id, new_name)
+    .then(() => {
+      res.status(200).send("Project renamed");
+    })
+    .catch((error) => {
+      res.status(500).send(error);
+    });
+});
+
+/**
+ * Deletes a project
+ */
+app.delete("/projects/:id", (req, res) => {
+  const project_id = req.params.id;
+  console.log("Deleting project with ID:", project_id);
+  db_client
+    .delete_project(project_id)
+    .then(() => {
+      res.status(200).send("Project deleted");
+    })
+    .catch((error) => {
+      res.status(500).send(error);
+    });
+});
+
+/**
  * Adds a new Folder to the parent_folder
  */
 app.post("/projects/folders", (req, res) => {
