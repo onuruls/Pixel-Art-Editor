@@ -47,6 +47,39 @@ export class MapEditorCanvas extends MapEditorPart {
       10 * this.map_editor.scale
     }px ${10 * this.map_editor.scale}px`;
     this.canvas_wrapper.style.backgroundPosition = `0px 0px`;
+
+    this.renderLayers();
+  }
+
+  renderLayers() {
+    const ctx = this.drawing_canvas.canvas.getContext("2d");
+    ctx.clearRect(
+      0,
+      0,
+      this.drawing_canvas.canvas.width,
+      this.drawing_canvas.canvas.height
+    );
+
+    this.map_editor.layers.forEach((layer) => {
+      for (let x = 0; x < this.map_editor.width; x++) {
+        for (let y = 0; y < this.map_editor.height; y++) {
+          const asset = layer[x][y];
+          if (asset) {
+            const img = new Image();
+            img.src = asset;
+            img.onload = () => {
+              ctx.drawImage(
+                img,
+                x * this.map_editor.pixel_size * 10,
+                y * this.map_editor.pixel_size * 10,
+                this.map_editor.pixel_size * 10,
+                this.map_editor.pixel_size * 10
+              );
+            };
+          }
+        }
+      }
+    });
   }
 }
 

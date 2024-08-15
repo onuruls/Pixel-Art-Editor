@@ -6,7 +6,7 @@ export class ActionStack {
 
   /**
    * Pushes a action on the action_stack
-   * @param {Array<{x: Number, y: Number, prev_asset: Array<Number>, asset: Array<Number>}} points_array
+   * @param {Array<{x: Number, y: Number, layer: Number, prev_asset: Array<Number>, asset: Array<Number>}} points_array
    */
   push(points_array) {
     this.actions.push(points_array);
@@ -15,7 +15,7 @@ export class ActionStack {
 
   /**
    * Returns the last action from the stack
-   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>, asset: Array<Number>}}
+   * @returns {Array<{x: Number, y: Number, layer: Number, prev_asset: Array<Number>, asset: Array<Number>}}
    */
   pop_last_action() {
     if (this.actions_is_empty()) {
@@ -45,11 +45,15 @@ export class ActionStack {
 
   /**
    * Returns the last redo_action
-   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>, asset: Array<Number>}}
+   * @returns {Array<{x: Number, y: Number, layer: Number, prev_asset: Array<Number>, asset: Array<Number>}}
    */
   pop_last_redo() {
-    const redo = this.redo_actions.pop();
-    this.actions.push(redo);
-    return redo;
+    if (this.redo_is_empty()) {
+      return undefined;
+    } else {
+      const redo = this.redo_actions.pop();
+      this.actions.push(redo);
+      return redo;
+    }
   }
 }

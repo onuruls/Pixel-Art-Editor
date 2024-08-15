@@ -17,9 +17,8 @@ export class MapEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.canvas_matrix = Array(64)
-      .fill("")
-      .map(() => Array(64).fill(""));
+    this.layers = [];
+    this.active_layer_index = 0;
     this.width = 64;
     this.height = 64;
     this.initialized = false;
@@ -29,6 +28,9 @@ export class MapEditor extends HTMLElement {
     this.action_stack = new ActionStack();
     this.action_buffer = [];
     this.scale = 1;
+    this.image_cache = {};
+
+    this.add_layer();
   }
 
   /**
@@ -101,6 +103,45 @@ export class MapEditor extends HTMLElement {
       this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
         .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
     });
+  }
+
+  /**
+   * Gets the currently active layer.
+   * @returns {Array}
+   */
+  get active_layer() {
+    return this.layers[this.active_layer_index];
+  }
+
+  /**
+   * Adds a new layer to the layers array.
+   */
+  add_layer() {
+    const new_layer = Array.from({ length: this.width }, () =>
+      Array(this.height).fill("")
+    );
+    this.layers.push(new_layer);
+  }
+
+  /**
+   * Removes a layer at the specified index.
+   * @param {number} index
+   */
+  remove_layer(index) {
+    if (this.layers.length > 1) {
+      this.layers.splice(index, 1);
+      this.active_layer_index = Math.max(0, this.active_layer_index - 1);
+    }
+  }
+
+  /**
+   * Switches to the layer at the specified index.
+   * @param {number} index
+   */
+  switch_layer(index) {
+    if (index >= 0 && index < this.layers.length) {
+      this.active_layer_index = index;
+    }
   }
 
   /**
@@ -185,7 +226,9 @@ export class MapEditor extends HTMLElement {
     if (!this.action_stack.actions_is_empty()) {
       const points = this.action_stack.pop_last_action();
       points.forEach((point) => {
-        this.canvas_matrix[point.x][point.y] = point.prev_asset;
+        const { x, y, layer, prev_asset } = point;
+        console.log(point);
+        this.layers[layer][x][y] = prev_asset;
       });
       this.dispatchEvent(
         new CustomEvent("revert_undo", { detail: { points: points } })
@@ -200,7 +243,9 @@ export class MapEditor extends HTMLElement {
     if (!this.action_stack.redo_is_empty()) {
       const points = this.action_stack.pop_last_redo();
       points.forEach((point) => {
-        this.canvas_matrix[point.x][point.y] = point.asset;
+        const { x, y, layer, asset } = point;
+        console.log(point);
+        this.layers[layer][x][y] = asset;
       });
       this.dispatchEvent(
         new CustomEvent("revert_redo", { detail: { points: points } })
@@ -214,31 +259,55 @@ export class MapEditor extends HTMLElement {
    */
   pen_change_matrix(x, y) {
     if (this.selected_asset) {
-      const img = new Image();
-      img.src = this.selected_asset;
-      img.onload = () => {
-        this.apply_to_pixel_block(x, y, (xi, yj) => {
-          const prev_asset = this.canvas_matrix[xi][yj];
-          if (prev_asset === this.selected_asset) return;
-          this.canvas_matrix[xi][yj] = this.selected_asset;
-          this.action_buffer.push({
-            x: xi,
-            y: yj,
-            prev_asset: prev_asset,
-            asset: this.selected_asset,
+      this.load_image(this.selected_asset)
+        .then((img) => {
+          this.apply_to_pixel_block(x, y, (xi, yj) => {
+            const prev_asset = this.active_layer[xi][yj];
+            if (prev_asset === this.selected_asset) return;
+            this.active_layer[xi][yj] = this.selected_asset;
+            this.action_buffer.push({
+              x: xi,
+              y: yj,
+              layer: this.active_layer_index,
+              prev_asset: prev_asset,
+              asset: this.selected_asset,
+            });
+            this.dispatchEvent(
+              new CustomEvent("pen_matrix_changed", {
+                detail: {
+                  x: xi,
+                  y: yj,
+                  asset: img,
+                },
+              })
+            );
           });
-          this.dispatchEvent(
-            new CustomEvent("pen_matrix_changed", {
-              detail: {
-                x: xi,
-                y: yj,
-                asset: img,
-              },
-            })
-          );
+        })
+        .catch((error) => {
+          console.error("Error loading image:", error);
         });
-      };
     }
+  }
+
+  /**
+   * Loads an image and caches it.
+   * @param {String} src
+   * @returns {Promise<Image>}
+   */
+  load_image(src) {
+    return new Promise((resolve, reject) => {
+      if (this.image_cache[src]) {
+        resolve(this.image_cache[src]);
+      } else {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          this.image_cache[src] = img;
+          resolve(img);
+        };
+        img.onerror = reject;
+      }
+    });
   }
 
   /**
@@ -247,12 +316,13 @@ export class MapEditor extends HTMLElement {
    */
   eraser_change_matrix(x, y) {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_asset = this.canvas_matrix[xi][yj];
+      const prev_asset = this.active_layer[xi][yj];
       if (prev_asset !== "") {
-        this.canvas_matrix[xi][yj] = "";
+        this.active_layer[xi][yj] = "";
         this.action_buffer.push({
           x: xi,
           y: yj,
+          layer: this.active_layer_index,
           prev_asset: prev_asset,
           asset: "",
         });
@@ -323,8 +393,8 @@ export class MapEditor extends HTMLElement {
     return (
       x >= 0 &&
       y >= 0 &&
-      x < this.canvas_matrix.length &&
-      y < this.canvas_matrix.length
+      x < this.active_layer.length &&
+      y < this.active_layer[0].length
     );
   }
 }
