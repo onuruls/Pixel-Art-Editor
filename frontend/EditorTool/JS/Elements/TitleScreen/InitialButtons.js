@@ -13,7 +13,6 @@ export class InitialButtons extends HTMLElement {
     this.open_button = this.create_open_button();
     this.appendChild(this.new_button);
     this.appendChild(this.open_button);
-    this.init();
   }
 
   /**
@@ -21,11 +20,11 @@ export class InitialButtons extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_new_button() {
-    return Util.create_element(
-      "button",
+    return Util.create_button(
       "new_button",
-      ["title_button"],
-      "Neues Projekt"
+      ["btn", "title-btn"],
+      "New Project",
+      this.title_screen.new_project_clicked.bind(this.title_screen)
     );
   }
 
@@ -34,33 +33,11 @@ export class InitialButtons extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_open_button() {
-    return Util.create_element(
-      "button",
+    return Util.create_button(
       "open_button",
-      ["title_button"],
-      "Projekt öffnen"
-    );
-  }
-
-  init() {
-    this.open_button.addEventListener(
-      "click",
+      ["btn", "title-btn"],
+      "Open Project",
       this.title_screen.load_project_clicked.bind(this.title_screen)
-    );
-    this.new_button.addEventListener(
-      "click",
-      this.title_screen.new_project_clicked.bind(this.title_screen)
-    );
-  }
-
-  disconnectedCallback() {
-    this.open_button.removeEventListener(
-      "click",
-      this.title_screen.load_project_clicked.bind(this.title_screen)
-    );
-    this.new_button.removeEventListener(
-      "click",
-      this.title_screen.new_project_clicked.bind(this.title_screen)
     );
   }
 }

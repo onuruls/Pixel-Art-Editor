@@ -14,24 +14,6 @@ title-screen {
   align-items: center;
   justify-content: center;
 
-  initial-buttons {
-    button {
-      height: 50px;
-      width: 150px;
-      margin: 20px;
-      font-family: monospace;
-      font-size: 20px;
-      font-weight: bold;
-      transition: all 0.2s ease-in;
-    }
-
-    button:hover {
-      height: 60px;
-      width: 180px;
-      font-size: 22px;
-    }
-  }
-
   projects-overview {
     display: flex;
     flex-direction: column;
@@ -43,66 +25,72 @@ title-screen {
     .views_container {
       height: 90%;
       width: 90%;
+      overflow-y: auto;
+      padding: 10px;
 
-      project-view {
+      .project-container {
         display: flex;
-        height: 40px;
-        margin: 10px;
-        color: white;
-        background-color: var(--container-bg);
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
+        background-color: var(--container-bg);
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
         transition: box-shadow 0.2s ease-in-out;
 
-        .project_name {
-          font-size: 20px;
-          margin: 0 0 0 10;
-          padding: 0;
+        .project-view {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
-        .project_date {
-          font-size: 12px;
-          margin: 0 10 0 0;
+        .btn {
+          margin-left: 10px;
+          font-size: 16px;
+          border: none;
+          background: none;
+          color: white;
+          cursor: pointer;
+        }
+
+        .btn-rename {
+          color: #4caf50;
+        }
+
+        .btn-delete {
+          color: #f44336;
+        }
+
+        .btn:hover {
+          transform: scale(1.1);
+        }
+
+        .fa {
+          margin-right: 5px;
         }
       }
 
-      project-view:hover {
-        box-shadow: 3px 3px 5px var(--primary-bg);
+      .project-container:hover {
+        box-shadow: 3px 3px 10px var(--primary-bg);
       }
     }
 
-    button {
+    #back_button {
+      margin-top: 20px;
       width: 100px;
       height: 35px;
-      font-size: 30px;
-    }
-  }
-
-  add-project-inputs {
-    display: flex;
-    flex-direction: column;
-    width: 360px;
-    height: 100px;
-
-    input {
-      text-align: center;
-      width: 100%;
-      height: 40px;
-      font-size: 30px;
-      font-weight: bold;
+      font-size: 20px;
+      background-color: var(--button-bg);
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.2s;
     }
 
-    .button_div {
-      width: 100%;
-      display: flex;
-      margin-top: 10px;
-      justify-content: space-between;
-
-      button {
-        height: 30px;
-        font-size: 25px;
-        width: 40%;
-      }
+    #back_button:hover {
+      background-color: var(--button-hover-bg);
     }
   }
 }

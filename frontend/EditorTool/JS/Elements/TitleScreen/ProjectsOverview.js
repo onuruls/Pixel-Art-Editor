@@ -22,7 +22,9 @@ export class ProjectsOverview extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_back_button() {
-    return Util.create_element("button", "back_button", [], "Zurück");
+    return Util.create_button("back_button", ["btn"], "Back", () =>
+      this.title_screen.back_button_clicked()
+    );
   }
 
   /**
@@ -59,13 +61,12 @@ export class ProjectsOverview extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_rename_button(project) {
-    const rename_button = Util.create_element(
-      "button",
+    const rename_button = Util.create_button(
       `rename-${project.id}`,
       ["btn"],
-      "Rename"
+      "Rename",
+      () => this.rename_project(project)
     );
-    rename_button.addEventListener("click", () => this.rename_project(project));
     return rename_button;
   }
 
@@ -74,13 +75,12 @@ export class ProjectsOverview extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_delete_button(project) {
-    const delete_button = Util.create_element(
-      "button",
+    const delete_button = Util.create_button(
       `delete-${project.id}`,
       ["btn"],
-      "Delete"
+      "Delete",
+      () => this.delete_project(project)
     );
-    delete_button.addEventListener("click", () => this.delete_project(project));
     return delete_button;
   }
 
@@ -90,20 +90,6 @@ export class ProjectsOverview extends HTMLElement {
     });
     this.appendChild(this.views_container);
     this.appendChild(this.back_button);
-  }
-
-  connectedCallback() {
-    this.back_button.addEventListener(
-      "click",
-      this.title_screen.back_button_clicked.bind(this.title_screen)
-    );
-  }
-
-  disconnectedCallback() {
-    this.back_button.removeEventListener(
-      "click",
-      this.title_screen.back_button_clicked.bind(this.title_screen)
-    );
   }
 
   /**
@@ -131,7 +117,7 @@ export class ProjectsOverview extends HTMLElement {
 
         console.log(`Project ${project.id} renamed to ${new_name}`);
         project.name = new_name;
-        this.render_loaded_projects(this.projects); // Refresh the view
+        this.render_loaded_projects(this.projects);
       } catch (error) {
         console.error("Error renaming project:", error);
       }
