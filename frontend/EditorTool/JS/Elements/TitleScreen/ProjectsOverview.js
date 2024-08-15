@@ -17,8 +17,8 @@ export class ProjectsOverview extends HTMLElement {
     this.project_views = this.create_project_views();
     this.init();
   }
+
   /**
-   *
    * @returns {HTMLButtonElement}
    */
   create_back_button() {
@@ -26,7 +26,6 @@ export class ProjectsOverview extends HTMLElement {
   }
 
   /**
-   *
    * @returns {HTMLDivElement}
    */
   create_views_container() {
@@ -34,13 +33,55 @@ export class ProjectsOverview extends HTMLElement {
   }
 
   /**
-   *
    * @returns {Array<HTMLDivElement>}
    */
   create_project_views() {
     return this.projects.map((project) => {
-      return new ProjectView(this.title_screen, project);
+      const project_container = Util.create_element(
+        "div",
+        "",
+        ["project-container"],
+        ""
+      );
+
+      const project_view = new ProjectView(this.title_screen, project);
+
+      const rename_button = this.create_rename_button(project);
+      const delete_button = this.create_delete_button(project);
+
+      project_container.append(rename_button, delete_button, project_view);
+      return project_container;
     });
+  }
+
+  /**
+   * @param {Project} project
+   * @returns {HTMLButtonElement}
+   */
+  create_rename_button(project) {
+    const rename_button = Util.create_element(
+      "button",
+      `rename-${project.id}`,
+      ["btn"],
+      "Rename"
+    );
+    rename_button.addEventListener("click", () => this.rename_project(project));
+    return rename_button;
+  }
+
+  /**
+   * @param {Project} project
+   * @returns {HTMLButtonElement}
+   */
+  create_delete_button(project) {
+    const delete_button = Util.create_element(
+      "button",
+      `delete-${project.id}`,
+      ["btn"],
+      "Delete"
+    );
+    delete_button.addEventListener("click", () => this.delete_project(project));
+    return delete_button;
   }
 
   init() {
@@ -63,6 +104,22 @@ export class ProjectsOverview extends HTMLElement {
       "click",
       this.title_screen.back_button_clicked.bind(this.title_screen)
     );
+  }
+
+  /**
+   * Handles renaming of the project
+   * @param {Project} project
+   */
+  rename_project(project) {
+    console.log(`Renaming project ${project.id}`);
+  }
+
+  /**
+   * Handles deletion of the project
+   * @param {Project} project
+   */
+  delete_project(project) {
+    console.log(`Deleting project ${project.id}`);
   }
 }
 
