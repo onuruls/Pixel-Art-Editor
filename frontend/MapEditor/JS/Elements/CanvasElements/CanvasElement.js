@@ -7,9 +7,8 @@ export class CanvasElement extends HTMLElement {
    */
   constructor(canvas) {
     super();
-    this.canvas = canvas;
-    this.map_editor = canvas.map_editor;
-    this.canvas = null;
+    this.parent_canvas = canvas;
+    this.map_editor = canvas?.map_editor;
   }
 
   connectedCallback() {
@@ -30,13 +29,13 @@ export class CanvasElement extends HTMLElement {
    * Paints a pixel with the selected asset
    * @param {Number} x
    * @param {Number} y
-   * @param {Array<Number>} asset
+   * @param {String} asset
    */
   paint_single_pixel(x, y, asset) {
     const scale = this.map_editor.scale;
-    const img = new Image();
-    img.src = asset;
-    img.onload = () => {
+
+    if (this.map_editor.image_cache[asset]) {
+      const img = this.map_editor.image_cache[asset];
       this.context.drawImage(
         img,
         x * 10 * scale,
@@ -44,7 +43,20 @@ export class CanvasElement extends HTMLElement {
         10 * scale,
         10 * scale
       );
-    };
+    } else {
+      const img = new Image();
+      img.src = asset;
+      img.onload = () => {
+        this.map_editor.image_cache[asset] = img;
+        this.context.drawImage(
+          img,
+          x * 10 * scale,
+          y * 10 * scale,
+          10 * scale,
+          10 * scale
+        );
+      };
+    }
   }
 
   /**

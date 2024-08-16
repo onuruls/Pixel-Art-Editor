@@ -10,8 +10,7 @@ export class MapEditorLayers extends MapEditorPart {
   }
 
   /**
-   * Returns the HTML string for the component
-   * @returns {String} The HTML string
+   * @returns {String}
    */
   render() {
     return `
@@ -43,17 +42,31 @@ export class MapEditorLayers extends MapEditorPart {
 
     layers.forEach((layer, index) => {
       const li = document.createElement("li");
-      li.textContent = `Layer ${index + 1}`;
       li.classList.add("layer-item");
+      li.setAttribute("data-index", index);
+
       if (index === activeLayerIndex) {
         li.classList.add("active-layer");
       }
+      const layerLabel = document.createElement("span");
+      layerLabel.textContent = `Layer ${index + 1}`;
+      layerLabel.classList.add("index_label");
+      li.appendChild(layerLabel);
 
-      li.addEventListener("mousedown", (e) => {
-        if (!e.target.classList.contains("delete_label")) {
-          this.map_editor.switch_layer(index);
-        }
+      const visibilityButton = document.createElement("button");
+      visibilityButton.classList.add("visibility_button");
+      const isVisible = this.map_editor.is_layer_visible(index);
+      visibilityButton.innerHTML = isVisible
+        ? '<i class="fas fa-eye"></i>'
+        : '<i class="fas fa-eye-slash"></i>';
+      visibilityButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.map_editor.toggle_layer_visibility(index);
+        visibilityButton.innerHTML = this.map_editor.is_layer_visible(index)
+          ? '<i class="fas fa-eye"></i>'
+          : '<i class="fas fa-eye-slash"></i>';
       });
+      li.appendChild(visibilityButton);
 
       const deleteButton = document.createElement("button");
       deleteButton.textContent = "Delete";
@@ -62,8 +75,12 @@ export class MapEditorLayers extends MapEditorPart {
         e.stopPropagation();
         this.map_editor.remove_layer(index);
       });
-
       li.appendChild(deleteButton);
+
+      li.addEventListener("click", () => {
+        this.map_editor.switch_layer(index);
+      });
+
       layersList.appendChild(li);
     });
   }

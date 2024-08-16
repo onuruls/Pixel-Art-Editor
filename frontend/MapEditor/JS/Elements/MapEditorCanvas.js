@@ -1,5 +1,4 @@
 import { MapEditorPart } from "./MapEditorPart.js";
-import { MapEditor } from "./MapEditor.js";
 import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 import { TempCanvas } from "./CanvasElements/TempCanvas.js";
 import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
@@ -7,12 +6,12 @@ import { InputCanvas } from "./CanvasElements/InputCanvas.js";
 
 export class MapEditorCanvas extends MapEditorPart {
   /**
-   *
+   * Creates an instance of MapEditorCanvas
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
     super(map_editor);
-    this.drawing_canvas = new DrawingCanvas(this);
+    this.layer_canvases = [];
     this.temp_canvas = new TempCanvas(this);
     this.hover_canvas = new HoverCanvas(this);
     this.input_canvas = new InputCanvas(this);
@@ -20,29 +19,23 @@ export class MapEditorCanvas extends MapEditorPart {
   }
 
   /**
-   * Returns the Html-String
+   * Returns the HTML string for the component
    * @returns {String}
    */
   render() {
     return `<div class="canvas-wrapper"></div>`;
   }
 
+  /**
+   * Initializes the MapEditorCanvas with its components
+   */
   init() {
     this.canvas_wrapper = this.querySelector(".canvas-wrapper");
     this.canvas_wrapper.append(
-      this.drawing_canvas,
       this.temp_canvas,
       this.hover_canvas,
       this.input_canvas
     );
-    this.drawing_canvas.canvas.addEventListener("resize", (event) => {
-      const { height, width } = event.target.getBoundingClientRect();
-      this.drawing_canvas.canvas.height = height;
-      this.drawing_canvas.canvas.width = width;
-      this.dispatchEvent(
-        new CustomEvent("canvas_resized", { detail: { height, width } })
-      );
-    });
     this.canvas_wrapper.style.backgroundSize = `${
       10 * this.map_editor.scale
     }px ${10 * this.map_editor.scale}px`;
@@ -51,19 +44,61 @@ export class MapEditorCanvas extends MapEditorPart {
     this.renderLayers();
   }
 
-  renderLayers() {
-    const ctx = this.drawing_canvas.canvas.getContext("2d");
-    ctx.clearRect(
-      0,
-      0,
-      this.drawing_canvas.canvas.width,
-      this.drawing_canvas.canvas.height
-    );
+  /**
+   * @param {number} index
+   * @param {boolean} isVisible
+   */
+  toggle_layer_visibility(index, isVisible) {
+    const layerCanvas = this.layer_canvases[index];
+    if (layerCanvas) {
+      layerCanvas.style.display = isVisible ? "block" : "none";
+    }
+  }
 
-    this.map_editor.layers.forEach((layer) => {
-      for (let x = 0; x < this.map_editor.width; x++) {
-        for (let y = 0; y < this.map_editor.height; y++) {
-          const asset = layer[x][y];
+  /**
+   * Adds a new layer canvas to the wrapper
+   * @param {DrawingCanvas} layerCanvas
+   */
+  addLayerCanvas(layerCanvas) {
+    this.layer_canvases.push(layerCanvas);
+    this.canvas_wrapper.insertBefore(layerCanvas, this.temp_canvas);
+  }
+
+  /**
+   * Removes the layer canvas at the specified index
+   * @param {number} index
+   */
+  removeLayerCanvas(index) {
+    const layerCanvas = this.layer_canvases[index];
+    if (layerCanvas) {
+      this.canvas_wrapper.removeChild(layerCanvas);
+      this.layer_canvases.splice(index, 1);
+    }
+  }
+
+  /**
+   * Sets the active layer by adjusting the Z-index and opacity of the layer canvases
+   * @param {number} activeIndex
+   */
+  setActiveLayer(activeIndex) {
+    this.layer_canvases.forEach((canvas, index) => {
+      canvas.style.zIndex =
+        index === activeIndex ? this.layer_canvases.length : index;
+    });
+  }
+
+  /**
+   * Renders all layers onto their respective canvases
+   */
+  renderLayers() {
+    this.layer_canvases.forEach((layerCanvas) => {
+      layerCanvas.clearCanvas();
+    });
+
+    this.map_editor.layers.forEach((layer, layerIndex) => {
+      const ctx = this.layer_canvases[layerIndex].getContext("2d");
+      layer.forEach((row, x) => {
+        row.forEach((asset, y) => {
           if (asset) {
             const img = new Image();
             img.src = asset;
@@ -77,8 +112,8 @@ export class MapEditorCanvas extends MapEditorPart {
               );
             };
           }
-        }
-      }
+        });
+      });
     });
   }
 }

@@ -2,16 +2,14 @@ import { Tool } from "./Tool.js";
 
 export class ZoomOut extends Tool {
   /**
-   *
-   * @param {MapEditorCanvas} canvas
+   * @param {MapEditor} map_editor
    */
-  constructor(canvas) {
-    super(canvas);
+  constructor(map_editor) {
+    super(map_editor);
     this.map_editor.style.cursor = `zoom-out`;
   }
 
   /**
-   * Handles mouse down event for zooming out
    * @param {Event} event
    */
   mouse_down(event) {
@@ -21,19 +19,17 @@ export class ZoomOut extends Tool {
   }
 
   /**
-   *
    * @param {Event} event
    */
   mouse_move(event) {}
 
   /**
-   *
    * @param {Event} event
    */
   mouse_up(event) {}
 
   /**
-   *
+   * Zooms out on the canvas based on the mouse position.
    * @param {Event} event
    */
   zoom(event) {

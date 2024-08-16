@@ -7,6 +7,7 @@ import { Eraser } from "../Tools/Eraser.js";
 import { ZoomIn } from "../Tools/ZoomIn.js";
 import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
+import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -19,18 +20,18 @@ export class MapEditor extends HTMLElement {
     this.selected_tool = null;
     this.layers = [];
     this.active_layer_index = 0;
+    this.layers_visibility = [];
+    this.layer_stacks = [];
     this.width = 64;
     this.height = 64;
     this.initialized = false;
     this.selected_points = [];
     this.pixel_size = 1;
     this.selected_asset = null;
-    this.action_stack = new ActionStack();
+    this.layer_stacks = new Map();
     this.action_buffer = [];
     this.scale = 1;
     this.image_cache = {};
-
-    this.add_layer(); // Adds the first layer and sets it as active
   }
 
   /**
@@ -51,7 +52,8 @@ export class MapEditor extends HTMLElement {
     this.set_listeners();
     this.selected_tool = new Pen(this);
     this.initialized = true;
-    this.dispatchEvent(new CustomEvent("layers-updated")); // Initial UI update
+    this.add_layer();
+    this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
   /**
@@ -115,15 +117,20 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Adds a new layer to the layers array
+   * Adds a new layer and its corresponding canvas
    */
   add_layer() {
     const new_layer = Array.from({ length: this.width }, () =>
       Array(this.height).fill("")
     );
     this.layers.push(new_layer);
+    this.layers_visibility.push(true);
 
-    // If this is the first layer, make it active
+    const layerCanvas = new DrawingCanvas(this.map_canvas);
+    this.map_canvas.addLayerCanvas(layerCanvas);
+
+    this.layer_stacks.set(this.layers.length - 1, new ActionStack());
+
     if (this.layers.length === 1) {
       this.active_layer_index = 0;
     }
@@ -131,26 +138,52 @@ export class MapEditor extends HTMLElement {
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
-  /**
-   * Removes a layer at the specified index
-   * @param {number} index
-   */
   remove_layer(index) {
     if (this.layers.length > 1) {
       this.layers.splice(index, 1);
+      this.layers_visibility.splice(index, 1);
+      this.map_canvas.removeLayerCanvas(index);
       this.active_layer_index = Math.max(0, this.active_layer_index - 1);
+      this.layer_stacks.delete(index);
       this.dispatchEvent(new CustomEvent("layers-updated"));
     }
   }
 
   /**
+   * Toggles the visibility of a layer
+   * @param {number} index
+   */
+  toggle_layer_visibility(index) {
+    if (index >= 0 && index < this.layers.length) {
+      this.layers_visibility[index] = !this.layers_visibility[index];
+      this.map_canvas.toggle_layer_visibility(
+        index,
+        this.layers_visibility[index]
+      );
+      this.dispatchEvent(new CustomEvent("layers-updated"));
+    }
+  }
+
+  /**
+   * Checks if a layer is visible
+   * @param {number} index
+   * @returns {boolean}
+   */
+  is_layer_visible(index) {
+    return this.layers_visibility[index];
+  }
+
+  /**
    * Switches to the layer at the specified index
-   * @param {number} index - The index of the layer to activate
+   * @param {number} index
    */
   switch_layer(index) {
     if (index >= 0 && index < this.layers.length) {
       this.active_layer_index = index;
+      this.map_canvas.setActiveLayer(index);
       this.dispatchEvent(new CustomEvent("layers-updated"));
+    } else {
+      console.error("Invalid layer index:", index);
     }
   }
 
@@ -228,21 +261,26 @@ export class MapEditor extends HTMLElement {
    * Ends grouping and pushes the action buffer to the stack
    */
   end_action_buffer() {
-    this.action_stack.push(this.action_buffer);
+    const current_stack = this.layer_stacks.get(this.active_layer_index);
+    if (current_stack) {
+      current_stack.push(this.action_buffer);
+    }
+    this.action_buffer = [];
   }
 
   /**
    * Reverts the last action (CTRL + Z)
    */
   revert_last_action() {
-    if (!this.action_stack.actions_is_empty()) {
-      const points = this.action_stack.pop_last_action();
+    const current_stack = this.layer_stacks.get(this.active_layer_index);
+
+    if (current_stack && !current_stack.actions_is_empty()) {
+      const points = current_stack.pop_last_action();
       points.forEach((point) => {
-        const { x, y, layer, prev_asset } = point;
-        this.layers[layer][x][y] = prev_asset;
+        this.active_layer[point.x][point.y] = point.prev_asset;
       });
-      this.dispatchEvent(
-        new CustomEvent("revert_undo", { detail: { points: points } })
+      this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
+        new CustomEvent("revert_undo", { detail: { points } })
       );
     }
   }
@@ -251,14 +289,17 @@ export class MapEditor extends HTMLElement {
    * Redoes the last reverted action
    */
   redo_last_action() {
-    if (!this.action_stack.redo_is_empty()) {
-      const points = this.action_stack.pop_last_redo();
+    const current_stack = this.layer_stacks.get(this.active_layer_index);
+
+    if (current_stack && !current_stack.redo_is_empty()) {
+      const points = current_stack.pop_last_redo();
       points.forEach((point) => {
-        const { x, y, layer, asset } = point;
-        this.layers[layer][x][y] = asset;
+        this.active_layer[point.x][point.y] = point.asset;
       });
-      this.dispatchEvent(
-        new CustomEvent("revert_redo", { detail: { points: points } })
+
+      // Trigger redo event only on the specific layer canvas
+      this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
+        new CustomEvent("revert_redo", { detail: { points } })
       );
     }
   }
@@ -283,7 +324,10 @@ export class MapEditor extends HTMLElement {
               prev_asset: prev_asset,
               asset: this.selected_asset,
             });
-            this.dispatchEvent(
+            // Trigger event only on the active layer canvas
+            this.map_canvas.layer_canvases[
+              this.active_layer_index
+            ].dispatchEvent(
               new CustomEvent("pen_matrix_changed", {
                 detail: {
                   x: xi,
@@ -338,7 +382,8 @@ export class MapEditor extends HTMLElement {
           prev_asset: prev_asset,
           asset: "",
         });
-        this.dispatchEvent(
+        // Trigger event only on the active layer canvas
+        this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
           new CustomEvent("eraser_matrix_changed", {
             detail: {
               x: xi,
