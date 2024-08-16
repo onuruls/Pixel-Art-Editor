@@ -15,20 +15,64 @@ title-screen {
   justify-content: center;
 
   initial-buttons {
-    button {
-      height: 50px;
-      width: 150px;
-      margin: 20px;
-      font-family: monospace;
-      font-size: 20px;
-      font-weight: bold;
-      transition: all 0.2s ease-in;
-    }
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+    justify-content: center;
 
-    button:hover {
-      height: 60px;
-      width: 180px;
-      font-size: 22px;
+    .btn {
+      width: 200px;
+      height: 50px;
+      font-size: 20px;
+      background-color: var(--button-bg);
+      color: var(--button-color);
+      border: var(--button-border);
+      cursor: pointer;
+      border-radius: 5px;
+
+      &:hover {
+        background-color: var(--button-hover-bg);
+      }
+    }
+  }
+
+  add-project-inputs {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+    justify-content: center;
+
+    #new_project_name {
+      width: 100%;
+      font-size: 20px;
+      background-color: var(--button-bg);
+      color: var(--button-color);
+      border: var(--button-border);
+      border-radius: 5px;
+      padding: 10px;
+    }
+    .button-div {
+      display: flex;
+      width: 100%;
+      column-gap: 20px;
+
+      .btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 20px;
+        background-color: var(--button-bg);
+        color: var(--button-color);
+        border: var(--button-border);
+        cursor: pointer;
+        border-radius: 5px;
+
+        &:hover {
+          background-color: var(--button-hover-bg);
+        }
+      }
     }
   }
 
@@ -39,69 +83,75 @@ title-screen {
     height: 400px;
     width: 750px;
     background-color: var(--secondary-bg);
+    padding: 10px;
+    row-gap: 10px;
+    scrollbar-color: var(--neutral-accent) var(--secondary-bg);
 
-    .views_container {
-      height: 90%;
-      width: 90%;
+    .views-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      row-gap: 5px;
 
-      project-view {
+      .project-container {
         display: flex;
-        height: 40px;
-        margin: 10px;
-        color: white;
-        background-color: var(--container-bg);
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
+        background-color: var(--container-bg);
+        padding: 10px;
+        border-radius: 5px;
         transition: box-shadow 0.2s ease-in-out;
 
-        .project_name {
-          font-size: 20px;
-          margin: 0 0 0 10;
-          padding: 0;
+        .project-buttons {
+          display: flex;
+          flex-direction: row;
+          column-gap: 10px;
+          align-items: center;
+
+          .btn {
+            padding: 10px;
+            width: min-content;
+            text-align: center;
+          }
         }
 
-        .project_date {
-          font-size: 12px;
-          margin: 0 10 0 0;
+        project-view {
+          display: flex;
+          flex: 1;
+          margin-left: 25px;
+          justify-content: space-between;
+          align-items: center;
+
+          .project-name {
+            font-size: larger;
+            color: white;
+          }
+          .project-date {
+            color: lightgray;
+            align-self: center;
+          }
         }
       }
 
-      project-view:hover {
-        box-shadow: 3px 3px 5px var(--primary-bg);
+      .project-container:hover {
+        box-shadow: 3px 3px 10px var(--primary-bg);
       }
     }
 
-    button {
-      width: 100px;
-      height: 35px;
-      font-size: 30px;
-    }
-  }
+    .btn {
+      width: 200px;
+      height: 50px;
+      font-size: 20px;
+      background-color: var(--button-bg);
+      color: var(--button-color);
+      border: var(--button-border);
+      cursor: pointer;
+      border-radius: 5px;
 
-  add-project-inputs {
-    display: flex;
-    flex-direction: column;
-    width: 360px;
-    height: 100px;
-
-    input {
-      text-align: center;
-      width: 100%;
-      height: 40px;
-      font-size: 30px;
-      font-weight: bold;
-    }
-
-    .button_div {
-      width: 100%;
-      display: flex;
-      margin-top: 10px;
-      justify-content: space-between;
-
-      button {
-        height: 30px;
-        font-size: 25px;
-        width: 40%;
+      &:hover {
+        background-color: var(--button-hover-bg);
       }
     }
   }
