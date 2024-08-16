@@ -1,8 +1,8 @@
 map-editor-layers {
   padding: 5px;
   background-color: var(--secondary-bg);
+  min-height: 200px;
   width: 200px;
-  height: 200px;
   display: flex;
   justify-content: center;
 

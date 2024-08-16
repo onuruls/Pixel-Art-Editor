@@ -11,7 +11,7 @@ import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 
 export class MapEditor extends HTMLElement {
   /**
-   * Creates an instance of MapEditor
+   *
    * @param {EditorTool} editor_tool
    */
   constructor(editor_tool) {
@@ -35,7 +35,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Called when the element is added to the DOM
+   * From HTMLElement called when element is mounted
    */
   connectedCallback() {
     if (!this.initialized) {
@@ -44,7 +44,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Initializes the MapEditor with its components
+   * Initializes the MapEditor with its Parts
    */
   init() {
     this.appendCSS();
@@ -57,7 +57,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Appends the CSS file to the MapEditor
+   * Appends CSS to the MapEditor
    */
   appendCSS() {
     const css = document.createElement("link");
@@ -79,7 +79,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Sets the necessary event listeners
+   * Sets the necessary eventlisteners
    */
   set_listeners() {
     this.map_tools
@@ -138,11 +138,15 @@ export class MapEditor extends HTMLElement {
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
+  /**
+   * Removes a layer at the specified index
+   * @param {number} index
+   */
   remove_layer(index) {
     if (this.layers.length > 1) {
       this.layers.splice(index, 1);
       this.layers_visibility.splice(index, 1);
-      this.map_canvas.removeLayerCanvas(index);
+      this.map_canvas.remove_layer_canvas(index);
       this.active_layer_index = Math.max(0, this.active_layer_index - 1);
       this.layer_stacks.delete(index);
       this.dispatchEvent(new CustomEvent("layers-updated"));
@@ -180,7 +184,6 @@ export class MapEditor extends HTMLElement {
   switch_layer(index) {
     if (index >= 0 && index < this.layers.length) {
       this.active_layer_index = index;
-      this.map_canvas.setActiveLayer(index);
       this.dispatchEvent(new CustomEvent("layers-updated"));
     } else {
       console.error("Invalid layer index:", index);
@@ -233,7 +236,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Applies a given action to a block of pixels defined by this.pixel_size
+   * Applies the given action to a block of pixels defined by this.pixel_size
    * @param {Number} x
    * @param {Number} y
    * @param {Function} action
@@ -251,14 +254,14 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Starts grouping pen points for the action stack
+   * Starts gouping pen points for the action stack
    */
   start_action_buffer() {
     this.action_buffer = [];
   }
 
   /**
-   * Ends grouping and pushes the action buffer to the stack
+   * Ends grouping and pushes to stack
    */
   end_action_buffer() {
     const current_stack = this.layer_stacks.get(this.active_layer_index);
@@ -269,7 +272,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Reverts the last action (CTRL + Z)
+   * Reverts the last action done (STRG + Z)
    */
   revert_last_action() {
     const current_stack = this.layer_stacks.get(this.active_layer_index);
@@ -286,7 +289,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Redoes the last reverted action
+   * Redoes the last reverted action on the active layer (STRG + Y)
    */
   redo_last_action() {
     const current_stack = this.layer_stacks.get(this.active_layer_index);
@@ -297,7 +300,6 @@ export class MapEditor extends HTMLElement {
         this.active_layer[point.x][point.y] = point.asset;
       });
 
-      // Trigger redo event only on the specific layer canvas
       this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
         new CustomEvent("revert_redo", { detail: { points } })
       );
@@ -305,7 +307,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Handles changes to the matrix when using the pen tool
    * @param {Number} x
    * @param {Number} y
    */
@@ -324,7 +325,6 @@ export class MapEditor extends HTMLElement {
               prev_asset: prev_asset,
               asset: this.selected_asset,
             });
-            // Trigger event only on the active layer canvas
             this.map_canvas.layer_canvases[
               this.active_layer_index
             ].dispatchEvent(
@@ -366,7 +366,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Handles changes to the matrix when using the eraser tool
    * @param {Number} x
    * @param {Number} y
    */
@@ -382,7 +381,6 @@ export class MapEditor extends HTMLElement {
           prev_asset: prev_asset,
           asset: "",
         });
-        // Trigger event only on the active layer canvas
         this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
           new CustomEvent("eraser_matrix_changed", {
             detail: {
@@ -396,7 +394,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Handles hover events over the canvas
    * @param {Number} x
    * @param {Number} y
    */
@@ -416,16 +413,15 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Removes the hover effect when the mouse leaves the canvas
+   * Removes the hover-effect, when mouse leaves the canvas
    */
   remove_hover() {
     this.dispatchEvent(new CustomEvent("remove_hover"));
   }
 
   /**
-   * Selects a tool based on the provided string identifier
+   * Gets the fitting tool, when clicked
    * @param {String} string
-   * @returns {Pen|Eraser|ZoomIn|ZoomOut}
    */
   select_tool_from_string(string) {
     switch (string) {
@@ -443,7 +439,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Checks if the given x and y coordinates are within the canvas bounds
+   * Returns true if the x and y coordinate are in the canvas bounds
    * @param {Number} x
    * @param {Number} y
    * @returns {Boolean}

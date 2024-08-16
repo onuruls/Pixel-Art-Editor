@@ -2,7 +2,6 @@ import { MapEditorPart } from "./MapEditorPart.js";
 
 export class MapEditorLayers extends MapEditorPart {
   /**
-   * Creates an instance of MapEditorLayers
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
@@ -22,9 +21,6 @@ export class MapEditorLayers extends MapEditorPart {
       `;
   }
 
-  /**
-   * Initializes the layers component and sets up event listeners
-   */
   init() {
     this.querySelector(".add-layer-button").addEventListener("click", () => {
       this.map_editor.add_layer();

@@ -6,7 +6,7 @@ import { InputCanvas } from "./CanvasElements/InputCanvas.js";
 
 export class MapEditorCanvas extends MapEditorPart {
   /**
-   * Creates an instance of MapEditorCanvas
+   *
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
@@ -19,16 +19,13 @@ export class MapEditorCanvas extends MapEditorPart {
   }
 
   /**
-   * Returns the HTML string for the component
+   * Returns the Html-String
    * @returns {String}
    */
   render() {
     return `<div class="canvas-wrapper"></div>`;
   }
 
-  /**
-   * Initializes the MapEditorCanvas with its components
-   */
   init() {
     this.canvas_wrapper = this.querySelector(".canvas-wrapper");
     this.canvas_wrapper.append(
@@ -68,23 +65,12 @@ export class MapEditorCanvas extends MapEditorPart {
    * Removes the layer canvas at the specified index
    * @param {number} index
    */
-  removeLayerCanvas(index) {
+  remove_layer_canvas(index) {
     const layerCanvas = this.layer_canvases[index];
     if (layerCanvas) {
       this.canvas_wrapper.removeChild(layerCanvas);
       this.layer_canvases.splice(index, 1);
     }
-  }
-
-  /**
-   * Sets the active layer by adjusting the Z-index and opacity of the layer canvases
-   * @param {number} activeIndex
-   */
-  setActiveLayer(activeIndex) {
-    this.layer_canvases.forEach((canvas, index) => {
-      canvas.style.zIndex =
-        index === activeIndex ? this.layer_canvases.length : index;
-    });
   }
 
   /**

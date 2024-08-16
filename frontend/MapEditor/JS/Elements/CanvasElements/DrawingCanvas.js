@@ -3,7 +3,8 @@ import { CanvasElement } from "./CanvasElement.js";
 
 export class DrawingCanvas extends CanvasElement {
   /**
-   * Creates an instance of DrawingCanvas
+   * Bottom level Canvas
+   * Shows the drawing (canvas_matrix)
    * @param {MapEditorCanvas} canvas
    */
   constructor(canvas) {
@@ -11,7 +12,7 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Renders the canvas element
+   * Returns the Html-String
    * @returns {String}
    */
   render() {
@@ -19,7 +20,7 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Initializes the DrawingCanvas with its components
+   * Initializes the Canvas
    */
   init() {
     this.context = this.querySelector("canvas").getContext("2d"); // Setzt den Kontext
@@ -38,8 +39,8 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Handles drawing on the canvas with the pen tool
-   * @param {CustomEvent} event
+   * Pen tool
+   * @param {Event} event
    */
   draw_pen_canvas(event) {
     const scale = this.map_editor.scale;
@@ -51,8 +52,8 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Handles erasing on the canvas
-   * @param {CustomEvent} event
+   * Eraser tool
+   * @param {Event} event
    */
   erase_canvas(event) {
     const scale = this.map_editor.scale;
@@ -63,8 +64,8 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Handles undoing an action on the canvas
-   * @param {CustomEvent} event
+   * Reverts the last action from the action_stack in the map_editor
+   * @param {Event} event
    */
   revert_undo(event) {
     const points = event.detail.points;
@@ -75,8 +76,8 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Handles redoing an action on the canvas
-   * @param {CustomEvent} event
+   * Redoing the last undo-action from the action stack
+   * @param {Event} event
    */
   revert_redo(event) {
     const points = event.detail.points;
@@ -87,17 +88,20 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Redraws the entire canvas based on the current state
+   * Redraws all layers
    */
   redraw_canvas() {
-    const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
-    this.map_editor.canvas_matrix.forEach((row, x) =>
-      row.forEach((pixel, y) => {
-        this.erase_single_pixel(x, y);
-        this.paint_single_pixel(x, y, pixel);
-      })
-    );
+    const ctx = this.context;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.map_editor.layers.forEach((layer) => {
+      layer.forEach((row, x) => {
+        row.forEach((pixel, y) => {
+          if (pixel) {
+            this.paint_single_pixel(x, y, pixel);
+          }
+        });
+      });
+    });
   }
 }
 

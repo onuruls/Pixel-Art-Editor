@@ -6,8 +6,10 @@ export class Tool {
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
+    this.layer_canvases = map_editor.map_canvas.layer_canvases;
+    // this.map_canvas = map_editor.map_canvas;
     this.map_editor = map_editor;
-    this.map_canvas = map_editor.map_canvas;
+
     this.is_drawing = false;
     this.hover_position = { x: 0, y: 0 };
     this.last_position = { x: 0, y: 0 };
@@ -117,13 +119,13 @@ export class Tool {
    * @returns {{x: Number, y: Number}}
    */
   get_mouse_position(event) {
-    const rect = this.map_canvas.getBoundingClientRect();
+    const activeLayerCanvas =
+      this.layer_canvases[this.map_editor.active_layer_index];
+    const rect = activeLayerCanvas.getBoundingClientRect();
     const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
     const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);
     const x = Math.floor(mouseX);
     const y = Math.floor(mouseY);
-
-    // Adjust position to fix the offset issue
-    return { x: x - 1, y: y - 1 };
+    return { x, y };
   }
 }
