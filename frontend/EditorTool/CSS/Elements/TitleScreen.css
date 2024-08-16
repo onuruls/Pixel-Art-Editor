@@ -84,6 +84,8 @@ title-screen {
     width: 750px;
     background-color: var(--secondary-bg);
     padding: 10px;
+    row-gap: 10px;
+    scrollbar-color: var(--neutral-accent) var(--secondary-bg);
 
     .views-container {
       display: flex;
@@ -96,6 +98,7 @@ title-screen {
       .project-container {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         background-color: var(--container-bg);
         padding: 10px;
         border-radius: 5px;
@@ -103,8 +106,9 @@ title-screen {
 
         .project-buttons {
           display: flex;
-          width: min-content;
+          flex-direction: row;
           column-gap: 10px;
+          align-items: center;
 
           .btn {
             padding: 10px;
@@ -118,7 +122,6 @@ title-screen {
           flex: 1;
           margin-left: 25px;
           justify-content: space-between;
-          text-align: center;
           align-items: center;
 
           .project-name {
@@ -127,6 +130,7 @@ title-screen {
           }
           .project-date {
             color: lightgray;
+            align-self: center;
           }
         }
       }
