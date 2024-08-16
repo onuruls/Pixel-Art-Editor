@@ -34,7 +34,7 @@ export class AddProjectInputs extends HTMLElement {
    * @returns {HTMLDivElement}
    */
   create_button_div() {
-    return Util.create_element("div", "", ["button_div"], "");
+    return Util.create_element("div", "", ["button-div"], "");
   }
 
   /**

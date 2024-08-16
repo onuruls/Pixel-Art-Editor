@@ -22,7 +22,7 @@ export class InitialButtons extends HTMLElement {
   create_new_button() {
     return Util.create_button(
       "new_button",
-      ["btn", "title-btn"],
+      ["btn"],
       "New Project",
       this.title_screen.new_project_clicked.bind(this.title_screen)
     );

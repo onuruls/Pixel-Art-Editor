@@ -31,7 +31,7 @@ export class ProjectsOverview extends HTMLElement {
    * @returns {HTMLDivElement}
    */
   create_views_container() {
-    return Util.create_element("div", "", ["views_container"], "");
+    return Util.create_element("div", "", ["views-container"], "");
   }
 
   /**
@@ -48,40 +48,39 @@ export class ProjectsOverview extends HTMLElement {
 
       const project_view = new ProjectView(this.title_screen, project);
 
-      const rename_button = this.create_rename_button(project);
-      const delete_button = this.create_delete_button(project);
+      const project_buttons = this.create_project_buttons(project);
 
-      project_container.append(rename_button, delete_button, project_view);
+      project_container.append(project_buttons, project_view);
       return project_container;
     });
   }
 
-  /**
-   * @param {Project} project
-   * @returns {HTMLButtonElement}
-   */
-  create_rename_button(project) {
+  create_project_buttons(project) {
+    const project_buttons = Util.create_element(
+      "div",
+      "",
+      ["project-buttons"],
+      ""
+    );
+
     const rename_button = Util.create_button(
       `rename-${project.id}`,
-      ["btn"],
-      "Rename",
-      () => this.rename_project(project)
+      ["btn", "rename-btn"],
+      "",
+      () => this.rename_project(project),
+      ["fa-solid", "fa-edit", "fa-fw"]
     );
-    return rename_button;
-  }
 
-  /**
-   * @param {Project} project
-   * @returns {HTMLButtonElement}
-   */
-  create_delete_button(project) {
     const delete_button = Util.create_button(
       `delete-${project.id}`,
-      ["btn"],
-      "Delete",
-      () => this.delete_project(project)
+      ["btn", "delete-btn"],
+      "",
+      () => this.delete_project(project),
+      ["fa-solid", "fa-trash", "fa-fw"]
     );
-    return delete_button;
+
+    project_buttons.append(rename_button, delete_button);
+    return project_buttons;
   }
 
   init() {
