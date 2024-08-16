@@ -176,11 +176,54 @@ class DbClient {
   }
 
   /**
+   * Renames a project
+   * @param {Number} id
+   * @param {String} new_name
+   * @returns {Promise}
+   */
+  rename_project(id, new_name) {
+    return new Promise((res, rej) => {
+      db.run(
+        `UPDATE projects SET name = ? WHERE id = ?`,
+        [new_name, id],
+        function (err) {
+          if (err) {
+            console.error("Error renaming project:", err);
+            rej(err);
+          } else {
+            console.log(`Project with ID ${id} renamed to ${new_name}.`);
+            res();
+          }
+        }
+      );
+    });
+  }
+
+  /**
    * Updates the project
    * @param {Number} id
    */
   update_project(id) {
     console.log("Not implementes yet");
+  }
+
+  /**
+   * Deletes a project
+   * @param {Number} id
+   * @returns {Promise}
+   */
+  delete_project(id) {
+    return new Promise((res, rej) => {
+      db.run(`DELETE FROM projects WHERE id = ?`, [id], function (err) {
+        if (err) {
+          console.error("Error deleting project:", err);
+          rej(err);
+        } else {
+          console.log(`Project with ID ${id} deleted.`);
+          res();
+        }
+      });
+    });
   }
 
   /**

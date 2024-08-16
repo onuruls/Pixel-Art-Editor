@@ -27,7 +27,7 @@ export class ProjectView extends HTMLElement {
     return Util.create_element(
       "p",
       this.project._id,
-      ["project_name"],
+      ["project-name"],
       this.project.name
     );
   }
@@ -39,8 +39,8 @@ export class ProjectView extends HTMLElement {
     return Util.create_element(
       "p",
       this.project._id,
-      ["project_date"],
-      `Erstellt am: ${this.project.created_at}`
+      ["project-date"],
+      `Created at: ${this.project.created_at}`
     );
   }
 

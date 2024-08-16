@@ -17,7 +17,6 @@ export class AddProjectInputs extends HTMLElement {
     this.button_div.appendChild(this.submit_button);
     this.appendChild(this.name_input);
     this.appendChild(this.button_div);
-    this.init();
   }
 
   /**
@@ -26,7 +25,7 @@ export class AddProjectInputs extends HTMLElement {
    */
   create_name_input() {
     const input = Util.create_element("input", "new_project_name");
-    input.setAttribute("placeholder", "Projekt-Name");
+    input.setAttribute("placeholder", "Project name");
     return input;
   }
 
@@ -35,7 +34,7 @@ export class AddProjectInputs extends HTMLElement {
    * @returns {HTMLDivElement}
    */
   create_button_div() {
-    return Util.create_element("div", "", ["button_div"], "");
+    return Util.create_element("div", "", ["button-div"], "");
   }
 
   /**
@@ -43,7 +42,12 @@ export class AddProjectInputs extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_back_button() {
-    return Util.create_element("button", "back_button", [], "Zurück");
+    return Util.create_button(
+      "back_button",
+      ["btn"],
+      "Back",
+      this.title_screen.back_button_clicked.bind(this.title_screen)
+    );
   }
 
   /**
@@ -51,16 +55,10 @@ export class AddProjectInputs extends HTMLElement {
    * @returns {HTMLButtonElement}
    */
   create_submit_button() {
-    return Util.create_element("button", "create_button", [], "Erstellen");
-  }
-
-  init() {
-    this.back_button.addEventListener(
-      "click",
-      this.title_screen.back_button_clicked.bind(this.title_screen)
-    );
-    this.submit_button.addEventListener(
-      "click",
+    return Util.create_button(
+      "create_button",
+      ["btn"],
+      "Create",
       this.submit_button_clicked.bind(this)
     );
   }
@@ -72,17 +70,6 @@ export class AddProjectInputs extends HTMLElement {
   submit_button_clicked(event) {
     event.preventDefault();
     this.title_screen.submit_button_clicked(this.name_input.value);
-  }
-
-  disconnectedCallback() {
-    this.back_button.removeEventListener(
-      "click",
-      this.title_screen.back_button_clicked.bind(this.title_screen)
-    );
-    this.submit_button.removeEventListener(
-      "click",
-      this.title_screen.submit_button_clicked.bind(this.title_screen)
-    );
   }
 }
 
