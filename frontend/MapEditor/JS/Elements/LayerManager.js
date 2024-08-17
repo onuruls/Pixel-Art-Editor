@@ -1,4 +1,5 @@
 import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
+
 export class LayerManager {
   constructor() {
     this.layers = [];
@@ -11,12 +12,13 @@ export class LayerManager {
    * @param {Array} layer
    */
   add_layer(layer) {
-    this.layers.push(layer);
+    this.layers.push({ content: layer, visible: true });
     this.layer_stacks.set(this.layers.length - 1, new ActionStack());
     if (this.layers.length === 1) {
       this.active_layer_index = 0;
     }
   }
+
   /**
    * Removes a layer at the specified index
    * @param {number} index
@@ -56,7 +58,7 @@ export class LayerManager {
    * @returns {Array} The active layer
    */
   get_active_layer() {
-    return this.layers[this.active_layer_index];
+    return this.layers[this.active_layer_index].content;
   }
 
   /**

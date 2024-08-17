@@ -123,6 +123,9 @@ export class MapEditorLayers extends MapEditorPart {
     delete_button.addEventListener("click", (e) => {
       e.stopPropagation();
       this.map_editor.remove_layer(index);
+
+      // Immediately re-render the layer list and reset active layer
+      this.map_editor.active_layer_index = Math.max(0, index - 1);
       this.render_layers_list();
     });
 
