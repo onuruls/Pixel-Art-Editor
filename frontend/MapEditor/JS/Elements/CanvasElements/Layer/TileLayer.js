@@ -1,22 +1,13 @@
-import { MapEditorCanvas } from "../MapEditorCanvas.js";
-import { CanvasElement } from "./CanvasElement.js";
+import { CanvasLayer } from "./CanvasLayer.js";
 
-export class DrawingCanvas extends CanvasElement {
+export class TileLayer extends CanvasLayer {
   /**
    * Bottom level Canvas
-   * Shows the drawing (canvas_matrix)
+   * Shows the drawing
    * @param {MapEditorCanvas} canvas
    */
   constructor(canvas) {
     super(canvas);
-  }
-
-  /**
-   * Returns the Html-String
-   * @returns {String}
-   */
-  render() {
-    return `<canvas></canvas>`;
   }
 
   /**
@@ -30,11 +21,9 @@ export class DrawingCanvas extends CanvasElement {
     this.addEventListener("eraser_matrix_changed", (event) =>
       this.erase_canvas(event)
     );
-    this.addEventListener("revert_undo", (event) => this.revert_undo(event));
-    this.addEventListener("revert_redo", (event) => this.revert_redo(event));
-    this.map_editor.addEventListener("zoom_changed", () => {
-      this.redraw_canvas();
-    });
+    this.map_editor.addEventListener("zoom_changed", () =>
+      this.redraw_canvas()
+    );
   }
 
   /**
@@ -64,7 +53,7 @@ export class DrawingCanvas extends CanvasElement {
 
   /**
    * Reverts the last action from the action_stack in the map_editor
-   * @param {Event} event
+   * @param {Event} point
    */
   revert_redo(point) {
     this.erase_single_pixel(point.x, point.y);
@@ -73,7 +62,7 @@ export class DrawingCanvas extends CanvasElement {
 
   /**
    * Redoes the last undo-action from the action stack
-   * @param {Event} event
+   * @param {Event} point
    */
   revert_undo(point) {
     this.erase_single_pixel(point.x, point.y);
@@ -144,4 +133,4 @@ export class DrawingCanvas extends CanvasElement {
   }
 }
 
-customElements.define("map-drawing-canvas", DrawingCanvas);
+customElements.define("tile-layer", TileLayer);

@@ -1,5 +1,5 @@
 import { MapEditorPart } from "./MapEditorPart.js";
-import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
+import { TileLayer } from "./CanvasElements/Layer/TileLayer.js";
 import { TempCanvas } from "./CanvasElements/TempCanvas.js";
 import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
 import { InputCanvas } from "./CanvasElements/InputCanvas.js";
@@ -54,7 +54,7 @@ export class MapEditorCanvas extends MapEditorPart {
 
   /**
    * Adds a new layer canvas to the wrapper
-   * @param {DrawingCanvas} layer_canvas
+   * @param {TileLayer} layer_canvas
    */
   add_layer_canvas(layer_canvas) {
     this.layer_canvases.push(layer_canvas);

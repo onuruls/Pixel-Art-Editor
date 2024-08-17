@@ -1,5 +1,5 @@
 import { LayerManager } from "./LayerManager.js";
-import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
+import { TileLayer } from "./CanvasElements/Layer/TileLayer.js";
 import { MapEditorCanvas } from "./MapEditorCanvas.js";
 import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
@@ -132,7 +132,7 @@ export class MapEditor extends HTMLElement {
     );
     this.layer_manager.add_layer(new_layer);
 
-    const layerCanvas = new DrawingCanvas(this.map_canvas);
+    const layerCanvas = new TileLayer(this.map_canvas);
     this.map_canvas.add_layer_canvas(layerCanvas);
 
     this.dispatchEvent(new CustomEvent("layers-updated"));
@@ -405,7 +405,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Gets the fitting tool, when clicked
+   * Gets the fitting tool, when click
    * @param {String} string
    */
   select_tool_from_string(string) {
