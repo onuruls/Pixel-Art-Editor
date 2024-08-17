@@ -17,30 +17,70 @@ export class ProjectsOverview extends HTMLElement {
     this.project_views = this.create_project_views();
     this.init();
   }
+
   /**
-   *
    * @returns {HTMLButtonElement}
    */
   create_back_button() {
-    return Util.create_element("button", "back_button", [], "Zurück");
+    return Util.create_button("back_button", ["btn"], "Back", () =>
+      this.title_screen.back_button_clicked()
+    );
   }
 
   /**
-   *
    * @returns {HTMLDivElement}
    */
   create_views_container() {
-    return Util.create_element("div", "", ["views_container"], "");
+    return Util.create_element("div", "", ["views-container"], "");
   }
 
   /**
-   *
    * @returns {Array<HTMLDivElement>}
    */
   create_project_views() {
     return this.projects.map((project) => {
-      return new ProjectView(this.title_screen, project);
+      const project_container = Util.create_element(
+        "div",
+        "",
+        ["project-container"],
+        ""
+      );
+
+      const project_view = new ProjectView(this.title_screen, project);
+
+      const project_buttons = this.create_project_buttons(project);
+
+      project_container.append(project_buttons, project_view);
+      return project_container;
     });
+  }
+
+  create_project_buttons(project) {
+    const project_buttons = Util.create_element(
+      "div",
+      "",
+      ["project-buttons"],
+      ""
+    );
+
+    const rename_button = Util.create_button(
+      `rename-${project.id}`,
+      ["btn", "rename-btn"],
+      "",
+      () => this.rename_project(project),
+      ["fa-solid", "fa-edit", "fa-fw"]
+    );
+
+    const delete_button = Util.create_button(
+      `delete-${project.id}`,
+      ["btn", "delete-btn"],
+      "",
+      () => this.delete_project(project),
+      ["fa-solid", "fa-trash", "fa-fw"]
+    );
+
+    project_buttons.append(rename_button, delete_button);
+    return project_buttons;
   }
 
   init() {
@@ -51,18 +91,63 @@ export class ProjectsOverview extends HTMLElement {
     this.appendChild(this.back_button);
   }
 
-  connectedCallback() {
-    this.back_button.addEventListener(
-      "click",
-      this.title_screen.back_button_clicked.bind(this.title_screen)
-    );
+  /**
+   * Handles renaming of the project
+   * @param {Project} project
+   */
+  async rename_project(project) {
+    const new_name = prompt(`Enter new name for project ${project.name}:`);
+    if (new_name) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/projects/${project.id}/rename`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ new_name }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to rename project.");
+        }
+
+        console.log(`Project ${project.id} renamed to ${new_name}`);
+        project.name = new_name;
+        this.render_loaded_projects(this.projects);
+      } catch (error) {
+        console.error("Error renaming project:", error);
+      }
+    }
   }
 
-  disconnectedCallback() {
-    this.back_button.removeEventListener(
-      "click",
-      this.title_screen.back_button_clicked.bind(this.title_screen)
-    );
+  /**
+   * Handles deletion of the project
+   * @param {Project} project
+   */
+  async delete_project(project) {
+    if (confirm(`Are you sure you want to delete project ${project.name}?`)) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/projects/${project.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete project.");
+        }
+
+        console.log(`Project ${project.id} deleted.`);
+        this.projects = this.projects.filter((p) => p.id !== project.id);
+        this.render_loaded_projects(this.projects);
+      } catch (error) {
+        console.error("Error deleting project:", error);
+      }
+    }
   }
 }
 
