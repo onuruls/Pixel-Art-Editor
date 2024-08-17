@@ -70,21 +70,31 @@ export class LayerManager {
 
   /**
    * Reverts the last action done on the active layer
+   * @param {Function} apply_undo
    */
-  revert_last_action() {
+  revert_last_action(apply_undo) {
     const current_stack = this.layer_stacks.get(this.active_layer_index);
     if (current_stack && !current_stack.actions_is_empty()) {
-      return current_stack.pop_last_action();
+      const points = current_stack.pop_last_action();
+      points.forEach((point) => {
+        this.get_active_layer()[point.x][point.y] = point.prev_asset;
+        apply_undo(point);
+      });
     }
   }
 
   /**
    * Redoes the last reverted action on the active layer
+   * @param {Function} apply_redo
    */
-  redo_last_action() {
+  redo_last_action(apply_redo) {
     const current_stack = this.layer_stacks.get(this.active_layer_index);
     if (current_stack && !current_stack.redo_is_empty()) {
-      return current_stack.pop_last_redo();
+      const points = current_stack.pop_last_redo();
+      points.forEach((point) => {
+        this.get_active_layer()[point.x][point.y] = point.asset;
+        apply_redo(point);
+      });
     }
   }
 }

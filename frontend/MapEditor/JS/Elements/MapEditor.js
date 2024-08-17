@@ -171,31 +171,39 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Reverts the last action done (STRG + Z)
+   * Reverts the last action done (CTRL + Z)
    */
   revert_last_action() {
-    const points = this.layer_manager.revert_last_action();
-    if (points) {
-      points.forEach((point) => {
-        this.map_canvas.layer_canvases[
-          this.layer_manager.active_layer_index
-        ].dispatchEvent(new CustomEvent("revert_undo", { detail: { points } }));
-      });
-    }
+    this.layer_manager.revert_last_action((point) => {
+      this.apply_undo(point);
+    });
   }
 
   /**
-   * Redoes the last reverted action on the active layer (STRG + Y)
+   * Redoes the last reverted action on the active layer (CTRL + Y)
    */
   redo_last_action() {
-    const points = this.layer_manager.redo_last_action();
-    if (points) {
-      points.forEach((point) => {
-        this.map_canvas.layer_canvases[
-          this.layer_manager.active_layer_index
-        ].dispatchEvent(new CustomEvent("revert_redo", { detail: { points } }));
-      });
-    }
+    this.layer_manager.redo_last_action((point) => {
+      this.apply_redo(point);
+    });
+  }
+
+  /**
+   * Function to apply an undo operation on the canvas.
+   * @param {Object} point
+   */
+  apply_undo(point) {
+    this.active_layer[point.x][point.y] = point.prev_asset;
+    this.map_canvas.layer_canvases[this.active_layer_index].revert_undo(point);
+  }
+
+  /**
+   * Function to apply a redo operation on the canvas.
+   * @param {Object} point
+   */
+  apply_redo(point) {
+    this.active_layer[point.x][point.y] = point.asset;
+    this.map_canvas.layer_canvases[this.active_layer_index].revert_redo(point);
   }
 
   /**
