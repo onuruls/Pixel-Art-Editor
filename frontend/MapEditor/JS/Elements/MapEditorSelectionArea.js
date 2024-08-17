@@ -27,12 +27,12 @@ export class MapEditorSelectionArea extends MapEditorPart {
     this.append(this.map_sprite_preview, this.map_map_preview, this.map_layers);
 
     this.map_editor.addEventListener("layers-updated", () => {
-      this.map_layers.renderLayersList(
+      this.map_layers.render_layers_list(
         this.map_editor.layers,
         this.map_editor.active_layer_index
       );
     });
-    this.map_layers.renderLayersList(
+    this.map_layers.render_layers_list(
       this.map_editor.layers,
       this.map_editor.active_layer_index
     );
