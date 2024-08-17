@@ -23,19 +23,16 @@ export class MapEditorLayers extends MapEditorPart {
   init() {
     this.querySelector(".add-layer-button").addEventListener("click", () => {
       this.map_editor.add_layer();
-      this.render_layers_list(
-        this.map_editor.layers,
-        this.map_editor.active_layer_index
-      );
+      this.render_layers_list();
     });
   }
 
   /**
    * Renders the list of layers in the UI
-   * @param {Array} layers
-   * @param {number} active_layer_index
    */
-  render_layers_list(layers, active_layer_index) {
+  render_layers_list() {
+    const layers = this.map_editor.layer_manager.layers;
+    const active_layer_index = this.map_editor.active_layer_index;
     const layersList = this.querySelector(".layers-list");
     layersList.innerHTML = "";
 
@@ -66,10 +63,7 @@ export class MapEditorLayers extends MapEditorPart {
 
     li.addEventListener("click", () => {
       this.map_editor.switch_layer(index);
-      this.render_layers_list(
-        this.map_editor.layers,
-        this.map_editor.active_layer_index
-      );
+      this.render_layers_list();
     });
 
     return li;
@@ -96,7 +90,7 @@ export class MapEditorLayers extends MapEditorPart {
     const visibility_button = document.createElement("button");
     visibility_button.classList.add("visibility_button");
 
-    const isVisible = this.map_editor.is_layer_visible(index);
+    const isVisible = this.map_editor.layer_manager.is_layer_visible(index);
     visibility_button.innerHTML = isVisible
       ? '<i class="fas fa-eye"></i>'
       : '<i class="fas fa-eye-slash"></i>';
@@ -104,9 +98,10 @@ export class MapEditorLayers extends MapEditorPart {
     visibility_button.addEventListener("click", (e) => {
       e.stopPropagation();
       this.map_editor.toggle_layer_visibility(index);
-      visibility_button.innerHTML = this.map_editor.is_layer_visible(index)
-        ? '<i class="fas fa-eye"></i>'
-        : '<i class="fas fa-eye-slash"></i>';
+      visibility_button.innerHTML =
+        this.map_editor.layer_manager.is_layer_visible(index)
+          ? '<i class="fas fa-eye"></i>'
+          : '<i class="fas fa-eye-slash"></i>';
     });
 
     return visibility_button;
@@ -128,10 +123,7 @@ export class MapEditorLayers extends MapEditorPart {
     delete_button.addEventListener("click", (e) => {
       e.stopPropagation();
       this.map_editor.remove_layer(index);
-      this.render_layers_list(
-        this.map_editor.layers,
-        this.map_editor.active_layer_index
-      );
+      this.render_layers_list();
     });
 
     return delete_button;

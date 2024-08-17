@@ -93,7 +93,7 @@ export class DrawingCanvas extends CanvasElement {
   redraw_canvas() {
     const ctx = this.context;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.map_editor.layers.forEach((layer) => {
+    this.map_editor.layer_manager.layers.forEach((layer) => {
       layer.forEach((row, x) => {
         row.forEach((pixel, y) => {
           if (pixel) {

@@ -38,7 +38,7 @@ export class MapEditorCanvas extends MapEditorPart {
     }px ${10 * this.map_editor.scale}px`;
     this.canvas_wrapper.style.backgroundPosition = `0px 0px`;
 
-    this.renderLayers();
+    this.render_layers();
   }
 
   /**
@@ -46,19 +46,19 @@ export class MapEditorCanvas extends MapEditorPart {
    * @param {boolean} isVisible
    */
   toggle_layer_visibility(index, isVisible) {
-    const layerCanvas = this.layer_canvases[index];
-    if (layerCanvas) {
-      layerCanvas.style.display = isVisible ? "block" : "none";
+    const layer_canvas = this.layer_canvases[index];
+    if (layer_canvas) {
+      layer_canvas.style.display = isVisible ? "block" : "none";
     }
   }
 
   /**
    * Adds a new layer canvas to the wrapper
-   * @param {DrawingCanvas} layerCanvas
+   * @param {DrawingCanvas} layer_canvas
    */
-  addLayerCanvas(layerCanvas) {
-    this.layer_canvases.push(layerCanvas);
-    this.canvas_wrapper.insertBefore(layerCanvas, this.temp_canvas);
+  add_layer_canvas(layer_canvas) {
+    this.layer_canvases.push(layer_canvas);
+    this.canvas_wrapper.insertBefore(layer_canvas, this.temp_canvas);
   }
 
   /**
@@ -66,9 +66,9 @@ export class MapEditorCanvas extends MapEditorPart {
    * @param {number} index
    */
   remove_layer_canvas(index) {
-    const layerCanvas = this.layer_canvases[index];
-    if (layerCanvas) {
-      this.canvas_wrapper.removeChild(layerCanvas);
+    const layer_canvas = this.layer_canvases[index];
+    if (layer_canvas) {
+      this.canvas_wrapper.removeChild(layer_canvas);
       this.layer_canvases.splice(index, 1);
     }
   }
@@ -76,13 +76,13 @@ export class MapEditorCanvas extends MapEditorPart {
   /**
    * Renders all layers onto their respective canvases
    */
-  renderLayers() {
-    this.layer_canvases.forEach((layerCanvas) => {
-      layerCanvas.clearCanvas();
+  render_layers() {
+    this.layer_canvases.forEach((layer_canvas) => {
+      layer_canvas.clearCanvas();
     });
 
-    this.map_editor.layers.forEach((layer, layerIndex) => {
-      const ctx = this.layer_canvases[layerIndex].getContext("2d");
+    this.map_editor.layer_manager.layers.forEach((layer, layer_index) => {
+      const ctx = this.layer_canvases[layer_index].getContext("2d");
       layer.forEach((row, x) => {
         row.forEach((asset, y) => {
           if (asset) {

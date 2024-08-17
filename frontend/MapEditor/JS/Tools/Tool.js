@@ -6,10 +6,7 @@ export class Tool {
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
-    this.layer_canvases = map_editor.map_canvas.layer_canvases;
-    // this.map_canvas = map_editor.map_canvas;
     this.map_editor = map_editor;
-
     this.is_drawing = false;
     this.hover_position = { x: 0, y: 0 };
     this.last_position = { x: 0, y: 0 };
@@ -120,7 +117,7 @@ export class Tool {
    */
   get_mouse_position(event) {
     const activeLayerCanvas =
-      this.layer_canvases[this.map_editor.active_layer_index];
+      this.map_editor.layer_canvases[this.map_editor.active_layer_index];
     const rect = activeLayerCanvas.getBoundingClientRect();
     const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
     const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);

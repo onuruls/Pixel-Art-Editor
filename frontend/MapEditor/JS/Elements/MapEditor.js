@@ -1,13 +1,13 @@
+import { LayerManager } from "./LayerManager.js";
+import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 import { MapEditorCanvas } from "./MapEditorCanvas.js";
 import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
-import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
 import { Pen } from "../Tools/Pen.js";
 import { Eraser } from "../Tools/Eraser.js";
 import { ZoomIn } from "../Tools/ZoomIn.js";
 import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
-import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -18,20 +18,15 @@ export class MapEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.layers = [];
-    this.active_layer_index = 0;
-    this.layers_visibility = [];
-    this.layer_stacks = [];
+    this.layer_manager = new LayerManager();
     this.width = 64;
     this.height = 64;
     this.initialized = false;
-    this.selected_points = [];
-    this.pixel_size = 1;
     this.selected_asset = null;
-    this.layer_stacks = new Map();
     this.action_buffer = [];
-    this.scale = 1;
     this.image_cache = {};
+    this.pixel_size = 1;
+    this.scale = 1;
   }
 
   /**
@@ -108,12 +103,24 @@ export class MapEditor extends HTMLElement {
     });
   }
 
-  /**
-   * Gets the currently active layer
-   * @returns {Array} The active layer
-   */
   get active_layer() {
-    return this.layers[this.active_layer_index];
+    return this.layer_manager.get_active_layer();
+  }
+
+  /**
+   * Getter for the layer canvases.
+   * @returns {Array} The layer canvases.
+   */
+  get layer_canvases() {
+    return this.map_canvas.layer_canvases;
+  }
+
+  /**
+   * Getter for the index of the currently active layer.
+   * @returns {number} The active layer index.
+   */
+  get active_layer_index() {
+    return this.layer_manager.active_layer_index;
   }
 
   /**
@@ -123,17 +130,10 @@ export class MapEditor extends HTMLElement {
     const new_layer = Array.from({ length: this.width }, () =>
       Array(this.height).fill("")
     );
-    this.layers.push(new_layer);
-    this.layers_visibility.push(true);
+    this.layer_manager.add_layer(new_layer);
 
     const layerCanvas = new DrawingCanvas(this.map_canvas);
-    this.map_canvas.addLayerCanvas(layerCanvas);
-
-    this.layer_stacks.set(this.layers.length - 1, new ActionStack());
-
-    if (this.layers.length === 1) {
-      this.active_layer_index = 0;
-    }
+    this.map_canvas.add_layer_canvas(layerCanvas);
 
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
@@ -143,14 +143,9 @@ export class MapEditor extends HTMLElement {
    * @param {number} index
    */
   remove_layer(index) {
-    if (this.layers.length > 1) {
-      this.layers.splice(index, 1);
-      this.layers_visibility.splice(index, 1);
-      this.map_canvas.remove_layer_canvas(index);
-      this.active_layer_index = Math.max(0, this.active_layer_index - 1);
-      this.layer_stacks.delete(index);
-      this.dispatchEvent(new CustomEvent("layers-updated"));
-    }
+    this.layer_manager.remove_layer(index);
+    this.map_canvas.remove_layerCanvas(index);
+    this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
   /**
@@ -158,23 +153,12 @@ export class MapEditor extends HTMLElement {
    * @param {number} index
    */
   toggle_layer_visibility(index) {
-    if (index >= 0 && index < this.layers.length) {
-      this.layers_visibility[index] = !this.layers_visibility[index];
-      this.map_canvas.toggle_layer_visibility(
-        index,
-        this.layers_visibility[index]
-      );
-      this.dispatchEvent(new CustomEvent("layers-updated"));
-    }
-  }
-
-  /**
-   * Checks if a layer is visible
-   * @param {number} index
-   * @returns {boolean}
-   */
-  is_layer_visible(index) {
-    return this.layers_visibility[index];
+    this.layer_manager.toggle_layer_visibility(index);
+    this.map_canvas.toggle_layer_visibility(
+      index,
+      this.layer_manager.is_layer_visible(index)
+    );
+    this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
   /**
@@ -182,11 +166,35 @@ export class MapEditor extends HTMLElement {
    * @param {number} index
    */
   switch_layer(index) {
-    if (index >= 0 && index < this.layers.length) {
-      this.active_layer_index = index;
-      this.dispatchEvent(new CustomEvent("layers-updated"));
-    } else {
-      console.error("Invalid layer index:", index);
+    this.layer_manager.switch_layer(index);
+    this.dispatchEvent(new CustomEvent("layers-updated"));
+  }
+
+  /**
+   * Reverts the last action done (STRG + Z)
+   */
+  revert_last_action() {
+    const points = this.layer_manager.revert_last_action();
+    if (points) {
+      points.forEach((point) => {
+        this.map_canvas.layer_canvases[
+          this.layer_manager.active_layer_index
+        ].dispatchEvent(new CustomEvent("revert_undo", { detail: { points } }));
+      });
+    }
+  }
+
+  /**
+   * Redoes the last reverted action on the active layer (STRG + Y)
+   */
+  redo_last_action() {
+    const points = this.layer_manager.redo_last_action();
+    if (points) {
+      points.forEach((point) => {
+        this.map_canvas.layer_canvases[
+          this.layer_manager.active_layer_index
+        ].dispatchEvent(new CustomEvent("revert_redo", { detail: { points } }));
+      });
     }
   }
 
@@ -264,46 +272,13 @@ export class MapEditor extends HTMLElement {
    * Ends grouping and pushes to stack
    */
   end_action_buffer() {
-    const current_stack = this.layer_stacks.get(this.active_layer_index);
+    const current_stack = this.layer_manager.layer_stacks.get(
+      this.layer_manager.active_layer_index
+    );
     if (current_stack) {
       current_stack.push(this.action_buffer);
     }
     this.action_buffer = [];
-  }
-
-  /**
-   * Reverts the last action done (STRG + Z)
-   */
-  revert_last_action() {
-    const current_stack = this.layer_stacks.get(this.active_layer_index);
-
-    if (current_stack && !current_stack.actions_is_empty()) {
-      const points = current_stack.pop_last_action();
-      points.forEach((point) => {
-        this.active_layer[point.x][point.y] = point.prev_asset;
-      });
-      this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
-        new CustomEvent("revert_undo", { detail: { points } })
-      );
-    }
-  }
-
-  /**
-   * Redoes the last reverted action on the active layer (STRG + Y)
-   */
-  redo_last_action() {
-    const current_stack = this.layer_stacks.get(this.active_layer_index);
-
-    if (current_stack && !current_stack.redo_is_empty()) {
-      const points = current_stack.pop_last_redo();
-      points.forEach((point) => {
-        this.active_layer[point.x][point.y] = point.asset;
-      });
-
-      this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
-        new CustomEvent("revert_redo", { detail: { points } })
-      );
-    }
   }
 
   /**
@@ -315,18 +290,18 @@ export class MapEditor extends HTMLElement {
       this.load_image(this.selected_asset)
         .then((img) => {
           this.apply_to_pixel_block(x, y, (xi, yj) => {
-            const prev_asset = this.active_layer[xi][yj];
+            const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
             if (prev_asset === this.selected_asset) return;
-            this.active_layer[xi][yj] = this.selected_asset;
+            this.layer_manager.get_active_layer()[xi][yj] = this.selected_asset;
             this.action_buffer.push({
               x: xi,
               y: yj,
-              layer: this.active_layer_index,
+              layer: this.layer_manager.active_layer_index,
               prev_asset: prev_asset,
               asset: this.selected_asset,
             });
             this.map_canvas.layer_canvases[
-              this.active_layer_index
+              this.layer_manager.active_layer_index
             ].dispatchEvent(
               new CustomEvent("pen_matrix_changed", {
                 detail: {
@@ -371,17 +346,19 @@ export class MapEditor extends HTMLElement {
    */
   eraser_change_matrix(x, y) {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_asset = this.active_layer[xi][yj];
+      const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
       if (prev_asset !== "") {
-        this.active_layer[xi][yj] = "";
+        this.layer_manager.get_active_layer()[xi][yj] = "";
         this.action_buffer.push({
           x: xi,
           y: yj,
-          layer: this.active_layer_index,
+          layer: this.layer_manager.active_layer_index,
           prev_asset: prev_asset,
           asset: "",
         });
-        this.map_canvas.layer_canvases[this.active_layer_index].dispatchEvent(
+        this.map_canvas.layer_canvases[
+          this.layer_manager.active_layer_index
+        ].dispatchEvent(
           new CustomEvent("eraser_matrix_changed", {
             detail: {
               x: xi,
@@ -448,8 +425,8 @@ export class MapEditor extends HTMLElement {
     return (
       x >= 0 &&
       y >= 0 &&
-      x < this.active_layer.length &&
-      y < this.active_layer[0].length
+      x < this.layer_manager.get_active_layer().length &&
+      y < this.layer_manager.get_active_layer()[0].length
     );
   }
 }
