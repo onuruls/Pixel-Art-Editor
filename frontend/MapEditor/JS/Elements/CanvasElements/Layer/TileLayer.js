@@ -22,7 +22,7 @@ export class TileLayer extends CanvasLayer {
       this.erase_canvas(event)
     );
     this.map_editor.addEventListener("zoom_changed", () =>
-      this.redraw_canvas()
+      this.redraw_every_canvas()
     );
   }
 
@@ -70,18 +70,21 @@ export class TileLayer extends CanvasLayer {
   }
 
   /**
-   * Redraws the active layer on the canvas
+   * Redraws every layer on the canvas
    */
-  redraw_canvas() {
+  redraw_every_canvas() {
     const ctx = this.context;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    const activeLayer = this.map_editor.active_layer;
+    const layers = this.map_editor.layer_manager.layers;
 
-    activeLayer.forEach((row, x) => {
-      row.forEach((pixel, y) => {
-        if (pixel) {
-          this.paint_single_pixel(x, y, pixel);
-        }
+    layers.forEach((layer) => {
+      const content = layer.content;
+      content.forEach((row, x) => {
+        row.forEach((pixel, y) => {
+          if (pixel) {
+            this.paint_single_pixel(x, y, pixel);
+          }
+        });
       });
     });
   }
