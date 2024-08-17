@@ -119,8 +119,11 @@ export class MapEditorLayers extends MapEditorPart {
    */
   create_delete_button(index) {
     const delete_button = document.createElement("button");
-    delete_button.textContent = "Delete";
     delete_button.classList.add("delete_label");
+
+    const icon = document.createElement("i");
+    icon.classList.add("fas", "fa-trash-alt");
+    delete_button.appendChild(icon);
 
     delete_button.addEventListener("click", (e) => {
       e.stopPropagation();
