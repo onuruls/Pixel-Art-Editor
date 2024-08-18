@@ -113,7 +113,7 @@ export class MapEditorLayers extends MapEditorPart {
    */
   handle_visibility_change(index) {
     this.map_editor.toggle_layer_visibility(index);
-    this.render_layers_list(); // Re-render list to update visibility icons
+    this.render_layers_list();
   }
 
   /**
@@ -142,7 +142,6 @@ export class MapEditorLayers extends MapEditorPart {
     );
 
     if (!isDeletable) {
-      // Set disabled and style it as inactive
       button.disabled = true;
       button.style.opacity = "0.5";
       button.style.cursor = "not-allowed";
@@ -261,10 +260,9 @@ export class MapEditorLayers extends MapEditorPart {
    * @param {number} toIndex
    */
   swap_layers(fromIndex, toIndex) {
-    const layers = this.map_editor.layer_manager.layers;
+    this.map_editor.layer_manager.swap_layers(fromIndex, toIndex);
     const layer_canvases = this.map_editor.map_canvas.layer_canvases;
 
-    [layers[fromIndex], layers[toIndex]] = [layers[toIndex], layers[fromIndex]];
     [layer_canvases[fromIndex], layer_canvases[toIndex]] = [
       layer_canvases[toIndex],
       layer_canvases[fromIndex],

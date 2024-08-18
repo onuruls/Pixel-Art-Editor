@@ -138,7 +138,7 @@ export class MapEditor extends HTMLElement {
    */
   remove_layer(index) {
     this.layer_manager.remove_layer(index);
-    this.map_canvas.remove_layer_canvas(index); // Verwenden Sie hier den korrekten Methodennamen
+    this.map_canvas.remove_layer_canvas(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
@@ -195,7 +195,7 @@ export class MapEditor extends HTMLElement {
 
   /**
    * Function to apply a redo operation on the canvas.
-   * @param {Object} point}
+   * @param {Object} point
    */
   apply_redo(point) {
     this.layer_manager.get_active_layer()[point.x][point.y] = point.asset;
@@ -208,7 +208,7 @@ export class MapEditor extends HTMLElement {
    * Adjusts the zoom level and position
    * @param {Number} zoom_level
    * @param {Number} mouseX
-   * @param {Number} mouseY
+   * @param {Number} mouseY}
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
     const current_mouseX =
@@ -415,8 +415,6 @@ export class MapEditor extends HTMLElement {
       case "zoom-in":
         return new ZoomIn(this);
       case "zoom-out":
-        return new ZoomOut(this);
-      default:
         return new Pen(this);
     }
   }

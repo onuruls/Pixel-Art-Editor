@@ -34,12 +34,44 @@ export class LayerManager {
         this.active_layer_index = Math.max(0, this.active_layer_index - 1);
       }
 
-      const newLayerStacks = new Map();
-      this.layer_stacks.forEach((stack, key) => {
-        const adjustedKey = key > index ? key - 1 : key;
-        newLayerStacks.set(adjustedKey, stack);
-      });
-      this.layer_stacks = newLayerStacks;
+      this.reassign_action_stacks(index);
+    }
+  }
+
+  /**
+   * Reassigns action stacks after a layer is removed or moved
+   * @param {number} removedIndex
+   */
+  reassign_action_stacks(removedIndex) {
+    const newLayerStacks = new Map();
+
+    this.layer_stacks.forEach((stack, key) => {
+      const adjustedKey = key > removedIndex ? key - 1 : key;
+      newLayerStacks.set(adjustedKey, stack);
+    });
+
+    this.layer_stacks = newLayerStacks;
+  }
+
+  /**
+   * Swaps two layers and their associated action stacks
+   * @param {number} fromIndex
+   * @param {number} toIndex
+   */
+  swap_layers(fromIndex, toIndex) {
+    const layers = this.layers;
+
+    [layers[fromIndex], layers[toIndex]] = [layers[toIndex], layers[fromIndex]];
+
+    const fromStack = this.layer_stacks.get(fromIndex);
+    const toStack = this.layer_stacks.get(toIndex);
+    this.layer_stacks.set(fromIndex, toStack);
+    this.layer_stacks.set(toIndex, fromStack);
+
+    if (this.active_layer_index === fromIndex) {
+      this.active_layer_index = toIndex;
+    } else if (this.active_layer_index === toIndex) {
+      this.active_layer_index = fromIndex;
     }
   }
 
