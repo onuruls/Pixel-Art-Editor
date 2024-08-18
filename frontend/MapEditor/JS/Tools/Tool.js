@@ -117,7 +117,9 @@ export class Tool {
    */
   get_mouse_position(event) {
     const activeLayerCanvas =
-      this.map_editor.layer_canvases[this.map_editor.active_layer_index];
+      this.map_editor.map_canvas.layer_canvases[
+        this.map_editor.layer_manager.active_layer_index
+      ];
     const rect = activeLayerCanvas.getBoundingClientRect();
     const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
     const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);

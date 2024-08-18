@@ -12,9 +12,11 @@ export class LayerManager {
    * @param {Array} layer
    */
   add_layer(layer) {
+    const newIndex = this.layers.length;
     this.layers.push({ content: layer, visible: true });
-    this.layer_stacks.set(this.layers.length - 1, new ActionStack());
-    if (this.layers.length === 1) {
+    this.layer_stacks.set(newIndex, new ActionStack());
+
+    if (newIndex === 0) {
       this.active_layer_index = 0;
     }
   }
@@ -27,7 +29,17 @@ export class LayerManager {
     if (this.layers.length > 1) {
       this.layers.splice(index, 1);
       this.layer_stacks.delete(index);
-      this.active_layer_index = Math.max(0, this.active_layer_index - 1);
+
+      if (this.active_layer_index >= index) {
+        this.active_layer_index = Math.max(0, this.active_layer_index - 1);
+      }
+
+      const newLayerStacks = new Map();
+      this.layer_stacks.forEach((stack, key) => {
+        const adjustedKey = key > index ? key - 1 : key;
+        newLayerStacks.set(adjustedKey, stack);
+      });
+      this.layer_stacks = newLayerStacks;
     }
   }
 
@@ -55,7 +67,7 @@ export class LayerManager {
 
   /**
    * Gets the currently active layer
-   * @returns {Array} The active layer
+   * @returns {Array}
    */
   get_active_layer() {
     return this.layers[this.active_layer_index].content;

@@ -6,7 +6,6 @@ export class MapEditorLayers extends MapEditorPart {
    */
   constructor(map_editor) {
     super(map_editor);
-    this.dragging_layer = null;
     this.dragging_layer_index = null;
     this.drop_target_layer = null;
   }
@@ -38,14 +37,14 @@ export class MapEditorLayers extends MapEditorPart {
    * Renders the list of layers in the UI
    */
   render_layers_list() {
-    const layers = this.map_editor.layer_manager.layers;
-    const active_layer_index = this.map_editor.active_layer_index;
+    const { layers, active_layer_index } = this.map_editor.layer_manager;
     const layersList = this.querySelector(".layers-list");
     layersList.innerHTML = "";
 
     layers.forEach((layer, index) => {
-      const li = this.create_layer_list_item(index, active_layer_index);
-      layersList.appendChild(li);
+      layersList.appendChild(
+        this.create_layer_list_item(index, active_layer_index)
+      );
     });
   }
 
@@ -57,18 +56,18 @@ export class MapEditorLayers extends MapEditorPart {
    */
   create_layer_list_item(index, active_layer_index) {
     const li = document.createElement("li");
-    li.classList.add("layer-item");
-    li.setAttribute("data-index", index);
+    li.className = `layer-item${
+      index === active_layer_index ? " active-layer" : ""
+    }`;
+    li.dataset.index = index;
     li.draggable = true;
 
-    if (index === active_layer_index) {
-      li.classList.add("active-layer");
-    }
-
-    li.appendChild(this.create_layer_label(index));
-    li.appendChild(this.create_visibility_button(index));
-    li.appendChild(this.create_delete_button(index));
-    li.appendChild(this.create_drag_handle());
+    li.append(
+      this.create_layer_label(index),
+      this.create_visibility_button(index),
+      this.create_delete_button(index),
+      this.create_drag_handle()
+    );
 
     this.attach_drag_events(li, index);
 
@@ -88,10 +87,7 @@ export class MapEditorLayers extends MapEditorPart {
    * @returns {HTMLSpanElement}
    */
   create_layer_label(index) {
-    const layerLabel = document.createElement("span");
-    layerLabel.textContent = `Layer ${index + 1}`;
-    layerLabel.classList.add("index_label");
-    return layerLabel;
+    return this.create_element("span", `Layer ${index + 1}`, "index_label");
   }
 
   /**
@@ -100,17 +96,15 @@ export class MapEditorLayers extends MapEditorPart {
    * @returns {HTMLButtonElement}
    */
   create_visibility_button(index) {
-    const visibility_button = document.createElement("button");
-    visibility_button.classList.add("visibility_button");
+    const button = this.create_element("button", "", "visibility_button");
+    this.update_visibility_button(button, index);
 
-    this.update_visibility_button(visibility_button, index);
-
-    visibility_button.addEventListener("click", (e) => {
+    button.addEventListener("click", (e) => {
       e.stopPropagation();
       this.handle_visibility_change(index);
     });
 
-    return visibility_button;
+    return button;
   }
 
   /**
@@ -140,19 +134,26 @@ export class MapEditorLayers extends MapEditorPart {
    * @returns {HTMLButtonElement}
    */
   create_delete_button(index) {
-    const delete_button = document.createElement("button");
-    delete_button.classList.add("delete_label");
+    const isDeletable = this.map_editor.layer_manager.layers.length > 1;
+    const button = this.create_element(
+      "button",
+      '<i class="fas fa-trash-alt"></i>',
+      "delete_label"
+    );
 
-    const icon = document.createElement("i");
-    icon.classList.add("fas", "fa-trash-alt");
-    delete_button.appendChild(icon);
+    if (!isDeletable) {
+      // Set disabled and style it as inactive
+      button.disabled = true;
+      button.style.opacity = "0.5";
+      button.style.cursor = "not-allowed";
+    } else {
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.handle_delete_layer(index);
+      });
+    }
 
-    delete_button.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.handle_delete_layer(index);
-    });
-
-    return delete_button;
+    return button;
   }
 
   /**
@@ -160,9 +161,17 @@ export class MapEditorLayers extends MapEditorPart {
    * @param {number} index
    */
   handle_delete_layer(index) {
+    const { layers, active_layer_index } = this.map_editor.layer_manager;
+
     this.map_editor.remove_layer(index);
-    this.map_editor.active_layer_index = Math.max(0, index - 1);
-    this.render_layers_list(); // Re-render list to reflect the deletion
+
+    if (index === active_layer_index) {
+      this.map_editor.layer_manager.active_layer_index = Math.max(0, index - 1);
+    } else if (index < active_layer_index) {
+      this.map_editor.layer_manager.active_layer_index--;
+    }
+
+    this.render_layers_list();
   }
 
   /**
@@ -170,11 +179,11 @@ export class MapEditorLayers extends MapEditorPart {
    * @returns {HTMLSpanElement}
    */
   create_drag_handle() {
-    const dragHandle = document.createElement("span");
-    dragHandle.innerHTML =
-      '<i class="fa-solid fa-arrows-up-down-left-right"></i>';
-    dragHandle.classList.add("drag-handle");
-    return dragHandle;
+    return this.create_element(
+      "span",
+      '<i class="fa-solid fa-arrows-up-down-left-right"></i>',
+      "drag-handle"
+    );
   }
 
   /**
@@ -183,26 +192,11 @@ export class MapEditorLayers extends MapEditorPart {
    * @param {number} index
    */
   attach_drag_events(li, index) {
-    let isDragging = false;
-
-    li.addEventListener("dragstart", (e) => {
-      this.drag_start(e, index);
-      isDragging = true;
-    });
-
+    li.addEventListener("dragstart", (e) => this.drag_start(e, index));
     li.addEventListener("dragover", (e) => this.drag_over(e, li));
     li.addEventListener("dragleave", () => this.drag_leave(li));
-    li.addEventListener("drop", (e) => {
-      this.drop(e, index);
-      isDragging = false;
-    });
-
-    li.addEventListener("dragend", (e) => {
-      this.drag_end(e);
-      setTimeout(() => {
-        isDragging = false;
-      }, 0);
-    });
+    li.addEventListener("drop", (e) => this.drop(e, index));
+    li.addEventListener("dragend", () => this.drag_end());
   }
 
   /**
@@ -211,9 +205,7 @@ export class MapEditorLayers extends MapEditorPart {
    * @param {number} index
    */
   drag_start(event, index) {
-    this.dragging_layer = this.map_editor.layer_manager.layers[index];
     this.dragging_layer_index = index;
-
     event.dataTransfer.effectAllowed = "move";
   }
 
@@ -251,12 +243,7 @@ export class MapEditorLayers extends MapEditorPart {
     event.preventDefault();
 
     if (this.dragging_layer_index !== dropIndex) {
-      this.map_editor.layer_manager.layers.splice(this.dragging_layer_index, 1);
-      this.map_editor.layer_manager.layers.splice(
-        dropIndex,
-        0,
-        this.dragging_layer
-      );
+      this.swap_layers(this.dragging_layer_index, dropIndex);
 
       this.render_layers_list();
       this.map_editor.layer_manager.switch_layer(dropIndex);
@@ -269,11 +256,27 @@ export class MapEditorLayers extends MapEditorPart {
   }
 
   /**
-   * Called when dragging ends
-   * @param {Event} event
+   * Swaps two layers and their associated canvases
+   * @param {number} fromIndex
+   * @param {number} toIndex
    */
-  drag_end(event) {
-    this.dragging_layer = null;
+  swap_layers(fromIndex, toIndex) {
+    const layers = this.map_editor.layer_manager.layers;
+    const layer_canvases = this.map_editor.map_canvas.layer_canvases;
+
+    [layers[fromIndex], layers[toIndex]] = [layers[toIndex], layers[fromIndex]];
+    [layer_canvases[fromIndex], layer_canvases[toIndex]] = [
+      layer_canvases[toIndex],
+      layer_canvases[fromIndex],
+    ];
+
+    this.map_editor.map_canvas.rearrange_layer_canvases(fromIndex, toIndex);
+  }
+
+  /**
+   * Called when dragging ends
+   */
+  drag_end() {
     this.dragging_layer_index = null;
 
     if (this.drop_target_layer) {
@@ -289,6 +292,20 @@ export class MapEditorLayers extends MapEditorPart {
    */
   is_click_on_action_button(e) {
     return e.target.closest("button") !== null;
+  }
+
+  /**
+   * Helper method to create an HTML element with optional classes and innerHTML
+   * @param {string} tag
+   * @param {string} innerHTML
+   * @param {string} className
+   * @returns {HTMLElement}
+   */
+  create_element(tag, innerHTML = "", className = "") {
+    const element = document.createElement(tag);
+    element.innerHTML = innerHTML;
+    if (className) element.className = className;
+    return element;
   }
 }
 

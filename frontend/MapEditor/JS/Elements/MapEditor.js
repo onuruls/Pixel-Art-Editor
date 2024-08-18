@@ -103,24 +103,16 @@ export class MapEditor extends HTMLElement {
     });
   }
 
-  get active_layer() {
+  get_active_layer() {
     return this.layer_manager.get_active_layer();
   }
 
   /**
    * Getter for the layer canvases.
-   * @returns {Array} The layer canvases.
+   * @returns {Array}
    */
-  get layer_canvases() {
+  get_layer_canvases() {
     return this.map_canvas.layer_canvases;
-  }
-
-  /**
-   * Getter for the index of the currently active layer.
-   * @returns {number} The active layer index.
-   */
-  get active_layer_index() {
-    return this.layer_manager.active_layer_index;
   }
 
   /**
@@ -134,6 +126,8 @@ export class MapEditor extends HTMLElement {
 
     const layerCanvas = new TileLayer(this.map_canvas);
     this.map_canvas.add_layer_canvas(layerCanvas);
+    this.layer_manager.active_layer_index =
+      this.layer_manager.layers.length - 1;
 
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
@@ -144,7 +138,7 @@ export class MapEditor extends HTMLElement {
    */
   remove_layer(index) {
     this.layer_manager.remove_layer(index);
-    this.map_canvas.remove_layerCanvas(index);
+    this.map_canvas.remove_layer_canvas(index); // Verwenden Sie hier den korrekten Methodennamen
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
@@ -193,17 +187,21 @@ export class MapEditor extends HTMLElement {
    * @param {Object} point
    */
   apply_undo(point) {
-    this.active_layer[point.x][point.y] = point.prev_asset;
-    this.map_canvas.layer_canvases[this.active_layer_index].revert_undo(point);
+    this.layer_manager.get_active_layer()[point.x][point.y] = point.prev_asset;
+    this.map_canvas.layer_canvases[
+      this.layer_manager.active_layer_index
+    ].revert_undo(point);
   }
 
   /**
    * Function to apply a redo operation on the canvas.
-   * @param {Object} point
+   * @param {Object} point}
    */
   apply_redo(point) {
-    this.active_layer[point.x][point.y] = point.asset;
-    this.map_canvas.layer_canvases[this.active_layer_index].revert_redo(point);
+    this.layer_manager.get_active_layer()[point.x][point.y] = point.asset;
+    this.map_canvas.layer_canvases[
+      this.layer_manager.active_layer_index
+    ].revert_redo(point);
   }
 
   /**

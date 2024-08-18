@@ -6,7 +6,6 @@ import { InputCanvas } from "./CanvasElements/InputCanvas.js";
 
 export class MapEditorCanvas extends MapEditorPart {
   /**
-   *
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
@@ -19,13 +18,16 @@ export class MapEditorCanvas extends MapEditorPart {
   }
 
   /**
-   * Returns the Html-String
+   * Returns the HTML string for the canvas wrapper
    * @returns {String}
    */
   render() {
     return `<div class="canvas-wrapper"></div>`;
   }
 
+  /**
+   * Initializes the MapEditorCanvas component
+   */
   init() {
     this.canvas_wrapper = this.querySelector(".canvas-wrapper");
     this.canvas_wrapper.append(
@@ -42,6 +44,7 @@ export class MapEditorCanvas extends MapEditorPart {
   }
 
   /**
+   * Toggles the visibility of a specific layer
    * @param {number} index
    * @param {boolean} isVisible
    */
@@ -74,16 +77,40 @@ export class MapEditorCanvas extends MapEditorPart {
   }
 
   /**
+   * Rearranges the canvases when layers are reordered
+   * @param {number} fromIndex
+   * @param {number} toIndex
+   */
+  rearrange_layer_canvases(fromIndex, toIndex) {
+    const [movedCanvas] = this.layer_canvases.splice(fromIndex, 1);
+    this.layer_canvases.splice(toIndex, 0, movedCanvas);
+
+    this.layer_canvases.forEach((layer_canvas) => {
+      this.canvas_wrapper.removeChild(layer_canvas);
+    });
+
+    this.layer_canvases.forEach((layer_canvas) => {
+      this.canvas_wrapper.insertBefore(layer_canvas, this.temp_canvas);
+    });
+
+    this.redraw_every_canvas();
+    this.map_editor.layer_manager.active_layer_index = toIndex;
+    this.map_editor.switch_layer(toIndex);
+  }
+
+  /**
    * Renders all layers onto their respective canvases
    */
   render_layers() {
-    this.layer_canvases.forEach((layer_canvas) => {
-      layer_canvas.clearCanvas();
-    });
+    this.layer_canvases.forEach((layer_canvas, layer_index) => {
+      const canvasElement = layer_canvas.canvas;
+      const ctx = canvasElement.getContext("2d");
+      ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-    this.map_editor.layer_manager.layers.forEach((layer, layer_index) => {
-      const ctx = this.layer_canvases[layer_index].getContext("2d");
-      layer.forEach((row, x) => {
+      const layer = this.map_editor.layer_manager.layers[layer_index];
+      const content = layer.content;
+
+      content.forEach((row, x) => {
         row.forEach((asset, y) => {
           if (asset) {
             const img = new Image();
@@ -101,6 +128,59 @@ export class MapEditorCanvas extends MapEditorPart {
         });
       });
     });
+  }
+
+  /**
+   * Redraws every layer canvas after rearranging layers
+   */
+  redraw_every_canvas() {
+    const layers = this.map_editor.layer_manager.layers;
+    this.layer_canvases.forEach((layer_wrapper, layer_index) => {
+      const canvas = layer_wrapper.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const layer = layers[layer_index];
+      const content = layer.content;
+
+      content.forEach((row, x) => {
+        row.forEach((asset, y) => {
+          if (asset) {
+            this.paint_single_pixel(x, y, asset, ctx);
+          }
+        });
+      });
+    });
+  }
+
+  /**
+   * Paints a single pixel on the canvas
+   * @param {number} x
+   * @param {number} y
+   * @param {string} asset
+   * @param {CanvasRenderingContext2D} ctx
+   */
+  paint_single_pixel(x, y, asset, ctx) {
+    const cachedImage = this.map_editor.image_cache[asset];
+    const scale = this.map_editor.scale;
+    const pixelSize = 10 * scale;
+
+    if (cachedImage) {
+      ctx.drawImage(
+        cachedImage,
+        x * pixelSize,
+        y * pixelSize,
+        pixelSize,
+        pixelSize
+      );
+    } else {
+      const img = new Image();
+      img.src = asset;
+      img.onload = () => {
+        this.map_editor.image_cache[asset] = img;
+        ctx.drawImage(img, x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      };
+    }
   }
 }
 
