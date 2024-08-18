@@ -21,22 +21,20 @@ export class Tool {
   }
 
   /**
-   * Destroys the tool by removing event listeners.
+   * Removes all key listeners
    */
   destroy() {
     document.removeEventListener("keydown", this.handle_key_events.bind(this));
   }
 
   /**
-   * Handles key events for the tool.
-   * @param {KeyboardEvent} e
+   * Handles all the keydown-Events of a tool e.g. CTRL + C
    */
   handle_key_events(e) {}
 
   /**
-   * Handles mouse down event.
+   *
    * @param {Event} event
-   * @throws Will throw an error if called directly.
    */
   mouse_down(event) {
     throw new Error(
@@ -45,9 +43,8 @@ export class Tool {
   }
 
   /**
-   * Handles mouse move event.
-   * @param {Event} event - The mouse move event.
-   * @throws Will throw an error if called directly.
+   *
+   * @param {Event} event
    */
   mouse_move(event) {
     throw new Error(
@@ -56,9 +53,8 @@ export class Tool {
   }
 
   /**
-   * Handles mouse up event.
-   * @param {Event} event - The mouse up event.
-   * @throws Will throw an error if called directly.
+   *
+   * @param {Event} event
    */
   mouse_up(event) {
     throw new Error(
@@ -67,7 +63,7 @@ export class Tool {
   }
 
   /**
-   * Handles global mouse up event.
+   *
    * @param {Event} event
    */
   global_mouse_up(event) {
@@ -78,9 +74,8 @@ export class Tool {
   }
 
   /**
-   * Draws on the canvas based on the event.
+   *
    * @param {Event} event
-   * @throws Will throw an error if called directly.
    */
   draw(event) {
     throw new Error(
@@ -89,7 +84,7 @@ export class Tool {
   }
 
   /**
-   * Handles hover event over the canvas.
+   *
    * @param {Event} event
    */
   hover(event) {
@@ -101,7 +96,7 @@ export class Tool {
   }
 
   /**
-   * Checks if the hover position has changed.
+   *
    * @param {Number} x
    * @param {Number} y
    * @returns {Boolean}

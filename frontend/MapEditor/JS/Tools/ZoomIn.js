@@ -2,17 +2,17 @@ import { Tool } from "./Tool.js";
 
 export class ZoomIn extends Tool {
   /**
-   * Creates an instance of the ZoomIn tool.
-   * @param {MapEditor} map_editor - The instance of the MapEditor.
+   *
+   * @param {MapEditorCanvas} canvas
    */
-  constructor(map_editor) {
-    super(map_editor);
+  constructor(canvas) {
+    super(canvas);
     this.map_editor.style.cursor = `zoom-in`;
   }
 
   /**
-   * Handles mouse down event for zooming in.
-   * @param {Event} event - The mouse down event.
+   * Handles mouse down event for zooming in
+   * @param {Event} event
    */
   mouse_down(event) {
     if (this.map_editor.scale != 2.0) {
@@ -21,20 +21,20 @@ export class ZoomIn extends Tool {
   }
 
   /**
-   * Handles mouse move event (no operation for zooming).
-   * @param {Event} event - The mouse move event.
+   *
+   * @param {Event} event
    */
   mouse_move(event) {}
 
   /**
-   * Handles mouse up event (no operation for zooming).
-   * @param {Event} event - The mouse up event.
+   *
+   * @param {Event} event
    */
   mouse_up(event) {}
 
   /**
-   * Zooms in on the canvas based on the mouse position.
-   * @param {Event} event - The event containing mouse position.
+   *
+   * @param {Event} event
    */
   zoom(event) {
     const { x, y } = this.get_mouse_position(event);

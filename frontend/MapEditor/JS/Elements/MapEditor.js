@@ -205,10 +205,10 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Adjusts the zoom level and position
+   * Adjusts the zoom level and location
    * @param {Number} zoom_level
    * @param {Number} mouseX
-   * @param {Number} mouseY}
+   * @param {Number} mouseY
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
     const current_mouseX =
@@ -415,7 +415,7 @@ export class MapEditor extends HTMLElement {
       case "zoom-in":
         return new ZoomIn(this);
       case "zoom-out":
-        return new Pen(this);
+        return new ZoomOut(this);
     }
   }
 

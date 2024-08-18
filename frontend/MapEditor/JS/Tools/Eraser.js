@@ -2,17 +2,17 @@ import { Tool } from "./Tool.js";
 
 export class Eraser extends Tool {
   /**
-   * Creates an instance of the Eraser tool.
-   * @param {MapEditor} map_editor - The instance of the MapEditor.
+   *
+   * @param {HTMLCanvasElement} canvas
    */
-  constructor(map_editor) {
-    super(map_editor);
+  constructor(canvas) {
+    super(canvas);
     this.map_editor.style.cursor = `crosshair`;
   }
 
   /**
-   * Handles the mouse down event to start erasing.
-   * @param {Event} event - The mouse down event.
+   *
+   * @param {Event} event
    */
   mouse_down(event) {
     this.is_drawing = true;
@@ -21,8 +21,8 @@ export class Eraser extends Tool {
   }
 
   /**
-   * Handles the mouse move event to erase as the mouse moves.
-   * @param {Event} event - The mouse move event.
+   *
+   * @param {Event} event
    */
   mouse_move(event) {
     this.hover(event);
@@ -32,8 +32,8 @@ export class Eraser extends Tool {
   }
 
   /**
-   * Handles the mouse up event to stop erasing.
-   * @param {Event} event - The mouse up event.
+   *
+   * @param {Event} event
    */
   mouse_up(event) {
     this.is_drawing = false;
@@ -41,8 +41,8 @@ export class Eraser extends Tool {
   }
 
   /**
-   * Erases on the canvas based on the mouse position.
-   * @param {Event} event - The event containing mouse position.
+   *
+   * @param {Event} event
    */
   draw(event) {
     const { x, y } = this.get_mouse_position(event);
