@@ -2,12 +2,11 @@ import { MapEditor } from "../Elements/MapEditor.js";
 
 export class Tool {
   /**
-   *
+   * Creates an instance of the Tool.
    * @param {MapEditor} map_editor
    */
   constructor(map_editor) {
     this.map_editor = map_editor;
-    this.map_canvas = map_editor.map_canvas.drawing_canvas;
     this.is_drawing = false;
     this.hover_position = { x: 0, y: 0 };
     this.last_position = { x: 0, y: 0 };
@@ -15,7 +14,7 @@ export class Tool {
   }
 
   /**
-   * Adds all key listeners
+   * Initializes the tool and adds necessary event listeners.
    */
   init() {
     document.addEventListener("keydown", this.handle_key_events.bind(this));
@@ -112,7 +111,11 @@ export class Tool {
    * @returns {{x: Number, y: Number}}
    */
   get_mouse_position(event) {
-    const rect = this.map_canvas.getBoundingClientRect();
+    const activeLayerCanvas =
+      this.map_editor.map_canvas.layer_canvases[
+        this.map_editor.layer_manager.active_layer_index
+      ];
+    const rect = activeLayerCanvas.getBoundingClientRect();
     const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
     const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);
     const x = Math.floor(mouseX);

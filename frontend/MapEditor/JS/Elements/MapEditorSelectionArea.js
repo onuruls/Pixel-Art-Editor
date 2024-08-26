@@ -25,6 +25,17 @@ export class MapEditorSelectionArea extends MapEditorPart {
     this.map_map_preview = new MapEditorMapPreview(this.map_editor);
     this.map_layers = new MapEditorLayers(this.map_editor);
     this.append(this.map_sprite_preview, this.map_map_preview, this.map_layers);
+
+    this.map_editor.addEventListener("layers-updated", () => {
+      this.map_layers.render_layers_list(
+        this.map_editor.layers,
+        this.map_editor.active_layer_index
+      );
+    });
+    this.map_layers.render_layers_list(
+      this.map_editor.layers,
+      this.map_editor.active_layer_index
+    );
   }
 }
 
