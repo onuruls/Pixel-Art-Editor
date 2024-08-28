@@ -15,6 +15,14 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
+   * Returns the Html-String
+   * @returns {String}
+   */
+  render() {
+    return `<canvas></canvas>`;
+  }
+
+  /**
    * Initializes the Canvas
    */
   init() {
@@ -28,14 +36,6 @@ export class DrawingCanvas extends CanvasElement {
     this.map_editor.addEventListener("zoom_changed", () =>
       this.redraw_canvas()
     );
-  }
-
-  /**
-   * Returns the Html-String
-   * @returns {String}
-   */
-  render() {
-    return `<canvas></canvas>`;
   }
 
   /**
@@ -111,52 +111,6 @@ export class DrawingCanvas extends CanvasElement {
       });
     });
   }
-
-  // /**
-  //  * Paints a single pixel on the canvas
-  //  * @param {number} x
-  //  * @param {number} y
-  //  * @param {string} asset
-  //  */
-  // paint_single_pixel(x, y, asset) {
-  //   const cachedImage = this.map_editor.image_cache[asset];
-  //   const scale = this.map_editor.scale;
-  //   const pixelSize = 10 * scale;
-
-  //   if (cachedImage) {
-  //     this.context.drawImage(
-  //       cachedImage,
-  //       x * pixelSize,
-  //       y * pixelSize,
-  //       pixelSize,
-  //       pixelSize
-  //     );
-  //   } else {
-  //     const img = new Image();
-  //     img.src = asset;
-  //     img.onload = () => {
-  //       this.map_editor.image_cache[asset] = img;
-  //       this.context.drawImage(
-  //         img,
-  //         x * pixelSize,
-  //         y * pixelSize,
-  //         pixelSize,
-  //         pixelSize
-  //       );
-  //     };
-  //   }
-  // }
-
-  // /**
-  //  * Erases a single pixel on the canvas
-  //  * @param {number} x
-  //  * @param {number} y
-  //  */
-  // erase_single_pixel(x, y) {
-  //   const scale = this.map_editor.scale;
-  //   const pixelSize = 10 * scale;
-  //   this.context.clearRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-  // }
 }
 
 customElements.define("drawing-canvas", DrawingCanvas);
