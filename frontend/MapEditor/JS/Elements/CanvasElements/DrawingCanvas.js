@@ -1,4 +1,3 @@
-import { CanvasLayer } from "./Layer/CanvasLayer.js";
 import { MapEditorCanvas } from "../MapEditorCanvas.js";
 import { CanvasElement } from "./CanvasElement.js";
 
