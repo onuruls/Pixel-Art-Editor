@@ -1,5 +1,5 @@
 import { LayerManager } from "./LayerManager.js";
-import { TileLayer } from "./CanvasElements/Layer/TileLayer.js";
+import { DrawingCanvas } from "./CanvasElements/DrawingCanvas.js";
 import { MapEditorCanvas } from "./MapEditorCanvas.js";
 import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
@@ -122,12 +122,11 @@ export class MapEditor extends HTMLElement {
     const new_layer = Array.from({ length: this.width }, () =>
       Array(this.height).fill("")
     );
-    this.layer_manager.add_layer(new_layer);
+    const new_layer_index = this.layer_manager.add_layer(new_layer);
 
-    const layerCanvas = new TileLayer(this.map_canvas);
+    const layerCanvas = new DrawingCanvas(this.map_canvas, new_layer_index);
     this.map_canvas.add_layer_canvas(layerCanvas);
-    this.layer_manager.active_layer_index =
-      this.layer_manager.layers.length - 1;
+    this.layer_manager.active_layer_index = new_layer_index;
 
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
