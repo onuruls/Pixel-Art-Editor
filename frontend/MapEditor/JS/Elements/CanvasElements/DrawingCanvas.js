@@ -112,4 +112,4 @@ export class DrawingCanvas extends CanvasElement {
   }
 }
 
-customElements.define("drawing-canvas", DrawingCanvas);
+customElements.define("map-drawing-canvas", DrawingCanvas);

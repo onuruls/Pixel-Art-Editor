@@ -1,8 +1,4 @@
 import { MapEditorPart } from "./MapEditorPart.js";
-import {
-  Draw,
-  DrawingCanvasingCanvas,
-} from "./CanvasElements/DrawingCanvas.js";
 import { TempCanvas } from "./CanvasElements/TempCanvas.js";
 import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
 import { InputCanvas } from "./CanvasElements/InputCanvas.js";
