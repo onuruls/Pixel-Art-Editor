@@ -1,13 +1,24 @@
-import { CanvasLayer } from "./CanvasLayer.js";
+import { MapEditorCanvas } from "../MapEditorCanvas.js";
+import { CanvasElement } from "./CanvasElement.js";
 
-export class TileLayer extends CanvasLayer {
+export class DrawingCanvas extends CanvasElement {
   /**
    * Bottom level Canvas
    * Shows the drawing
    * @param {MapEditorCanvas} canvas
+   * @param {number} layerIndex
    */
-  constructor(canvas) {
+  constructor(canvas, layerIndex) {
     super(canvas);
+    this.layerIndex = layerIndex;
+  }
+
+  /**
+   * Returns the Html-String
+   * @returns {String}
+   */
+  render() {
+    return `<canvas></canvas>`;
   }
 
   /**
@@ -22,7 +33,7 @@ export class TileLayer extends CanvasLayer {
       this.erase_canvas(event)
     );
     this.map_editor.addEventListener("zoom_changed", () =>
-      this.redraw_every_canvas()
+      this.redraw_canvas()
     );
   }
 
@@ -70,70 +81,35 @@ export class TileLayer extends CanvasLayer {
   }
 
   /**
-   * Redraws every layer on the canvas
+   * Redraws the current layer on the canvas
    */
-  redraw_every_canvas() {
+  redraw_canvas() {
+    this.clear_canvas();
+    this.draw_content();
+  }
+
+  /**
+   * Clears the canvas context
+   */
+  clear_canvas() {
     const ctx = this.context;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    const layers = this.map_editor.layer_manager.layers;
+  }
 
-    layers.forEach((layer) => {
-      const content = layer.content;
-      content.forEach((row, x) => {
-        row.forEach((pixel, y) => {
-          if (pixel) {
-            this.paint_single_pixel(x, y, pixel);
-          }
-        });
+  /**
+   * Draws the content of the current layer onto the canvas
+   */
+  draw_content() {
+    const content =
+      this.map_editor.layer_manager.layers[this.layerIndex].content;
+    content.forEach((row, x) => {
+      row.forEach((pixel, y) => {
+        if (pixel) {
+          this.paint_single_pixel(x, y, pixel);
+        }
       });
     });
   }
-
-  /**
-   * Paints a single pixel on the canvas
-   * @param {number} x
-   * @param {number} y
-   * @param {string} asset
-   */
-  paint_single_pixel(x, y, asset) {
-    const cachedImage = this.map_editor.image_cache[asset];
-    const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
-
-    if (cachedImage) {
-      this.context.drawImage(
-        cachedImage,
-        x * pixelSize,
-        y * pixelSize,
-        pixelSize,
-        pixelSize
-      );
-    } else {
-      const img = new Image();
-      img.src = asset;
-      img.onload = () => {
-        this.map_editor.image_cache[asset] = img;
-        this.context.drawImage(
-          img,
-          x * pixelSize,
-          y * pixelSize,
-          pixelSize,
-          pixelSize
-        );
-      };
-    }
-  }
-
-  /**
-   * Erases a single pixel on the canvas
-   * @param {number} x
-   * @param {number} y
-   */
-  erase_single_pixel(x, y) {
-    const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
-    this.context.clearRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-  }
 }
 
-customElements.define("tile-layer", TileLayer);
+customElements.define("map-drawing-canvas", DrawingCanvas);

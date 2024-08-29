@@ -10,6 +10,7 @@ export class LayerManager {
   /**
    * Adds a new layer
    * @param {Array} layer
+   * @returns {number} The index of the newly added layer
    */
   add_layer(layer) {
     const newIndex = this.layers.length;
@@ -19,6 +20,8 @@ export class LayerManager {
     if (newIndex === 0) {
       this.active_layer_index = 0;
     }
+
+    return newIndex;
   }
 
   /**
