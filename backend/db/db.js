@@ -1,55 +1,67 @@
-const sqlite3 = require("sqlite3").verbose();
+const { Sequelize, DataTypes } = require("sequelize");
 const path = require("path");
 
-const dbPath = path.resolve(__dirname, "database.db");
-
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error("Error opening database:", err.message);
-  } else {
-    console.log("Connected to the SQLite database.");
-    init_db();
-  }
+const sequelize = new Sequelize({
+  dialect: "sqlite",
+  storage: path.resolve(__dirname, "database.db"),
 });
 
 /**
- * Creates the necessarty tables
+ * Define the Project, Folder, and File models.
  */
-function init_db() {
-  const projects_table = `
-    CREATE TABLE IF NOT EXISTS projects (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      created_at TEXT,
-      root_folder_id INTEGER,
-      FOREIGN KEY (root_folder_id) REFERENCES folders (id)
-    )
-  `;
 
-  const folders_table = `
-    CREATE TABLE IF NOT EXISTS folders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      folder_id INTEGER,
-      FOREIGN KEY (folder_id) REFERENCES folders (id)
-    )
-  `;
+const Project = sequelize.define("Project", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: Sequelize.NOW,
+  },
+});
 
-  const files_table = `
-    CREATE TABLE IF NOT EXISTS files (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      folder_id INTEGER,
-      type TEXT,
-      FOREIGN KEY (folder_id) REFERENCES folders (id)
-    )
-  `;
+const Folder = sequelize.define("Folder", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
 
-  db.serialize(() => {
-    db.run(projects_table);
-    db.run(folders_table);
-    db.run(files_table);
-  });
-}
+const File = sequelize.define("File", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  type: {
+    type: DataTypes.STRING,
+  },
+});
 
-module.exports = db;
+/**
+ * Define the relationships between the models.
+ */
+
+Project.belongsTo(Folder, { as: "rootFolder", foreignKey: "root_folder_id" });
+Folder.hasMany(Folder, { as: "children", foreignKey: "folder_id" });
+Folder.hasMany(File, { foreignKey: "folder_id" });
+Folder.belongsTo(Folder, { as: "parentFolder", foreignKey: "folder_id" });
+
+sequelize.sync();
+
+module.exports = { sequelize, Project, Folder, File };
