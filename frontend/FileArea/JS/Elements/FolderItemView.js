@@ -1,4 +1,3 @@
-import { FileAreaView } from "./FileAreaView.js";
 import { ItemView } from "./ItemView.js";
 
 export class FolderItemView extends ItemView {
@@ -12,7 +11,7 @@ export class FolderItemView extends ItemView {
   }
 
   /**
-   *
+   * Creates an icon for the folder
    * @returns {HTMLElement}
    */
   create_icon() {
@@ -26,6 +25,9 @@ export class FolderItemView extends ItemView {
     this.icon.addEventListener("dblclick", this.open_folder.bind(this));
   }
 
+  /**
+   * Opens the folder when it is double-clicked
+   */
   open_folder() {
     this.file_area_view.navigate_to_folder(this.name);
   }

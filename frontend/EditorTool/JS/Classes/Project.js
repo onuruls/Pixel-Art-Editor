@@ -2,7 +2,7 @@ import { Folder } from "./Folder.js";
 
 export class Project {
   /**
-   * Represents a whole projects with all his folders and files
+   * Represents a whole project with all its folders and files
    * @param {Number} id
    * @param {String} name
    * @param {String} created_at
@@ -18,7 +18,7 @@ export class Project {
   }
 
   /**
-   * Rebuilds the project structure out of an response object
+   * Rebuilds the project structure out of a response object
    * @param {Object} root_folder_obj
    */
   build_project_structure(root_folder_obj) {

@@ -51,7 +51,7 @@ app.get("/projects", async (req, res) => {
 });
 
 /**
- * Gets a project and all of its folders and files
+ * Gets a project and its root folder
  */
 app.get("/projects/:id", async (req, res) => {
   const id = req.params.id;
@@ -68,10 +68,20 @@ app.get("/projects/:id", async (req, res) => {
 });
 
 /**
- * Updates a project CURRENTLY UNUSED
+ * Gets a folder and its immediate children
  */
-app.put("/projects/:id", (req, res) => {
-  res.status(501).send("Not implemented yet");
+app.get("/folders/:id", async (req, res) => {
+  const folder_id = req.params.id;
+  console.log("Loading folder with ID:", folder_id);
+
+  try {
+    const folder = await db_client.get_folder(folder_id);
+    console.log(`Loaded folder: ${folder}`);
+    res.status(200).send(folder);
+  } catch (err) {
+    console.error("Failed loading folder:", err);
+    res.status(500).send(err);
+  }
 });
 
 /**
@@ -120,12 +130,13 @@ app.post("/projects/folders", async (req, res) => {
     return res.status(400).send("Parent folder ID is required");
   }
 
-  console.log("Adding Folder");
+  console.log("Adding Folder with parent_folder_id:", folder_id);
 
   try {
     const folder = await db_client.add_folder(folder_id, folder_name);
     res.status(201).send(folder);
   } catch (error) {
+    console.error("Error adding folder:", error);
     res.status(500).send(error);
   }
 });

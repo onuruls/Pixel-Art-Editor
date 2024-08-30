@@ -21,7 +21,7 @@ class DbClient {
   }
 
   /**
-   * Fetches a project by its ID and retrieves its structure with all folders and files.
+   * Fetches a project by its ID and retrieves its structure with the root folder.
    * @param {Number} id
    * @returns {Promise<Object>}
    */
@@ -32,13 +32,6 @@ class DbClient {
         include: {
           model: Folder,
           as: "rootFolder",
-          include: [
-            {
-              model: Folder,
-              as: "children",
-              include: [File],
-            },
-          ],
         },
       });
 
@@ -46,7 +39,17 @@ class DbClient {
         throw new Error("Project not found");
       }
 
-      return this.structure_project_data(project);
+      return {
+        id: project.id,
+        name: project.name,
+        created_at: project.created_at,
+        root_folder_id: project.rootFolder ? project.rootFolder.id : null,
+        root_folder: {
+          id: project.rootFolder.id,
+          name: project.rootFolder.name,
+          children: [],
+        },
+      };
     } catch (err) {
       console.error("Error fetching project:", err);
       throw err;
@@ -54,54 +57,72 @@ class DbClient {
   }
 
   /**
-   * Structures the project data into a nested format.
-   * @param {Object} project
+   * Fetches a folder by its ID and retrieves its immediate children.
+   * @param {Number} id
+   * @returns {Promise<Object>}
+   */
+  async get_folder(id) {
+    try {
+      const folder = await Folder.findOne({
+        where: { id },
+        include: [
+          {
+            model: Folder,
+            as: "children",
+          },
+          {
+            model: File,
+          },
+        ],
+      });
+
+      if (!folder) {
+        throw new Error("Folder not found");
+      }
+
+      return this.structure_folder_data(folder);
+    } catch (err) {
+      console.error("Error fetching folder:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Structures the folder data into a nested format.
+   * @param {Object} folder
    * @returns {Object}
    */
-  structure_project_data(project) {
-    const folderMap = {};
-    const rootFolder = {
-      id: project.rootFolder.id,
-      name: project.rootFolder.name,
+  structure_folder_data(folder) {
+    const folderData = {
+      id: folder.id,
+      name: folder.name,
       children: [],
     };
 
-    project.rootFolder.children.forEach((folder) => {
-      if (!folderMap[folder.id]) {
-        folderMap[folder.id] = {
-          id: folder.id,
-          name: folder.name,
-          folder_id: folder.folder_id,
+    // Process each child folder
+    if (folder.children && folder.children.length > 0) {
+      folder.children.forEach((childFolder) => {
+        folderData.children.push({
+          id: childFolder.id,
+          name: childFolder.name,
           children: [],
-        };
-      }
+        });
+      });
+    }
 
+    // Process each file
+    if (folder.Files && folder.Files.length > 0) {
       folder.Files.forEach((file) => {
-        folderMap[folder.id].children.push({
+        folderData.children.push({
           id: file.id,
           name: file.name,
           type: file.type,
           folder_id: file.folder_id,
         });
       });
-    });
+    }
 
-    Object.values(folderMap).forEach((folder) => {
-      if (folder.folder_id) {
-        const parentFolder = folderMap[folder.folder_id] || rootFolder;
-        parentFolder.children.push(folder);
-      } else {
-        rootFolder.children.push(folder);
-      }
-    });
-
-    return {
-      id: project.id,
-      name: project.name,
-      created_at: project.created_at,
-      root_folder_id: project.rootFolder.id,
-      root_folder: rootFolder,
-    };
+    return folderData;
   }
 
   /**
@@ -126,8 +147,8 @@ class DbClient {
 
         await Folder.bulkCreate(
           [
-            { name: "Maps", folder_id: rootFolder.id },
-            { name: "Sprites", folder_id: rootFolder.id },
+            { name: "Maps", parent_folder_id: rootFolder.id },
+            { name: "Sprites", parent_folder_id: rootFolder.id },
           ],
           { transaction: t }
         );
@@ -181,7 +202,7 @@ class DbClient {
     try {
       const newFolder = await Folder.create({
         name: folder_name,
-        folder_id: parent_folder_id,
+        parent_folder_id: parent_folder_id,
       });
       console.log(`New folder created with ID: ${newFolder.id}`);
       return newFolder;

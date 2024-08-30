@@ -36,6 +36,14 @@ const Folder = sequelize.define("Folder", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  parent_folder_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: "Folders",
+      key: "id",
+    },
+  },
 });
 
 const File = sequelize.define("File", {
@@ -51,6 +59,14 @@ const File = sequelize.define("File", {
   type: {
     type: DataTypes.STRING,
   },
+  folder_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "Folders",
+      key: "id",
+    },
+  },
 });
 
 /**
@@ -58,10 +74,21 @@ const File = sequelize.define("File", {
  */
 
 Project.belongsTo(Folder, { as: "rootFolder", foreignKey: "root_folder_id" });
-Folder.hasMany(Folder, { as: "children", foreignKey: "folder_id" });
-Folder.hasMany(File, { foreignKey: "folder_id" });
-Folder.belongsTo(Folder, { as: "parentFolder", foreignKey: "folder_id" });
 
-sequelize.sync();
+Folder.hasMany(Folder, {
+  as: "children",
+  foreignKey: "parent_folder_id",
+});
+
+Folder.belongsTo(Folder, {
+  as: "parentFolder",
+  foreignKey: "parent_folder_id",
+});
+
+Folder.hasMany(File, { foreignKey: "folder_id" });
+
+sequelize.sync().then(async () => {
+  console.log("Database synchronized");
+});
 
 module.exports = { sequelize, Project, Folder, File };

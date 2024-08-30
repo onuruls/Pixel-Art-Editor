@@ -1,6 +1,6 @@
 export class Item {
   /**
-   * Parent-Class for Files and Folders
+   * Parent class for Files and Folders
    * @param {Number} id
    * @param {String} name
    * @param {Number} folder_id

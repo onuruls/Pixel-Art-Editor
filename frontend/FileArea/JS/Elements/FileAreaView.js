@@ -1,6 +1,5 @@
 import { File } from "../../../EditorTool/JS/Classes/File.js";
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
-import { FileArea } from "./FileArea.js";
 import { FileItemView } from "./FileItemView.js";
 import { FolderItemView } from "./FolderItemView.js";
 import { ItemView } from "./ItemView.js";
@@ -23,7 +22,7 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   *
+   * Creates a CSS link element for styling
    * @returns {HTMLLinkElement}
    */
   create_css_link() {
@@ -35,18 +34,20 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   * Called by upper class
+   * Initializes the view
    */
   init() {}
 
+  /**
+   * Called when the component is added to the DOM
+   */
   connectedCallback() {
     this.file_system_handler = this.file_area.file_system_handler;
     this.file_system_handler.read_directory_content();
   }
 
   /**
-   * Called form the file_system_handler
-   * Updates the view
+   * Called by the file_system_handler to update the view
    */
   rebuild_view() {
     this.clear_old_items();
@@ -87,7 +88,7 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   * Navigates to the dblclicked folder
+   * Navigates to the double-clicked folder
    * when file_system_handler is done, FileAreaView will
    * be updated
    * @param {String} name

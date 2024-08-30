@@ -1,4 +1,3 @@
-import { FileAreaView } from "./FileAreaView.js";
 import { ItemView } from "./ItemView.js";
 
 export class FileItemView extends ItemView {
@@ -12,7 +11,7 @@ export class FileItemView extends ItemView {
   }
 
   /**
-   *
+   * Creates an icon for the file
    * @returns {HTMLElement}
    */
   create_icon() {

@@ -1,5 +1,3 @@
-import { FileAreaView } from "./FileAreaView.js";
-
 export class ItemView extends HTMLElement {
   /**
    * Parent-View-Class for the views in the FileAreaView
@@ -20,7 +18,7 @@ export class ItemView extends HTMLElement {
   }
 
   /**
-   *
+   * Creates an icon for the item
    * @returns {HTMLElement}
    */
   create_icon() {
@@ -30,7 +28,7 @@ export class ItemView extends HTMLElement {
   }
 
   /**
-   *
+   * Creates a name field for the item
    * @returns {HTMLParagraphElement}
    */
   create_name_field() {
@@ -40,7 +38,7 @@ export class ItemView extends HTMLElement {
   }
 
   /**
-   *
+   * Creates an input field for editing the name
    * @returns {HTMLInputElement}
    */
   create_edit_name_input() {
@@ -52,3 +50,5 @@ export class ItemView extends HTMLElement {
 
   init() {}
 }
+
+customElements.define("item-view", ItemView);

@@ -21,7 +21,16 @@ export class FileSystemHandler {
    * Reads the content of the current Folder
    * and updates the UI
    */
-  read_directory_content() {
+  async read_directory_content() {
+    // If the active folder has not loaded its children yet, fetch them
+    if (!this.active_folder.children.length) {
+      const response = await fetch(
+        `http://localhost:3000/folders/${this.active_folder.id}`
+      );
+      const folder_data = await response.json();
+      this.active_folder.build_folder_structure(folder_data.children);
+    }
+
     this.entries = this.active_folder.children;
     this.file_area_view.rebuild_view();
   }
