@@ -184,16 +184,52 @@ class DbClient {
   }
 
   /**
+   * Generates a unique folder name within the same parent folder.
+   * @param {Number} parent_folder_id
+   * @param {String} folder_name
+   * @returns {String}
+   */
+  async generate_unique_folder_name(parent_folder_id, folder_name) {
+    let unique_name = folder_name;
+    let counter = 1;
+    let is_unique = false;
+
+    while (!is_unique) {
+      const existingFolder = await Folder.findOne({
+        where: {
+          name: unique_name,
+          parent_folder_id: parent_folder_id,
+        },
+      });
+
+      if (!existingFolder) {
+        is_unique = true;
+      } else {
+        unique_name = `${folder_name} (${counter})`;
+        counter++;
+      }
+    }
+
+    return unique_name;
+  }
+
+  /**
    * Adds a new folder to a parent folder.
    * @param {Number} parent_folder_id
    * @param {String} [folder_name="New Folder"]
    */
   async add_folder(parent_folder_id, folder_name = "New Folder") {
     try {
+      const unique_name = await this.generate_unique_folder_name(
+        parent_folder_id,
+        folder_name
+      );
+
       const newFolder = await Folder.create({
-        name: folder_name,
+        name: unique_name,
         parent_folder_id: parent_folder_id,
       });
+
       console.log(`New folder created with ID: ${newFolder.id}`);
       return newFolder;
     } catch (err) {
