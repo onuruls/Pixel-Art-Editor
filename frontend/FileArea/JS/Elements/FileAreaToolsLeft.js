@@ -11,13 +11,7 @@ export class FileAreaToolsLeft extends HTMLElement {
     this.file_area = file_area;
     this.editor_name = "Map Editor";
     this.editor_button = this.create_editor_button();
-    this.create_folder_button = this.create_create_folder_button();
-    this.delete_button = this.create_delete_button();
-    this.rename_button = this.create_rename_button();
     this.appendChild(this.editor_button);
-    this.appendChild(this.create_folder_button);
-    this.appendChild(this.delete_button);
-    this.appendChild(this.rename_button);
     this.init();
   }
 
@@ -36,69 +30,10 @@ export class FileAreaToolsLeft extends HTMLElement {
     return editor_button;
   }
 
-  /**
-   * Creates the create folder button
-   * @returns {HTMLButtonElement}
-   */
-  create_create_folder_button() {
-    const create_folder_button = document.createElement("button");
-    const icon = document.createElement("i");
-    icon.classList.add("fa-solid", "fa-folder-plus", "fa-fw");
-    icon.setAttribute("alt", "New Folder");
-    create_folder_button.setAttribute("id", "create_folder_button");
-    create_folder_button.appendChild(icon);
-    create_folder_button.appendChild(document.createTextNode("New Folder"));
-    return create_folder_button;
-  }
-
-  /**
-   * Creates the delete button
-   * @returns {HTMLButtonElement}
-   */
-  create_delete_button() {
-    const delete_folder_button = document.createElement("button");
-    const icon = document.createElement("i");
-    icon.classList.add("fa-solid", "fa-trash", "fa-fw");
-    icon.setAttribute("alt", "Delete");
-    delete_folder_button.setAttribute("id", "delete_button");
-    delete_folder_button.appendChild(icon);
-    delete_folder_button.appendChild(document.createTextNode("Delete"));
-    return delete_folder_button;
-  }
-
-  /**
-   * Create the rename button
-   * @returns {HTMLButtonElement}
-   */
-  create_rename_button() {
-    const rename_folder_button = document.createElement("button");
-    const icon = document.createElement("i");
-    icon.classList.add("fas", "fa-edit", "fa-fw");
-    icon.setAttribute("alt", "Rename");
-    rename_folder_button.setAttribute("id", "rename_button");
-    rename_folder_button.appendChild(icon);
-    rename_folder_button.appendChild(document.createTextNode("Rename"));
-    return rename_folder_button;
-  }
-
   init() {
     this.editor_button.addEventListener(
       "click",
       this.file_area.editor_tool.change_editor.bind(this.file_area.editor_tool)
-    );
-
-    this.create_folder_button.addEventListener(
-      "click",
-      this.file_area.create_new_folder.bind(this.file_area)
-    );
-
-    this.delete_button.addEventListener(
-      "click",
-      this.file_area.delete_selected_folder.bind(this.file_area)
-    );
-    this.rename_button.addEventListener(
-      "click",
-      this.file_area.rename_selected_folder.bind(this.file_area)
     );
   }
 
