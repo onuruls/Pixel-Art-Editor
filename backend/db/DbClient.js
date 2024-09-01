@@ -1,4 +1,5 @@
-const db = require("./db.js");
+const { Project, Folder, File } = require("./db");
+const { sequelize } = require("./db");
 
 class DbClient {
   /**
@@ -7,269 +8,239 @@ class DbClient {
   constructor() {}
 
   /**
-   * Fetch all projects
-   * @returns {Promise}
+   * Fetches all projects
    */
-  get_projects() {
-    return new Promise((res, rej) => {
-      db.all(`SELECT * FROM projects`, (err, rows) => {
-        if (err) {
-          rej(err);
-        } else {
-          res(rows);
-        }
-      });
-    });
+  async get_projects() {
+    try {
+      return await Project.findAll();
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+      throw err;
+    }
   }
 
   /**
-   * Gets a project form the database
+   * Fetches a project by its ID and retrieves its structure with the root folder.
    * @param {Number} id
-   * @returns
    */
-  get_project(id) {
-    return new Promise((res, rej) => {
-      // Project and root folder
-      db.get(
-        `SELECT projects.id AS project_id, projects.name AS project_name, projects.created_at, folders.id AS root_folder_id, folders.name AS root_folder_name
-         FROM projects
-         JOIN folders ON projects.root_folder_id = folders.id
-         WHERE projects.id = ?`,
-        [id],
-        (err, project) => {
-          // recursive query for all the folder and files
-          db.all(
-            `WITH RECURSIVE folder_hierarchy AS (
-               SELECT id, name, folder_id
-               FROM folders
-               WHERE id = ?
-               UNION ALL
-               SELECT f.id, f.name, f.folder_id
-               FROM folders f
-               INNER JOIN folder_hierarchy fh ON f.folder_id = fh.id
-             )
-             SELECT fh.id AS folder_id, fh.name AS folder_name, fh.folder_id AS parent_folder_id,
-                    fl.id AS file_id, fl.name AS file_name, fl.type AS file_type
-             FROM folder_hierarchy fh
-             LEFT JOIN files fl ON fh.id = fl.folder_id`,
-            [project.root_folder_id],
-            (err, rows) => {
-              res(this.structure_project_data(project, rows));
-            }
-          );
-        }
-      );
-    });
+  async get_project(id) {
+    try {
+      const project = await Project.findOne({
+        where: { id },
+        include: {
+          model: Folder,
+          as: "rootFolder",
+        },
+      });
+
+      if (!project) {
+        throw new Error("Project not found");
+      }
+
+      return {
+        id: project.id,
+        name: project.name,
+        created_at: project.created_at,
+        root_folder_id: project.rootFolder ? project.rootFolder.id : null,
+        root_folder: {
+          id: project.rootFolder.id,
+          name: project.rootFolder.name,
+          children: [],
+        },
+      };
+    } catch (err) {
+      console.error("Error fetching project:", err);
+      throw err;
+    }
   }
 
   /**
-   * Turns the data from the database to a project struture
-   * @param {any} project
-   * @param {any} rows
-   * @returns
+   * Fetches a folder by its ID and retrieves its immediate children.
+   * @param {Number} id
    */
-  structure_project_data(project, rows) {
-    const folderMap = {};
-    const rootFolder = {
-      id: project.root_folder_id,
-      name: project.root_folder_name,
+  async get_folder(id) {
+    try {
+      const folder = await Folder.findOne({
+        where: { id },
+        include: [
+          {
+            model: Folder,
+            as: "children",
+          },
+          {
+            model: File,
+          },
+        ],
+      });
+
+      if (!folder) {
+        throw new Error("Folder not found");
+      }
+
+      return this.structure_folder_data(folder);
+    } catch (err) {
+      console.error("Error fetching folder:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Structures the folder data into a nested format.
+   * @param {Object} folder
+   */
+  structure_folder_data(folder) {
+    const folderData = {
+      id: folder.id,
+      name: folder.name,
       children: [],
     };
 
-    rows.forEach((row) => {
-      if (!folderMap[row.folder_id]) {
-        folderMap[row.folder_id] = {
-          id: row.folder_id,
-          name: row.folder_name,
-          folder_id: row.parent_folder_id,
+    if (folder.children && folder.children.length > 0) {
+      folder.children.forEach((childFolder) => {
+        folderData.children.push({
+          id: childFolder.id,
+          name: childFolder.name,
           children: [],
-        };
-      }
-      if (row.file_id) {
-        folderMap[row.folder_id].children.push({
-          id: row.file_id,
-          name: row.file_name,
-          type: row.file_type,
-          folder_id: row.folder_id,
         });
-      }
-    });
+      });
+    }
 
-    Object.values(folderMap).forEach((folder) => {
-      if (folder.id !== rootFolder.id) {
-        const parentFolder = folderMap[folder.parent_folder_id] || rootFolder;
-        parentFolder.children.push(folder);
-      }
-    });
+    if (folder.Files && folder.Files.length > 0) {
+      folder.Files.forEach((file) => {
+        folderData.children.push({
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          folder_id: file.folder_id,
+        });
+      });
+    }
 
-    return {
-      id: project.project_id,
-      name: project.project_name,
-      created_at: project.created_at,
-      root_folder_id: project.root_folder_id,
-      root_folder: rootFolder,
-    };
+    return folderData;
   }
 
   /**
-   * Creates a new Project
+   * Creates a new project with a root folder and subfolders.
    * @param {String} name
    */
-  new_project(name) {
-    db.serialize(() => {
-      db.run("BEGIN TRANSACTION");
-      // Root-Folder
-      db.run(
-        `INSERT INTO folders (name, folder_id) VALUES (?, NULL)`,
-        ["Root"],
-        function (err) {
-          if (err) {
-            console.error("Error inserting root folder:", err);
-            db.run("ROLLBACK");
-            return;
-          }
-          const rootFolderId = this.lastID;
+  async new_project(name) {
+    try {
+      return await sequelize.transaction(async (t) => {
+        const rootFolder = await Folder.create(
+          { name: "Root" },
+          { transaction: t }
+        );
+        const project = await Project.create(
+          {
+            name,
+            root_folder_id: rootFolder.id,
+          },
+          { transaction: t }
+        );
 
-          // Project
-          db.run(
-            `INSERT INTO projects (name, created_at, root_folder_id) VALUES (?, ?, ?)`,
-            [name, new Date().toISOString(), rootFolderId],
-            function (err) {
-              if (err) {
-                console.error("Error inserting project:", err);
-                db.run("ROLLBACK");
-                return;
-              }
+        await Folder.bulkCreate(
+          [
+            { name: "Maps", parent_folder_id: rootFolder.id },
+            { name: "Sprites", parent_folder_id: rootFolder.id },
+          ],
+          { transaction: t }
+        );
 
-              //Maps-Folder
-              db.run(
-                `INSERT INTO folders (name, folder_id) VALUES (?, ?)`,
-                ["Maps", rootFolderId],
-                function (err) {
-                  if (err) {
-                    console.error("Error inserting Maps folder:", err);
-                    db.run("ROLLBACK");
-                    return;
-                  }
-                }
-              );
-              // Sprites-Folder
-              db.run(
-                `INSERT INTO folders (name, folder_id) VALUES (?, ?)`,
-                ["Sprites", rootFolderId],
-                function (err) {
-                  if (err) {
-                    console.error("Error inserting Sprites folder:", err);
-                    db.run("ROLLBACK");
-                    return;
-                  }
-                }
-              );
-
-              console.log("Project and folders created successfully.");
-            }
-          );
-        }
-      );
-      db.run("COMMIT");
-    });
+        return project;
+      });
+    } catch (err) {
+      console.error("Error creating project:", err);
+      throw err;
+    }
   }
 
   /**
-   * Renames a project
+   * Renames an existing project.
    * @param {Number} id
    * @param {String} new_name
-   * @returns {Promise}
    */
-  rename_project(id, new_name) {
-    return new Promise((res, rej) => {
-      db.run(
-        `UPDATE projects SET name = ? WHERE id = ?`,
-        [new_name, id],
-        function (err) {
-          if (err) {
-            console.error("Error renaming project:", err);
-            rej(err);
-          } else {
-            console.log(`Project with ID ${id} renamed to ${new_name}.`);
-            res();
-          }
-        }
-      );
-    });
+  async rename_project(id, new_name) {
+    try {
+      await Project.update({ name: new_name }, { where: { id } });
+      console.log(`Project with ID ${id} renamed to ${new_name}.`);
+    } catch (err) {
+      console.error("Error renaming project:", err);
+      throw err;
+    }
   }
 
   /**
-   * Updates the project
+   * Deletes a project by its ID.
    * @param {Number} id
    */
-  update_project(id) {
-    console.log("Not implementes yet");
+  async delete_project(id) {
+    try {
+      await Project.destroy({ where: { id } });
+      console.log(`Project with ID ${id} deleted.`);
+    } catch (err) {
+      console.error("Error deleting project:", err);
+      throw err;
+    }
   }
 
   /**
-   * Deletes a project
-   * @param {Number} id
-   * @returns {Promise}
-   */
-  delete_project(id) {
-    return new Promise((res, rej) => {
-      db.run(`DELETE FROM projects WHERE id = ?`, [id], function (err) {
-        if (err) {
-          console.error("Error deleting project:", err);
-          rej(err);
-        } else {
-          console.log(`Project with ID ${id} deleted.`);
-          res();
-        }
-      });
-    });
-  }
-
-  /**
-   * Adds a new folder to the parent_folder
+   * Adds a new folder to a parent folder.
    * @param {Number} parent_folder_id
-   * @param {String} folder_name
-   * @returns
+   * @param {String} [folder_name="New Folder"]
    */
-  add_folder(parent_folder_id, folder_name = "New Folder") {
-    return new Promise((res, rej) => {
-      // Führe die SQL-Anweisung aus
-      db.run(
-        `INSERT INTO folders (name, folder_id) VALUES (?, ?)`,
-        [folder_name, parent_folder_id],
-        function (err) {
-          if (err) {
-            console.error("Error inserting folder:", err);
-            rej(err);
-          } else {
-            const new_folder_id = this.lastID;
-            console.log(`New folder created with ID: ${new_folder_id}`);
-            res({
-              id: new_folder_id,
-              name: folder_name,
-              folder_id: parent_folder_id,
-            });
-          }
-        }
+  async add_folder(parent_folder_id, folder_name = "New Folder") {
+    try {
+      const newFolder = await Folder.create({
+        name: folder_name,
+        parent_folder_id: parent_folder_id,
+      });
+      console.log(`New folder created with ID: ${newFolder.id}`);
+      return newFolder;
+    } catch (err) {
+      console.error("Error creating folder:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Deletes a folder by its ID.
+   * This will cascade delete all child folders and files
+   * due to the onDelete: "CASCADE" setting.
+   * @param {Number} folder_id
+   */
+  async delete_folder(folder_id) {
+    try {
+      await Folder.destroy({
+        where: { id: folder_id },
+      });
+      console.log(`Folder with ID ${folder_id} deleted.`);
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Renames an existing folder.
+   * @param {Number} id
+   * @param {String} new_name
+   */
+  async rename_folder(id, new_name) {
+    try {
+      const [updated] = await Folder.update(
+        { name: new_name },
+        { where: { id } }
       );
-    });
-  }
 
-  /**
-   * Updates a folder
-   * @param {Number} id
-   */
-  update_folder(id) {
-    console.log("Not implemented yet");
-  }
+      if (!updated) {
+        throw new Error("Folder not found");
+      }
 
-  /**
-   *
-   * @param {Number} id
-   */
-  update_file(id) {
-    console.log("Not implemented yet");
+      console.log(`Folder with ID ${id} renamed to ${new_name}.`);
+    } catch (err) {
+      console.error("Error renaming folder:", err);
+      throw err;
+    }
   }
 }
 

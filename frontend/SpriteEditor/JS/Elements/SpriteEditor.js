@@ -121,7 +121,7 @@ export class SpriteEditor extends HTMLElement {
       if (event.ctrlKey && event.key === "y") {
         this.redo_last_action();
       } else {
-        this.handle_tool_shortcuts(event);
+        // this.handle_tool_shortcuts(event);
       }
     });
     this.import_input.addEventListener("change", (event) => {

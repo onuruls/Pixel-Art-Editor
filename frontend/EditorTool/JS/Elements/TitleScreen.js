@@ -62,7 +62,15 @@ export class TitleScreen extends HTMLElement {
       throw new Error("Network response was not ok");
     }
 
-    const new_project = await response.json();
+    const projectData = await response.json();
+
+    const new_project = new Project(
+      projectData.id,
+      projectData.name,
+      projectData.created_at,
+      projectData.root_folder_id,
+      projectData.root_folder
+    );
     this.editor_tool.set_project(new_project);
   }
 

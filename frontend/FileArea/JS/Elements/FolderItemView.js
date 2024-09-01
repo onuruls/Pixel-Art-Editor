@@ -1,4 +1,3 @@
-import { FileAreaView } from "./FileAreaView.js";
 import { ItemView } from "./ItemView.js";
 
 export class FolderItemView extends ItemView {
@@ -7,12 +6,14 @@ export class FolderItemView extends ItemView {
    * @param {String} name
    * @param {FileAreaView} file_area_view
    */
-  constructor(name, file_area_view) {
-    super(name, file_area_view);
+
+  constructor(name, file_area_view, id) {
+    super(name, file_area_view, id);
+    this.edit_name_input = this.create_edit_name_input();
   }
 
   /**
-   *
+   * Creates an icon for the folder
    * @returns {HTMLElement}
    */
   create_icon() {
@@ -26,8 +27,18 @@ export class FolderItemView extends ItemView {
     this.icon.addEventListener("dblclick", this.open_folder.bind(this));
   }
 
+  /**
+   * Opens the folder when it is double-clicked
+   */
   open_folder() {
     this.file_area_view.navigate_to_folder(this.name);
+  }
+
+  /**
+   * Replaces the name field with an input field for renaming
+   */
+  replace_name_with_input() {
+    this.replaceChild(this.edit_name_input, this.name_field);
   }
 }
 

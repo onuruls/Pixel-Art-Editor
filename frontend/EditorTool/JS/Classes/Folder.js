@@ -1,4 +1,3 @@
-import { File } from "./File.js";
 import { Item } from "./Item.js";
 
 export class Folder extends Item {
@@ -15,7 +14,7 @@ export class Folder extends Item {
   }
 
   /**
-   * Builds the children of a folder from Array of Objects
+   * Builds the children of a folder from an array of objects
    * @param {Array<Object>} children
    */
   build_folder_structure(children) {
@@ -32,7 +31,7 @@ export class Folder extends Item {
   }
 
   /**
-   *
+   * Deletes an item in the folder by name
    * @param {String} name
    */
   delete_item(name) {
