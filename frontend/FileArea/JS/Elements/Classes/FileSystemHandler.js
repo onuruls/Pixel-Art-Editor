@@ -18,10 +18,15 @@ export class FileSystemHandler {
   }
 
   /**
-   * Reads the content of the current folder and updates the UI.
-   * @returns {Promise<void>}
+   * Reads the content of the current Folder
+   * and updates the UI
    */
   async read_directory_content() {
+    if (!this.active_folder || !this.active_folder.children) {
+      console.error("Active folder is not defined or has no children.");
+      return;
+    }
+
     if (!this.active_folder.children.length) {
       const response = await fetch(
         `http://localhost:3000/folders/${this.active_folder.id}`
@@ -60,9 +65,16 @@ export class FileSystemHandler {
    * @param {String} name
    */
   load_new_directory(name) {
-    this.active_folder = this.entries.find(
+    const folder_to_load = this.entries.find(
       (item) => item instanceof Folder && item.name === name
     );
+
+    if (!folder_to_load) {
+      console.error(`Folder with name ${name} not found.`);
+      return;
+    }
+
+    this.active_folder = folder_to_load;
     this.folder_history.push(this.active_folder);
     this.read_directory_content();
   }
@@ -103,7 +115,6 @@ export class FileSystemHandler {
    * @param {string} id
    * @param {string} newName
    */
-
   async rename_folder_by_id(id, newName) {
     try {
       const response = await fetch(
@@ -119,6 +130,15 @@ export class FileSystemHandler {
 
       if (!response.ok) {
         throw new Error("Failed to rename the folder.");
+      }
+
+      const folder = this.active_folder.children.find(
+        (child) => child.id === id
+      );
+      if (folder) {
+        folder.name = newName;
+      } else {
+        console.error(`Folder with ID ${id} not found in active folder.`);
       }
 
       console.log(`Folder with ID ${id} renamed to ${newName}.`);

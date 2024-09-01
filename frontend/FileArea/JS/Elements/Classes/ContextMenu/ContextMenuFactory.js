@@ -1,43 +1,44 @@
 import { FileAreaContextMenu } from "./FileAreaContextMenu.js";
 import { FolderContextMenu } from "./FolderContextmenu.js";
+import { MultipleItemsContextMenu } from "./MultipleItemsContextMenu.js";
 
-/**
- * Factory for creating context menus based on the target.
- */
 export class ContextMenuFactory {
   /**
-   * @param {FileArea} fileArea
-   * @param {HTMLElement} contextMenuElement
+   * @param {FileArea} file_area
+   * @param {HTMLElement} context_menu_element
    */
-  constructor(fileArea, contextMenuElement) {
-    /** @type {FileArea} */
-    this.fileArea = fileArea;
-
-    /** @type {FileAreaContextMenu} */
-    this.fileAreaContextMenu = new FileAreaContextMenu(
-      this.fileArea,
-      contextMenuElement
+  constructor(file_area, context_menu_element) {
+    this.file_area = file_area;
+    this.file_area_context_menu = new FileAreaContextMenu(
+      this.file_area,
+      context_menu_element
     );
-
-    /** @type {FolderContextMenu} */
-    this.folderContextMenu = new FolderContextMenu(
-      this.fileArea,
-      contextMenuElement
+    this.folder_context_menu = new FolderContextMenu(
+      this.file_area,
+      context_menu_element
+    );
+    this.multiple_items_context_menu = new MultipleItemsContextMenu(
+      this.file_area,
+      context_menu_element
     );
   }
 
   /**
-   * Returns the appropriate context menu based on the target.
+   * Returns context menu based on the target and selection state
    * @param {HTMLElement} target
+   * @param {boolean} multiple_selection
    * @returns {ContextMenu}
    */
-  getContextMenu(target) {
-    if (target) {
-      this.folderContextMenu.configure(target);
-      return this.folderContextMenu;
+  getContextMenu(target, multiple_selection = false) {
+    if (multiple_selection) {
+      this.multiple_items_context_menu.configure();
+      return this.multiple_items_context_menu;
+    } else if (target) {
+      this.folder_context_menu.configure(target);
+      return this.folder_context_menu;
     } else {
-      this.fileAreaContextMenu.configure();
-      return this.fileAreaContextMenu;
+      this.file_area_context_menu.configure();
+      return this.file_area_context_menu;
     }
   }
 }

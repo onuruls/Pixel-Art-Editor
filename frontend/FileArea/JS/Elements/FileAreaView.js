@@ -4,12 +4,16 @@ import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
 import { ContextMenuFactory } from "./Classes/ContextMenu/ContextMenuFactory.js";
 
 export class FileAreaView extends HTMLElement {
+  /**
+   * The view of the folders and files in the FileArea
+   * @param {FileArea} file_area
+   */
   constructor(file_area) {
     super();
     this.file_area = file_area;
 
     this.items = [];
-    this.selected_item = null;
+    this.selected_items = new Set();
 
     this.contextMenuElement = this.createContextMenuElement();
 
@@ -24,6 +28,10 @@ export class FileAreaView extends HTMLElement {
     this.init();
   }
 
+  /**
+   *
+   * @returns {HTMLLinkElement}
+   */
   create_css_link() {
     const css = document.createElement("link");
     css.setAttribute("href", `../FileArea/CSS/Elements/FileAreaView.css`);
@@ -31,29 +39,96 @@ export class FileAreaView extends HTMLElement {
     css.setAttribute("type", "text/css");
     return css;
   }
-
+  /**
+   *
+   * @returns {HTMLElement}
+   */
   createContextMenuElement() {
-    const menuElement = document.createElement("div");
-    menuElement.classList.add("context-menu");
-    return menuElement;
+    const menu_element = document.createElement("div");
+    menu_element.classList.add("context-menu");
+    return menu_element;
   }
-
+  /**
+   * Called by upper class
+   */
   init() {
     this.addEventListener("contextmenu", this.handleContextMenu.bind(this));
+    this.addEventListener("click", this.handleClick.bind(this));
   }
 
+  /**
+   * Handles left-clicks to select or deselect items
+   * Clears selection if the click is outside of any item
+   * @param {MouseEvent} event
+   */
+  handleClick(event) {
+    const target = event.target.closest(".item");
+
+    if (target) {
+      if (event.ctrlKey && event.button === 0) {
+        // Ctrl + Left Click
+        this.toggle_item_selection(target);
+      } else {
+        this.clear_selection();
+        this.select_item(target);
+      }
+    } else {
+      this.clear_selection();
+    }
+  }
+
+  /**
+   * Toggles the selection state of an item
+   * @param {HTMLElement} target
+   */
+  toggle_item_selection(target) {
+    if (this.selected_items.has(target)) {
+      this.selected_items.delete(target);
+      target.classList.remove("selected");
+    } else {
+      this.selected_items.add(target);
+      target.classList.add("selected");
+    }
+  }
+
+  /**
+   * Clears the current selection of items
+   */
+  clear_selection() {
+    this.selected_items.forEach((item) => item.classList.remove("selected"));
+    this.selected_items.clear();
+  }
+
+  /**
+   * Highlights the selected item and updates the file area selection
+   * @param {HTMLElement} target
+   */
+  select_item(target) {
+    this.selected_items.add(target);
+    target.classList.add("selected");
+    this.file_area.selected_items = this.selected_items;
+  }
+
+  /**
+   * Handles right-clicks to show the context menu
+   * @param {MouseEvent} event
+   */
   handleContextMenu(event) {
     event.preventDefault();
     const target = event.target.closest(".item");
 
-    if (target) {
+    if (target && !event.ctrlKey) {
       this.select_item(target);
     }
 
-    const contextMenu = this.contextMenuFactory.getContextMenu(target);
-    contextMenu.show(event);
+    const context_menu = this.contextMenuFactory.getContextMenu(
+      target,
+      this.selected_items.size > 1
+    );
+    console.log("multipleSelection: ", this.selected_items.size > 1);
+    context_menu.show(event);
 
-    document.addEventListener("click", () => contextMenu.hide(), {
+    document.addEventListener("click", () => context_menu.hide(), {
       once: true,
     });
   }
@@ -67,7 +142,8 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   * Called by the file_system_handler to update the view
+   * Called form the file_system_handler
+   * Updates the view
    */
   rebuild_view() {
     this.clear_old_items();
@@ -88,7 +164,7 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   * Removes the old items from the DOM
+   * Removes the old items from the DOM.
    */
   clear_old_items() {
     for (const item of this.items) {
@@ -97,16 +173,7 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   * Highlights the selected item
-   * @param {HTMLElement} target
-   */
-  select_item(target) {
-    this.selected_item = target;
-    this.file_area.selected_item = this.selected_item;
-  }
-
-  /**
-   * Navigates to the double-clicked folder
+   * Navigates to the dblclicked folder
    * when file_system_handler is done, FileAreaView will
    * be updated
    * @param {String} name
@@ -116,7 +183,7 @@ export class FileAreaView extends HTMLElement {
   }
 
   /**
-   * Creates a new folder item view and returns it
+   * Creates a new folder item view and returns it.
    * @returns {FolderItemView}
    */
   create_new_folder() {

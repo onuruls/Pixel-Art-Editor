@@ -1,23 +1,22 @@
 import { ContextMenuAction } from "./ContextMenuAction.js";
 
 /**
- * Action for renaming a folder.
+ * Action for renaming a folder
  */
 export class RenameFolderAction extends ContextMenuAction {
   /**
-   * @param {FileArea} fileArea
+   * @param {FileArea} file_area
    */
-  constructor(fileArea) {
+  constructor(file_area) {
     super();
-    /** @type {FileArea} */
-    this.fileArea = fileArea;
+    this.file_area = file_area;
   }
 
   /**
-   * Executes the action to rename the selected folder.
+   * Executes the action to rename the selected folder
    * @returns {void}
    */
   execute() {
-    this.fileArea.rename_selected_folder();
+    this.file_area.rename_selected_folder();
   }
 }

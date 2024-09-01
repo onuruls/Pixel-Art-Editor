@@ -1,23 +1,22 @@
 import { ContextMenuAction } from "./ContextMenuAction.js";
 
 /**
- * Action for deleting a folder.
+ * Action for deleting a folder
  */
 export class DeleteFolderAction extends ContextMenuAction {
   /**
-   * @param {FileArea} fileArea
+   * @param {FileArea} file_area
    */
-  constructor(fileArea) {
+  constructor(file_area) {
     super();
-    /** @type {FileArea} */
-    this.fileArea = fileArea;
+    this.file_area = file_area;
   }
 
   /**
-   * Executes the action to delete the selected folder.
+   * Executes the action to delete the selected folder
    * @returns {void}
    */
   execute() {
-    this.fileArea.delete_selected_folder();
+    this.file_area.delete_selected_folder();
   }
 }

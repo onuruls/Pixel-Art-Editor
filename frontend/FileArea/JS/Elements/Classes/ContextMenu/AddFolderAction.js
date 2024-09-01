@@ -1,20 +1,20 @@
 import { ContextMenuAction } from "./ContextMenuAction.js";
 
 /**
- * Action for adding a new folder.
+ * Action for adding a new folder
  */
 export class AddFolderAction extends ContextMenuAction {
-  constructor(fileArea) {
+  constructor(file_area) {
     super();
-    /** @type {FileArea} */
-    this.fileArea = fileArea;
+
+    this.file_area = file_area;
   }
 
   /**
-   * Executes the action to create a new folder.
+   * Executes the action to create a new folder
    * @returns {void}
    */
   execute() {
-    this.fileArea.create_new_folder();
+    this.file_area.create_new_folder();
   }
 }

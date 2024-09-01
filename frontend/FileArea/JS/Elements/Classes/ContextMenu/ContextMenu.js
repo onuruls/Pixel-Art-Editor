@@ -1,10 +1,9 @@
 export class ContextMenu {
   /**
-   * @param {HTMLElement} menuElement
+   * @param {HTMLElement} menu_element
    */
-  constructor(menuElement) {
-    /** @type {HTMLElement} */
-    this.menuElement = menuElement;
+  constructor(menu_element) {
+    this.menu_element = menu_element;
   }
 
   /**
@@ -19,7 +18,7 @@ export class ContextMenu {
    * @returns {void}
    */
   clearOptions() {
-    this.menuElement.innerHTML = "";
+    this.menu_element.innerHTML = "";
   }
 
   /**
@@ -35,7 +34,7 @@ export class ContextMenu {
       action();
       this.hide();
     });
-    this.menuElement.appendChild(option);
+    this.menu_element.appendChild(option);
   }
 
   /**
@@ -44,9 +43,9 @@ export class ContextMenu {
    * @returns {void}
    */
   show(event) {
-    this.menuElement.style.left = `${event.pageX}px`;
-    this.menuElement.style.top = `${event.pageY}px`;
-    this.menuElement.classList.add("visible");
+    this.menu_element.style.left = `${event.pageX}px`;
+    this.menu_element.style.top = `${event.pageY}px`;
+    this.menu_element.classList.add("visible");
   }
 
   /**
@@ -54,6 +53,6 @@ export class ContextMenu {
    * @returns {void}
    */
   hide() {
-    this.menuElement.classList.remove("visible");
+    this.menu_element.classList.remove("visible");
   }
 }
