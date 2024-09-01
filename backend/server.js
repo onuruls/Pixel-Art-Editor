@@ -1,5 +1,4 @@
 const express = require("express");
-const db = require("./db/db");
 const cors = require("cors");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
@@ -25,7 +24,7 @@ app.post("/projects", async (req, res) => {
   }
 
   console.log("Creating new project");
-  console.log("Projectname:", name);
+  console.log("Project name:", name);
 
   try {
     const project = await db_client.new_project(name);
@@ -130,14 +129,48 @@ app.post("/projects/folders", async (req, res) => {
     return res.status(400).send("Parent folder ID is required");
   }
 
-  console.log("Adding Folder with parent_folder_id:", folder_id);
-
   try {
     const folder = await db_client.add_folder(folder_id, folder_name);
     res.status(201).send(folder);
   } catch (error) {
     console.error("Error adding folder:", error);
     res.status(500).send(error);
+  }
+});
+
+/**
+ * Deletes a folder by its ID
+ */
+app.delete("/folders/:id", async (req, res) => {
+  const folder_id = req.params.id;
+  console.log("Deleting folder with ID:", folder_id);
+
+  try {
+    await db_client.delete_folder(folder_id);
+    res.status(200).send("Folder deleted");
+  } catch (error) {
+    console.error("Error deleting folder:", error);
+    res.status(500).send("Error deleting folder");
+  }
+});
+
+/**
+ * Renames a folder by its ID
+ */
+app.put("/folders/:id/rename", async (req, res) => {
+  const folder_id = req.params.id;
+  const { new_name } = req.body;
+
+  if (!new_name) {
+    return res.status(400).send("New folder name is required");
+  }
+
+  try {
+    await db_client.rename_folder(folder_id, new_name);
+    res.status(200).send("Folder renamed");
+  } catch (error) {
+    console.error("Error renaming folder:", error);
+    res.status(500).send("Error renaming folder");
   }
 });
 

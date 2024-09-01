@@ -41,4 +41,36 @@ file-area {
       }
     }
   }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    margin: 0.5rem;
+    text-overflow: ellipsis;
+    padding-top: 1rem;
+
+    i {
+      font-size: 2.5rem;
+    }
+
+    p,
+    .rename-input {
+      font-size: 0.9rem;
+      text-align: center;
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 2px;
+      box-sizing: border-box;
+    }
+
+    .rename-input {
+      border: 1px solid transparent;
+      outline: none;
+      border-color: var(--neutral-accent);
+      background: var(--button-bg);
+      border-radius: 3px;
+    }
+  }
 }

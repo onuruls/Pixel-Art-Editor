@@ -43,6 +43,7 @@ const Folder = sequelize.define("Folder", {
       model: "Folders",
       key: "id",
     },
+    onDelete: "CASCADE",
   },
 });
 
@@ -66,6 +67,7 @@ const File = sequelize.define("File", {
       model: "Folders",
       key: "id",
     },
+    onDelete: "CASCADE",
   },
 });
 
@@ -78,6 +80,7 @@ Project.belongsTo(Folder, { as: "rootFolder", foreignKey: "root_folder_id" });
 Folder.hasMany(Folder, {
   as: "children",
   foreignKey: "parent_folder_id",
+  onDelete: "CASCADE",
 });
 
 Folder.belongsTo(Folder, {
@@ -85,7 +88,7 @@ Folder.belongsTo(Folder, {
   foreignKey: "parent_folder_id",
 });
 
-Folder.hasMany(File, { foreignKey: "folder_id" });
+Folder.hasMany(File, { foreignKey: "folder_id", onDelete: "CASCADE" });
 
 sequelize.sync().then(async () => {
   console.log("Database synchronized");

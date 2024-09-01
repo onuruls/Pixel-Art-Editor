@@ -5,9 +5,10 @@ export class FileItemView extends ItemView {
    * View-Class of a File in the FileAreaView
    * @param {String} name
    * @param {FileAreaView} file_area_view
+   * @param {number} id
    */
-  constructor(name, file_area_view) {
-    super(name, file_area_view);
+  constructor(name, file_area_view, id) {
+    super(name, file_area_view, id);
   }
 
   /**

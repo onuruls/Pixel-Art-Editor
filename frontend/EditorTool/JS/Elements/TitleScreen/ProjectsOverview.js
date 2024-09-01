@@ -149,6 +149,20 @@ export class ProjectsOverview extends HTMLElement {
       }
     }
   }
+
+  /**
+   * Re-renders the list of projects.
+   * @param {Array<Project>} projects
+   */
+  render_loaded_projects(projects) {
+    this.views_container.innerHTML = "";
+    this.projects = projects;
+    this.project_views = this.create_project_views();
+
+    this.project_views.forEach((view) => {
+      this.views_container.appendChild(view);
+    });
+  }
 }
 
 customElements.define("projects-overview", ProjectsOverview);

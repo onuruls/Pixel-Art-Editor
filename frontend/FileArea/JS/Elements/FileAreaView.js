@@ -1,30 +1,29 @@
-import { File } from "../../../EditorTool/JS/Classes/File.js";
-import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
 import { FileItemView } from "./FileItemView.js";
 import { FolderItemView } from "./FolderItemView.js";
-import { ItemView } from "./ItemView.js";
+import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
+import { ContextMenuFactory } from "./Classes/ContextMenu/ContextMenuFactory.js";
 
 export class FileAreaView extends HTMLElement {
-  /**
-   * The view of the folders and files in the FileArea
-   * @param {FileArea} file_area
-   */
   constructor(file_area) {
     super();
     this.file_area = file_area;
-    this.file_system_handler = null;
+
     this.items = [];
-    this.directory_content = [];
     this.selected_item = null;
+
+    this.contextMenuElement = this.createContextMenuElement();
+
+    this.contextMenuFactory = new ContextMenuFactory(
+      this.file_area,
+      this.contextMenuElement
+    );
+
     this.css = this.create_css_link();
     this.appendChild(this.css);
+    this.appendChild(this.contextMenuElement);
     this.init();
   }
 
-  /**
-   * Creates a CSS link element for styling
-   * @returns {HTMLLinkElement}
-   */
   create_css_link() {
     const css = document.createElement("link");
     css.setAttribute("href", `../FileArea/CSS/Elements/FileAreaView.css`);
@@ -33,10 +32,31 @@ export class FileAreaView extends HTMLElement {
     return css;
   }
 
-  /**
-   * Initializes the view
-   */
-  init() {}
+  createContextMenuElement() {
+    const menuElement = document.createElement("div");
+    menuElement.classList.add("context-menu");
+    return menuElement;
+  }
+
+  init() {
+    this.addEventListener("contextmenu", this.handleContextMenu.bind(this));
+  }
+
+  handleContextMenu(event) {
+    event.preventDefault();
+    const target = event.target.closest(".item");
+
+    if (target) {
+      this.select_item(target);
+    }
+
+    const contextMenu = this.contextMenuFactory.getContextMenu(target);
+    contextMenu.show(event);
+
+    document.addEventListener("click", () => contextMenu.hide(), {
+      once: true,
+    });
+  }
 
   /**
    * Called when the component is added to the DOM
@@ -52,10 +72,11 @@ export class FileAreaView extends HTMLElement {
   rebuild_view() {
     this.clear_old_items();
     this.items = this.file_system_handler.entries.map((item) => {
+      console.log(item);
       if (item instanceof File) {
-        return new FileItemView(item.name, this);
+        return new FileItemView(item.name, this, item.id);
       } else if (item instanceof Folder) {
-        return new FolderItemView(item.name, this);
+        return new FolderItemView(item.name, this, item.id);
       }
     });
     if (this.file_system_handler.folder_history.length > 1) {
@@ -77,14 +98,11 @@ export class FileAreaView extends HTMLElement {
 
   /**
    * Highlights the selected item
-   * @param {Event} event
+   * @param {HTMLElement} target
    */
-  select_item(event) {
-    const target =
-      event.target instanceof ItemView ? event.target : event.target.parentNode;
-    this.selected_item?.classList.remove("selected");
+  select_item(target) {
     this.selected_item = target;
-    this.selected_item.classList.add("selected");
+    this.file_area.selected_item = this.selected_item;
   }
 
   /**
@@ -95,6 +113,16 @@ export class FileAreaView extends HTMLElement {
    */
   navigate_to_folder(name) {
     this.file_system_handler.change_directory_handle(name);
+  }
+
+  /**
+   * Creates a new folder item view and returns it
+   * @returns {FolderItemView}
+   */
+  create_new_folder() {
+    const newFolder = new FolderItemView("New Folder", this, null);
+    this.appendChild(newFolder);
+    return newFolder;
   }
 }
 

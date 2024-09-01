@@ -9,7 +9,6 @@ class DbClient {
 
   /**
    * Fetches all projects
-   * @returns {Promise<Array<Object>>}
    */
   async get_projects() {
     try {
@@ -23,7 +22,6 @@ class DbClient {
   /**
    * Fetches a project by its ID and retrieves its structure with the root folder.
    * @param {Number} id
-   * @returns {Promise<Object>}
    */
   async get_project(id) {
     try {
@@ -59,7 +57,6 @@ class DbClient {
   /**
    * Fetches a folder by its ID and retrieves its immediate children.
    * @param {Number} id
-   * @returns {Promise<Object>}
    */
   async get_folder(id) {
     try {
@@ -90,7 +87,6 @@ class DbClient {
   /**
    * Structures the folder data into a nested format.
    * @param {Object} folder
-   * @returns {Object}
    */
   structure_folder_data(folder) {
     const folderData = {
@@ -99,7 +95,6 @@ class DbClient {
       children: [],
     };
 
-    // Process each child folder
     if (folder.children && folder.children.length > 0) {
       folder.children.forEach((childFolder) => {
         folderData.children.push({
@@ -110,7 +105,6 @@ class DbClient {
       });
     }
 
-    // Process each file
     if (folder.Files && folder.Files.length > 0) {
       folder.Files.forEach((file) => {
         folderData.children.push({
@@ -128,7 +122,6 @@ class DbClient {
   /**
    * Creates a new project with a root folder and subfolders.
    * @param {String} name
-   * @returns {Promise<Object>}
    */
   async new_project(name) {
     try {
@@ -165,7 +158,6 @@ class DbClient {
    * Renames an existing project.
    * @param {Number} id
    * @param {String} new_name
-   * @returns {Promise<void>}
    */
   async rename_project(id, new_name) {
     try {
@@ -180,7 +172,6 @@ class DbClient {
   /**
    * Deletes a project by its ID.
    * @param {Number} id
-   * @returns {Promise<void>}
    */
   async delete_project(id) {
     try {
@@ -196,7 +187,6 @@ class DbClient {
    * Adds a new folder to a parent folder.
    * @param {Number} parent_folder_id
    * @param {String} [folder_name="New Folder"]
-   * @returns {Promise<Object>}
    */
   async add_folder(parent_folder_id, folder_name = "New Folder") {
     try {
@@ -208,6 +198,47 @@ class DbClient {
       return newFolder;
     } catch (err) {
       console.error("Error creating folder:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Deletes a folder by its ID.
+   * This will cascade delete all child folders and files
+   * due to the onDelete: "CASCADE" setting.
+   * @param {Number} folder_id
+   */
+  async delete_folder(folder_id) {
+    try {
+      await Folder.destroy({
+        where: { id: folder_id },
+      });
+      console.log(`Folder with ID ${folder_id} deleted.`);
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Renames an existing folder.
+   * @param {Number} id
+   * @param {String} new_name
+   */
+  async rename_folder(id, new_name) {
+    try {
+      const [updated] = await Folder.update(
+        { name: new_name },
+        { where: { id } }
+      );
+
+      if (!updated) {
+        throw new Error("Folder not found");
+      }
+
+      console.log(`Folder with ID ${id} renamed to ${new_name}.`);
+    } catch (err) {
+      console.error("Error renaming folder:", err);
       throw err;
     }
   }

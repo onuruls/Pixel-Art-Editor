@@ -29,6 +29,5 @@ export class Project {
       null
     );
     this.root_folder.build_folder_structure(root_folder_obj.children);
-    console.log(root_folder_obj);
   }
 }

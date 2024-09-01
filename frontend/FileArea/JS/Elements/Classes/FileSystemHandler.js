@@ -18,11 +18,10 @@ export class FileSystemHandler {
   }
 
   /**
-   * Reads the content of the current Folder
-   * and updates the UI
+   * Reads the content of the current folder and updates the UI.
+   * @returns {Promise<void>}
    */
   async read_directory_content() {
-    // If the active folder has not loaded its children yet, fetch them
     if (!this.active_folder.children.length) {
       const response = await fetch(
         `http://localhost:3000/folders/${this.active_folder.id}`
@@ -69,16 +68,26 @@ export class FileSystemHandler {
   }
 
   /**
-   * Creates a new Folder in the Database
+   * Creates a new folder in the database.
+   * @param {string} folderName
+   * @returns {Promise<void>}
    */
-  async create_folder() {
+  async create_folder(folderName) {
     const response = await fetch("http://localhost:3000/projects/folders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ folder_id: this.active_folder.id }),
+      body: JSON.stringify({
+        folder_id: this.active_folder.id,
+        folder_name: folderName,
+      }),
     });
+
+    if (!response.ok) {
+      throw new Error("Failed to create the folder.");
+    }
+
     const folder_obj = await response.json();
     const new_folder = new Folder(
       folder_obj.id,
@@ -89,7 +98,68 @@ export class FileSystemHandler {
     this.read_directory_content();
   }
 
-  rename_folder() {}
+  /**
+   * Renames a folder by ID.
+   * @param {string} id
+   * @param {string} newName
+   */
 
-  delete_folder() {}
+  async rename_folder_by_id(id, newName) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/folders/${id}/rename`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ new_name: newName }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to rename the folder.");
+      }
+
+      console.log(`Folder with ID ${id} renamed to ${newName}.`);
+    } catch (error) {
+      console.error("Failed to rename the folder on the server:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes a folder by ID and updates the UI.
+   * @param {string} folderId
+   * @returns {Promise<void>}
+   */
+  async delete_folder_by_id(folderId) {
+    try {
+      await fetch(`http://localhost:3000/folders/${folderId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      this.active_folder.children = this.active_folder.children.filter(
+        (child) => child.id !== folderId
+      );
+
+      console.log(`Folder with ID ${folderId} deleted successfully.`);
+    } catch (error) {
+      console.error("Failed to delete the folder from the server:", error);
+    }
+
+    this.read_directory_content();
+  }
+
+  /**
+   * Deletes a file by ID and updates the UI.
+   * @param {string} fileId
+   * @returns {Promise<void>}
+   */
+  async delete_file_by_id(fileId) {
+    console.log("not implemented yet");
+  }
 }

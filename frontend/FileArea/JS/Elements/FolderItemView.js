@@ -5,9 +5,11 @@ export class FolderItemView extends ItemView {
    * View-Class of a folder in the FileAreaView
    * @param {String} name
    * @param {FileAreaView} file_area_view
+   * @param {number} id
    */
-  constructor(name, file_area_view) {
-    super(name, file_area_view);
+  constructor(name, file_area_view, id) {
+    super(name, file_area_view, id);
+    this.edit_name_input = this.create_edit_name_input();
   }
 
   /**
@@ -30,6 +32,13 @@ export class FolderItemView extends ItemView {
    */
   open_folder() {
     this.file_area_view.navigate_to_folder(this.name);
+  }
+
+  /**
+   * Replaces the name field with an input field for renaming.
+   */
+  replace_name_with_input() {
+    this.replaceChild(this.edit_name_input, this.name_field);
   }
 }
 

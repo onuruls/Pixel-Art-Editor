@@ -44,4 +44,36 @@ file-area-view {
   .folder-name-input {
     width: 80px;
   }
+
+  .context-menu {
+    position: absolute;
+    display: none;
+    z-index: 100;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--neutral-accent);
+    border-radius: 4px;
+    width: 150px;
+    z-index: 1000;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .context-menu.visible {
+    display: flex;
+  }
+
+  .context-menu-option {
+    padding: 10px;
+    color: var(--title);
+    cursor: pointer;
+    border-bottom: 1px solid var(--container-bg);
+  }
+
+  .context-menu-option:last-child {
+    border-bottom: none;
+  }
+
+  .context-menu-option:hover {
+    background-color: var(--neutral-accent);
+  }
 }
