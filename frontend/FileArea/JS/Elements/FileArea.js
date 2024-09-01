@@ -302,21 +302,24 @@ export class FileArea extends HTMLElement {
    */
   handle_rename(inputField, pElement, item, originalName) {
     const newName = inputField.value.trim();
-    if (newName && newName !== originalName) {
-      this.file_system_handler
-        .rename_folder_by_id(item.id, newName)
-        .then(() => {
-          item.name = newName;
-          pElement.textContent = newName;
-        })
-        .catch((error) => {
-          console.error("Failed to rename the item on the server:", error);
-          pElement.textContent = originalName;
-        });
-    } else {
-      pElement.textContent = originalName;
-    }
-    inputField.replaceWith(pElement);
+
+    setTimeout(() => {
+      if (newName && newName !== originalName) {
+        this.file_system_handler
+          .rename_folder_by_id(item.id, newName)
+          .then(() => {
+            item.name = newName;
+            pElement.textContent = newName;
+          })
+          .catch((error) => {
+            console.error("Failed to rename the item on the server:", error);
+            pElement.textContent = originalName;
+          });
+      } else {
+        pElement.textContent = originalName;
+      }
+      inputField.replaceWith(pElement);
+    }, 0);
   }
 
   /**
