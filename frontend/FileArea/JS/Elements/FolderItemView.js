@@ -1,12 +1,15 @@
 import { ItemView } from "./ItemView.js";
 
+/**
+ * Represents a view for a folder item in the FileAreaView.
+ * Extends the base ItemView to customize behavior for folders.
+ */
 export class FolderItemView extends ItemView {
   /**
-   * View-Class of a folder in the FileAreaView
-   * @param {String} name
+   * @param {string} name
    * @param {FileAreaView} file_area_view
+   * @param {number} id
    */
-
   constructor(name, file_area_view, id) {
     super(name, file_area_view, id);
     this.edit_name_input = this.create_edit_name_input();
@@ -22,6 +25,9 @@ export class FolderItemView extends ItemView {
     return icon;
   }
 
+  /**
+   * Initializes the folder item view with custom event listeners
+   */
   init() {
     super.init();
     this.icon.addEventListener("dblclick", this.open_folder.bind(this));

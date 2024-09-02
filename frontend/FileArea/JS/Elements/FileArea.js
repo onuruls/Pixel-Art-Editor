@@ -1,4 +1,4 @@
-import { FileSystemHandler } from "./Classes/FileSystemHandler.js";
+import { FileSystemHandler } from "../Classes/FileSystemHandler.js";
 import { FileAreaToolsLeft } from "./FileAreaToolsLeft.js";
 import { FileAreaToolsRight } from "./FileAreaToolsRight.js";
 import { FileAreaView } from "./FileAreaView.js";
@@ -29,7 +29,6 @@ export class FileArea extends HTMLElement {
   }
 
   /**
-   *
    * @returns {HTMLLinkElement}
    */
   create_css_link() {
@@ -84,16 +83,35 @@ export class FileArea extends HTMLElement {
   handle_global_click(event) {
     const is_click_inside =
       this.contains(event.target) && event.target.closest(".item") !== null;
-    if (!is_click_inside && this.file_view.selected_items.size > 0) {
+    if (!is_click_inside && this.file_view.has_selected_items()) {
       this.file_view.clear_selection();
     }
+  }
+
+  /**
+   * Processes selected items and applies a given action to each item
+   * @param {Function} action
+   */
+  async process_selected_items(action) {
+    const items_to_process = Array.from(this.file_view.selected_items);
+
+    const promises = items_to_process.map(async (selected_item) => {
+      const id = this.get_selected_item_id(selected_item);
+      const item = this.get_item_by_id(id);
+
+      if (item) {
+        await action(id, selected_item);
+      }
+    });
+
+    await Promise.all(promises);
   }
 
   /**
    * Creates a new folder element in the file view
    * The folder includes an image, and an input field for the folder name
    */
-  create_new_folder() {
+  async create_new_folder() {
     if (this.operation_in_progress) return;
 
     const new_folder = new FolderItemView("New Folder", this.file_view, null);
@@ -101,8 +119,11 @@ export class FileArea extends HTMLElement {
     this.file_view.appendChild(new_folder);
     new_folder.edit_name_input.focus();
 
+    let is_blur_handled = false;
+
     const handleCreate = async () => {
-      if (this.operation_in_progress) return;
+      if (this.operation_in_progress || is_blur_handled) return;
+      is_blur_handled = true;
       this.operation_in_progress = true;
 
       await this.handle_create_folder(new_folder);
@@ -149,43 +170,43 @@ export class FileArea extends HTMLElement {
   /**
    * Deletes the selected folders
    */
-  delete_selected_folder() {
-    this.delete_selected_items((id) =>
-      this.file_system_handler.delete_folder_by_id(id)
-    );
+  async delete_selected_folder() {
+    await this.process_selected_items(async (id, selected_item) => {
+      await this.file_system_handler.delete_folder_by_id(id);
+      this.remove_item_from_view(selected_item);
+      this.remove_item_from_entries(id);
+    });
   }
 
   /**
    * Deletes the selected files
    */
-  delete_selected_file() {
-    this.delete_selected_items((id) =>
-      this.file_system_handler.delete_file_by_id(id)
-    );
+  async delete_selected_file() {
+    await this.process_selected_items(async (id, selected_item) => {
+      await this.file_system_handler.delete_file_by_id(id);
+      this.remove_item_from_view(selected_item);
+      this.remove_item_from_entries(id);
+    });
   }
 
   /**
-   * Deletes the selected items based on the provided delete method
-   * @param {Function} deleteMethod
+   * Deletes the selected items (folders or files).
    */
-  delete_selected_items(deleteMethod) {
-    const items_to_delete = Array.from(this.file_view.selected_items);
+  async delete_selected_items() {
+    const selected_items = Array.from(this.file_view.selected_items);
 
-    const delete_promises = items_to_delete.map((selected_item) => {
-      const id = this.get_selected_item_id(selected_item);
-      const item = this.get_item_by_id(id);
-
-      if (item) {
-        return deleteMethod(id)
-          .then(() => {
-            this.remove_item_from_view(selected_item);
-            this.remove_item_from_entries(id);
-          })
-          .catch((error) => {
-            console.error("Failed to delete the item from the server:", error);
-          });
-      }
+    const delete_promises = selected_items.map(async (item) => {
+      const id = parseInt(item.getAttribute("data-id"), 10);
+      return this.file_system_handler.delete_folder_by_id(id);
     });
+
+    try {
+      await Promise.all(delete_promises);
+      selected_items.forEach((item) => this.remove_item_from_view(item));
+      this.file_view.clear_selection();
+    } catch (error) {
+      console.error("Failed to delete selected items:", error);
+    }
   }
 
   /**
@@ -230,14 +251,14 @@ export class FileArea extends HTMLElement {
   /**
    * Renames the first selected folder or file
    */
-  rename_selected_folder() {
+  async rename_selected_folder() {
     if (this.file_view.selected_items.size === 1) {
       const selected_item = Array.from(this.file_view.selected_items)[0];
       const id = this.get_selected_item_id(selected_item);
       const item = this.get_item_by_id(id);
 
       if (item) {
-        this.initiate_rename(item, selected_item);
+        this.start_rename_or_create(item, selected_item, "rename");
       }
     } else {
       console.warn("Please select a single folder or file to rename.");
@@ -245,12 +266,12 @@ export class FileArea extends HTMLElement {
   }
 
   /**
-   * Initiates the renaming process by replacing the text element with an input field
+   * Initiates the renaming or creation process by replacing the text element with an input field
    * @param {Object} item
    * @param {HTMLElement} selected_item
+   * @param {string} action_type
    */
-  initiate_rename(item, selected_item) {
-    if (this.operation_in_progress) return;
+  start_rename_or_create(item, selected_item, action_type) {
     const p_element = selected_item.querySelector("p");
     const original_name = item.name;
 
@@ -258,26 +279,36 @@ export class FileArea extends HTMLElement {
     selected_item.replaceChild(input_field, p_element);
     input_field.focus();
 
-    const handleRename = async () => {
+    const handle_action = async () => {
       if (this.operation_in_progress) return;
       this.operation_in_progress = true;
 
-      input_field.removeEventListener("blur", handleRename);
-      input_field.removeEventListener("keypress", handleKeyPress);
+      input_field.removeEventListener("blur", handle_blur);
+      input_field.removeEventListener("keypress", handle_key_press);
 
-      this.handle_rename(input_field, p_element, item, original_name);
+      if (action_type === "rename") {
+        await this.handle_rename(input_field, p_element, item, original_name);
+      } else if (action_type === "create") {
+        await this.handle_create_folder(selected_item);
+      }
 
       this.operation_in_progress = false;
     };
 
-    const handleKeyPress = (event) => {
+    const handle_key_press = (event) => {
       if (event.key === "Enter") {
-        handleRename();
+        handle_action();
       }
     };
 
-    input_field.addEventListener("blur", handleRename);
-    input_field.addEventListener("keypress", handleKeyPress);
+    const handle_blur = () => {
+      if (!this.operation_in_progress) {
+        handle_action();
+      }
+    };
+
+    input_field.addEventListener("keypress", handle_key_press);
+    input_field.addEventListener("blur", handle_blur);
   }
 
   /**
@@ -305,32 +336,48 @@ export class FileArea extends HTMLElement {
    * @param {Object} item
    * @param {string} original_name
    */
-  handle_rename(input_field, p_element, item, original_name) {
+  async handle_rename(input_field, p_element, item, original_name) {
     const new_name = input_field.value.trim();
 
-    setTimeout(async () => {
-      if (new_name && new_name !== original_name) {
-        try {
-          await this.file_system_handler.rename_folder_by_id(item.id, new_name);
-
-          item.name = new_name;
-          p_element.textContent = new_name;
-
-          const folder_item_view = Array.from(this.selected_items)[0];
-          if (folder_item_view) {
-            folder_item_view.name = new_name;
-          }
-          await this.file_system_handler.read_directory_content();
-        } catch (error) {
-          console.error("Failed to rename the item on the server:", error);
-          p_element.textContent = original_name;
+    if (new_name && new_name !== original_name) {
+      try {
+        await this.file_system_handler.rename_folder_by_id(item.id, new_name);
+        item.name = new_name;
+        p_element.textContent = new_name;
+        const folder_item_view = Array.from(this.selected_items)[0];
+        if (folder_item_view) {
+          folder_item_view.name = new_name;
         }
-      } else {
+        await this.file_system_handler.read_directory_content();
+      } catch (error) {
+        console.error("Failed to rename the item on the server:", error);
         p_element.textContent = original_name;
       }
-      input_field.replaceWith(p_element);
+    } else {
+      p_element.textContent = original_name;
+    }
+
+    input_field.replaceWith(p_element);
+  }
+
+  /**
+   * Moves the items to the specified folder using the file system handler
+   * @param {Array<string>} item_ids
+   * @param {string} folder_id
+   */
+  async move_items(item_ids, folder_id) {
+    if (this.operation_in_progress) return;
+
+    try {
+      this.operation_in_progress = true;
+      await this.file_system_handler.move_items_to_folder(item_ids, folder_id);
+    } catch (error) {
+      console.error("Failed to move items:", error);
+    } finally {
       this.operation_in_progress = false;
-    }, 0);
+      await this.file_system_handler.read_directory_content();
+      this.file_view.rebuild_view();
+    }
   }
 
   /**

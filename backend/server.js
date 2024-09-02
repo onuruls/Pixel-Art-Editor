@@ -174,6 +174,28 @@ app.put("/folders/:id/rename", async (req, res) => {
   }
 });
 
+/**
+ * Moves folders/files to a different parent folder
+ */
+app.put("/folders/move", async (req, res) => {
+  const { item_ids, folder_id } = req.body;
+
+  if (!item_ids || !folder_id) {
+    return res.status(400).send("Item IDs and target folder ID are required");
+  }
+
+  try {
+    const updated_folder = await db_client.move_items_to_folder(
+      item_ids,
+      folder_id
+    );
+    res.status(200).send(updated_folder);
+  } catch (error) {
+    console.error("Error moving items:", error);
+    res.status(500).send(error);
+  }
+});
+
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
