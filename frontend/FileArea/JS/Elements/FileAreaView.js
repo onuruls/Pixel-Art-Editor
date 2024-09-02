@@ -119,6 +119,10 @@ export class FileAreaView extends HTMLElement {
    */
   handleContextMenu(event) {
     event.preventDefault();
+    const target = event.target.closest(".item");
+    if (target && !this.selected_items.has(target)) {
+      this.select_item(target);
+    }
     const context_menu = this.contextMenuFactory.getContextMenu(
       this.selected_items
     );
