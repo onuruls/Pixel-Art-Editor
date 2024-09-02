@@ -104,6 +104,10 @@ export class FileAreaView extends HTMLElement {
    * @param {HTMLElement} target
    */
   select_item(target) {
+    const id = target.getAttribute("data-id");
+    if (id === "undefined") {
+      return;
+    }
     this.selected_items.add(target);
     target.classList.add("selected");
     this.file_area.selected_items = this.selected_items;
@@ -116,14 +120,11 @@ export class FileAreaView extends HTMLElement {
   handleContextMenu(event) {
     event.preventDefault();
     const target = event.target.closest(".item");
-
-    if (target && !event.ctrlKey) {
+    if (target && !this.selected_items.has(target)) {
       this.select_item(target);
     }
-
     const context_menu = this.contextMenuFactory.getContextMenu(
-      target,
-      this.selected_items.size > 1
+      this.selected_items
     );
     context_menu.show(event);
 
@@ -177,6 +178,7 @@ export class FileAreaView extends HTMLElement {
    * @param {String} name
    */
   navigate_to_folder(name) {
+    this.clear_selection();
     this.file_system_handler.change_directory_handle(name);
   }
 

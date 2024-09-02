@@ -26,50 +26,72 @@ const Project = sequelize.define("Project", {
   },
 });
 
-const Folder = sequelize.define("Folder", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  parent_folder_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: "Folders",
-      key: "id",
+const Folder = sequelize.define(
+  "Folder",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    onDelete: "CASCADE",
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    parent_folder_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Folders",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
   },
-});
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ["name", "parent_folder_id"],
+      },
+    ],
+  }
+);
 
-const File = sequelize.define("File", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  type: {
-    type: DataTypes.STRING,
-  },
-  folder_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Folders",
-      key: "id",
+const File = sequelize.define(
+  "File",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    onDelete: "CASCADE",
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.STRING,
+    },
+    folder_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Folders",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
   },
-});
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ["name", "folder_id"],
+      },
+    ],
+  }
+);
 
 /**
  * Define the relationships between the models.

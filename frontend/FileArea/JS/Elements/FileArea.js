@@ -11,7 +11,6 @@ export class FileArea extends HTMLElement {
   constructor(editor_tool) {
     super();
     this.editor_tool = editor_tool;
-    this.selected_items = new Set();
     this.file_system_handler = null;
     this.operation_in_progress = false;
 
@@ -85,17 +84,9 @@ export class FileArea extends HTMLElement {
   handle_global_click(event) {
     const is_click_inside =
       this.contains(event.target) && event.target.closest(".item") !== null;
-    if (!is_click_inside && this.selected_items.size > 0) {
-      this.deselect_all_items();
+    if (!is_click_inside && this.file_view.selected_items.size > 0) {
+      this.file_view.clear_selection();
     }
-  }
-
-  /**
-   * Deselects all currently selected items
-   */
-  deselect_all_items() {
-    this.selected_items.forEach((item) => item.classList.remove("selected"));
-    this.selected_items.clear();
   }
 
   /**
@@ -178,7 +169,7 @@ export class FileArea extends HTMLElement {
    * @param {Function} deleteMethod
    */
   delete_selected_items(deleteMethod) {
-    const items_to_delete = Array.from(this.selected_items);
+    const items_to_delete = Array.from(this.file_view.selected_items);
 
     const delete_promises = items_to_delete.map((selected_item) => {
       const id = this.get_selected_item_id(selected_item);
@@ -194,10 +185,6 @@ export class FileArea extends HTMLElement {
             console.error("Failed to delete the item from the server:", error);
           });
       }
-    });
-
-    Promise.all(delete_promises).then(() => {
-      this.selected_items.clear();
     });
   }
 
@@ -244,9 +231,8 @@ export class FileArea extends HTMLElement {
    * Renames the first selected folder or file
    */
   rename_selected_folder() {
-    if (this.operation_in_progress) return;
-    if (this.selected_items.size === 1) {
-      const selected_item = Array.from(this.selected_items)[0];
+    if (this.file_view.selected_items.size === 1) {
+      const selected_item = Array.from(this.file_view.selected_items)[0];
       const id = this.get_selected_item_id(selected_item);
       const item = this.get_item_by_id(id);
 

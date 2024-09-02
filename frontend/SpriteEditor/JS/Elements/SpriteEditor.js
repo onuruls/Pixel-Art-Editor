@@ -121,7 +121,7 @@ export class SpriteEditor extends HTMLElement {
       if (event.ctrlKey && event.key === "y") {
         this.redo_last_action();
       } else {
-        // this.handle_tool_shortcuts(event);
+        this.handle_tool_shortcuts(event);
       }
     });
     this.import_input.addEventListener("change", (event) => {
@@ -133,9 +133,20 @@ export class SpriteEditor extends HTMLElement {
    * @param {} event
    */
   handle_tool_shortcuts(event) {
+    const active_element = document.activeElement;
+    const is_input_field =
+      active_element.tagName === "INPUT" ||
+      active_element.tagName === "TEXTAREA" ||
+      active_element.isContentEditable;
+
+    if (is_input_field) {
+      return;
+    }
+
     if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
       return;
     }
+
     const key = event.key;
     const tool_shortcuts = {
       p: "pen",
