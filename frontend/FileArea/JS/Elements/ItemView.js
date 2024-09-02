@@ -10,7 +10,6 @@ export class ItemView extends HTMLElement {
     this.name = name;
     this.file_area_view = file_area_view;
     this.id = id;
-    console.log(`The type of id is: ${typeof id}`);
     this.icon = this.create_icon();
     this.name_field = this.create_name_field();
     this.edit_name_input = null;
