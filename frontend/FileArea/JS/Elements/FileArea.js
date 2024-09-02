@@ -12,7 +12,7 @@ export class FileArea extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.file_system_handler = null;
-    this.folder_creation_in_progress = false;
+    this.operation_in_progress = false;
 
     this.css = this.create_css_link();
     this.appendChild(this.css);
@@ -94,7 +94,7 @@ export class FileArea extends HTMLElement {
    * The folder includes an image, and an input field for the folder name
    */
   create_new_folder() {
-    if (this.folder_creation_in_progress) return;
+    if (this.operation_in_progress) return;
 
     const new_folder = new FolderItemView("New Folder", this.file_view, null);
     this.replace_name_with_input(new_folder);
@@ -102,8 +102,8 @@ export class FileArea extends HTMLElement {
     new_folder.edit_name_input.focus();
 
     const handleCreate = async () => {
-      if (this.folder_creation_in_progress) return;
-      this.folder_creation_in_progress = true;
+      if (this.operation_in_progress) return;
+      this.operation_in_progress = true;
 
       await this.handle_create_folder(new_folder);
 
@@ -113,7 +113,7 @@ export class FileArea extends HTMLElement {
         handleKeyPress
       );
 
-      this.folder_creation_in_progress = false;
+      this.operation_in_progress = false;
     };
 
     const handleKeyPress = (event) => {
@@ -250,6 +250,7 @@ export class FileArea extends HTMLElement {
    * @param {HTMLElement} selected_item
    */
   initiate_rename(item, selected_item) {
+    if (this.operation_in_progress) return;
     const p_element = selected_item.querySelector("p");
     const original_name = item.name;
 
@@ -257,15 +258,26 @@ export class FileArea extends HTMLElement {
     selected_item.replaceChild(input_field, p_element);
     input_field.focus();
 
-    input_field.addEventListener("blur", () =>
-      this.handle_rename(input_field, p_element, item, original_name)
-    );
+    const handleRename = async () => {
+      if (this.operation_in_progress) return;
+      this.operation_in_progress = true;
 
-    input_field.addEventListener("keypress", (event) => {
+      input_field.removeEventListener("blur", handleRename);
+      input_field.removeEventListener("keypress", handleKeyPress);
+
+      this.handle_rename(input_field, p_element, item, original_name);
+
+      this.operation_in_progress = false;
+    };
+
+    const handleKeyPress = (event) => {
       if (event.key === "Enter") {
-        this.handle_rename(input_field, p_element, item, original_name);
+        handleRename();
       }
-    });
+    };
+
+    input_field.addEventListener("blur", handleRename);
+    input_field.addEventListener("keypress", handleKeyPress);
   }
 
   /**
@@ -296,22 +308,28 @@ export class FileArea extends HTMLElement {
   handle_rename(input_field, p_element, item, original_name) {
     const new_name = input_field.value.trim();
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (new_name && new_name !== original_name) {
-        this.file_system_handler
-          .rename_folder_by_id(item.id, new_name)
-          .then(() => {
-            item.name = new_name;
-            p_element.textContent = new_name;
-          })
-          .catch((error) => {
-            console.error("Failed to rename the item on the server:", error);
-            p_element.textContent = original_name;
-          });
+        try {
+          await this.file_system_handler.rename_folder_by_id(item.id, new_name);
+
+          item.name = new_name;
+          p_element.textContent = new_name;
+
+          const folder_item_view = Array.from(this.selected_items)[0];
+          if (folder_item_view) {
+            folder_item_view.name = new_name;
+          }
+          await this.file_system_handler.read_directory_content();
+        } catch (error) {
+          console.error("Failed to rename the item on the server:", error);
+          p_element.textContent = original_name;
+        }
       } else {
         p_element.textContent = original_name;
       }
       input_field.replaceWith(p_element);
+      this.operation_in_progress = false;
     }, 0);
   }
 

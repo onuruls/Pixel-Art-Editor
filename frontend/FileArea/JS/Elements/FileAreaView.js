@@ -15,7 +15,7 @@ export class FileAreaView extends HTMLElement {
     this.items = [];
     this.selected_items = new Set();
 
-    this.contextMenuElement = this.createContextMenuElement();
+    this.contextMenuElement = this.create_context_menu_element();
 
     this.contextMenuFactory = new ContextMenuFactory(
       this.file_area,
@@ -43,7 +43,7 @@ export class FileAreaView extends HTMLElement {
    *
    * @returns {HTMLElement}
    */
-  createContextMenuElement() {
+  create_context_menu_element() {
     const menu_element = document.createElement("div");
     menu_element.classList.add("context-menu");
     return menu_element;
@@ -148,7 +148,6 @@ export class FileAreaView extends HTMLElement {
   rebuild_view() {
     this.clear_old_items();
     this.items = this.file_system_handler.entries.map((item) => {
-      console.log(item);
       if (item instanceof File) {
         return new FileItemView(item.name, this, item.id);
       } else if (item instanceof Folder) {
