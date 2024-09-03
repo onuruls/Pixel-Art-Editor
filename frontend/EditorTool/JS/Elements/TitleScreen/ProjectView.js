@@ -36,11 +36,24 @@ export class ProjectView extends HTMLElement {
    * @returns {HTMLParagraphElement}
    */
   create_created_at() {
+    const date = new Date(this.project.created_at);
+    const formattedDate = `${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}:${date
+      .getSeconds()
+      .toString()
+      .padStart(2, "0")} - ${date.getDate().toString().padStart(2, "0")}.${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}.${date.getFullYear()}`;
+
     return Util.create_element(
       "p",
       this.project._id,
       ["project-date"],
-      `Created at: ${this.project.created_at}`
+      `Created at: ${formattedDate}`
     );
   }
 

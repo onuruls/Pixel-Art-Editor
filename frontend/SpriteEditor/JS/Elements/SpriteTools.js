@@ -14,7 +14,6 @@ export class SpriteTools extends SpriteEditorPart {
       )
       .join("");
     return `
-    <h1 id="title">Sprite Editor</h1>
     <div class="pixel-size-options" title="Pixel size">
       <button class="pixel-size-option active" data-size="1">
         1x
