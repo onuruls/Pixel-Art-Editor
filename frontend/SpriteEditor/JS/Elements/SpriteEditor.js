@@ -93,6 +93,9 @@ export class SpriteEditor extends HTMLElement {
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
+    this.secondary_color = this.hex_to_rgb_array(
+      this.sprite_tools.querySelector("#secondary_color_input").value
+    );
     this.initialized = true;
   }
 

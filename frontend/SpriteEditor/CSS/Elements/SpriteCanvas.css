@@ -1,5 +1,5 @@
 sprite-canvas {
-  flex: 5;
+  flex: 10;
   display: flex;
   align-items: center;
   background-color: var(--primary-bg);
@@ -19,7 +19,7 @@ sprite-canvas {
       linear-gradient(0deg, var(--canvas-grid-line) 1px, transparent 1px),
       linear-gradient(0deg, var(--canvas-grid-line) 1px, transparent 1px);
     background-size: 10px 10px;
-    background-position: 0 0; /* Größe der Schachbrettmuster-Quadrate */
+    background-position: 0 0;
     border: 1cap solid var(--canvas-border);
     width: 640px;
     height: 640px;
