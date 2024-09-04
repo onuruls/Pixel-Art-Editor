@@ -49,6 +49,9 @@ export class DrawingCanvas extends CanvasElement {
     this.sprite_editor.addEventListener("repaint_canvas", (event) => {
       this.repaint_canvas(event);
     });
+    this.sprite_editor.addEventListener("erase_selected_pixels", (event) => {
+      this.erase_selected_pixels(event);
+    });
   }
 
   /**
@@ -168,6 +171,13 @@ export class DrawingCanvas extends CanvasElement {
     const points = event.detail.points;
     points.forEach((point) => {
       this.paint_single_pixel(point.x, point.y, point.original_color);
+    });
+  }
+
+  erase_selected_pixels(event) {
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
     });
   }
 
