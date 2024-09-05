@@ -43,9 +43,8 @@ file-area {
 
   top-menu {
     background-color: var(--container-bg);
-    border-right: 1px solid var(--primary-border);
     position: absolute;
-    width: 85.6vw;
+    width: 85.2vw;
     height: 3em;
     top: 0;
     display: flex;
