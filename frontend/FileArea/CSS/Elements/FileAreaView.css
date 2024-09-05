@@ -16,10 +16,9 @@ file-area-view {
     flex-direction: column;
     align-items: center;
     width: 90px;
-    height: 3.5rem;
-    margin: 1.2rem 0.8rem;
+    height: 5rem;
+    margin: 1.2rem 0.5rem;
     text-overflow: ellipsis;
-    padding-top: 0.5rem;
     transition: transform 0.2s, background-color 0.2s;
 
     &:hover {
@@ -43,16 +42,16 @@ file-area-view {
         text-align: center;
       }
     }
+
+    .rename-input {
+      margin-top: 12px;
+      width: 100%;
+      padding: 0.25em 0.5em;
+    }
   }
 
   .item.selected {
     background-color: var(--neutral-accent);
-  }
-
-  .folder-name-input {
-    width: 90px;
-    border-radius: 4px;
-    padding: 4px;
   }
 
   .context-menu {

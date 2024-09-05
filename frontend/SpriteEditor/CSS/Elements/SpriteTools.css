@@ -6,26 +6,40 @@ sprite-tools {
   padding: 1em;
   background-color: var(--primary-bg);
   margin-top: 3em;
+  align-items: center;
 
   .pixel-size-options {
     display: flex;
     justify-content: center;
     column-gap: 0.1em;
+    width: 100%;
 
     .pixel-size-option {
+      width: 2rem;
+      height: 2rem;
       text-align: center;
-      padding: 0.4em;
       cursor: pointer;
       background-color: var(--tool-button-inactive-background-color);
       color: var(--tool-button-inactive-color);
+      border: solid var(--color-input-default);
 
       &:hover {
         filter: invert(5%) brightness(100%) contrast(100%);
       }
 
       &.active {
-        filter: invert(100%) brightness(100%) contrast(100%);
+        border-color: var(--active-accent);
       }
+    }
+
+    #size_1 {
+      border-width: 10px;
+    }
+    #size_2 {
+      border-width: 6px;
+    }
+    #size_3 {
+      border-width: 3px;
     }
   }
 
@@ -68,6 +82,14 @@ sprite-tools {
       color: white;
       border: none;
       cursor: pointer;
+      transition: color 200ms ease;
+
+      &:hover {
+        color: var(--button-hover-bg);
+      }
+      &:active {
+        color: var(--active-accent);
+      }
     }
 
     #color_input {
