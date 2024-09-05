@@ -93,6 +93,9 @@ export class SpriteEditor extends HTMLElement {
     this.selected_color = this.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
+    this.secondary_color = this.hex_to_rgb_array(
+      this.sprite_tools.querySelector("#secondary_color_input").value
+    );
     this.initialized = true;
   }
 
@@ -115,11 +118,17 @@ export class SpriteEditor extends HTMLElement {
         this.selected_color = this.hex_to_rgb_array(event.target.value);
       });
     document.addEventListener("keydown", (event) => {
-      if (event.ctrlKey && event.key === "z") {
-        this.revert_last_action();
-      }
-      if (event.ctrlKey && event.key === "y") {
-        this.redo_last_action();
+      if (event.ctrlKey) {
+        switch (event.key) {
+          case "z":
+            this.revert_last_action();
+            break;
+          case "y":
+            this.redo_last_action();
+            break;
+        }
+      } else if (event.key === "Delete" && this.selected_points.length > 0) {
+        this.erase_selected_pixels();
       } else {
         this.handle_tool_shortcuts(event);
       }
@@ -1251,6 +1260,33 @@ export class SpriteEditor extends HTMLElement {
       x: this.selection_move_start_point.x - position.x,
       y: this.selection_move_start_point.y - position.y,
     };
+  }
+
+  /**
+   * Removes the selected pixels
+   */
+  erase_selected_pixels() {
+    this.start_action_buffer();
+    this.selected_points.forEach((point) => {
+      const prev_color = this.canvas_matrix[point.x][point.y];
+      this.canvas_matrix[point.x][point.y] = [0, 0, 0, 0];
+      this.action_buffer.push({
+        x: point.x,
+        y: point.y,
+        prev_color,
+        color: [0, 0, 0, 0],
+      });
+    });
+    this.end_action_buffer();
+    this.dispatchEvent(
+      new CustomEvent("erase_selected_pixels", {
+        detail: {
+          points: this.selected_points,
+        },
+      })
+    );
+
+    this.repaint_canvas();
   }
 
   /**

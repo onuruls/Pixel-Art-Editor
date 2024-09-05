@@ -1,24 +1,39 @@
 sprite-tools {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  background-color: var(--secondary-bg);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  row-gap: 1em;
+  padding: 1em;
+  background-color: var(--primary-bg);
+  margin-top: 3em;
 
-  #title {
-    font-size: 2.5em;
-    text-align: center;
-    color: var(--title);
-    margin-bottom: 1em;
-    -webkit-text-stroke-width: 0.5px;
-    -webkit-text-stroke-color: var(--title-stroke);
+  .pixel-size-options {
+    display: flex;
+    justify-content: center;
+    column-gap: 0.1em;
+
+    .pixel-size-option {
+      text-align: center;
+      padding: 0.4em;
+      cursor: pointer;
+      background-color: var(--tool-button-inactive-background-color);
+      color: var(--tool-button-inactive-color);
+
+      &:hover {
+        filter: invert(5%) brightness(100%) contrast(100%);
+      }
+
+      &.active {
+        filter: invert(100%) brightness(100%) contrast(100%);
+      }
+    }
   }
 
   .toolbox {
     display: grid;
-    grid-template-columns: repeat(2, 3.6rem);
+    grid-template-columns: repeat(2, 3.1rem);
     justify-content: center;
+    gap: 0.1rem;
 
     .tool-button {
       border: none;
@@ -38,54 +53,41 @@ sprite-tools {
       }
 
       img {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 3rem;
+        height: 3rem;
       }
-    }
-
-    #color_input {
-      width: 3.5rem;
-      height: 3.5rem;
-      margin: 0.1rem;
-      cursor: pointer;
-      justify-self: center;
     }
   }
 
-  .pixel-size-options {
-    width: 8rem;
+  .color-selection {
     display: flex;
-    justify-content: center;
-    gap: 0.1rem;
-    margin-bottom: 0.5rem;
+    align-items: center;
 
-    .pixel-size-option {
-      text-align: center;
+    .swap-btn {
+      background-color: transparent;
+      color: white;
       border: none;
-      padding: 0.5rem 0.75rem;
       cursor: pointer;
-      background-color: var(--tool-button-inactive-background-color);
-      color: var(--tool-button-inactive-color);
-      &:hover {
-        filter: invert(5%) brightness(100%) contrast(100%);
-      }
+    }
 
-      &.active {
-        filter: invert(100%) brightness(100%) contrast(100%);
-      }
+    #color_input {
+      width: 3rem;
+      height: 3rem;
     }
   }
 
   .palettes {
     display: grid;
-    grid-template-columns: repeat(3, 2.7rem);
+    grid-template-columns: repeat(3, 2.4rem);
     justify-content: center;
-    margin-top: 0.5rem;
+  }
 
-    .palette-color {
-      width: 2.5rem;
-      height: 2.5rem;
-      cursor: pointer;
-    }
+  input[type="color"] {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 2.2rem;
+    height: 2.2rem;
   }
 }
