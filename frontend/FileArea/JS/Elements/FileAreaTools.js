@@ -1,8 +1,8 @@
 import { FileArea } from "./FileArea.js";
 
-export class FileAreaToolsRight extends HTMLElement {
+export class FileAreaTools extends HTMLElement {
   /**
-   * Right toolbar in FileArea
+   * Toolbar in FileArea
    * @param {FileArea} file_area
    */
   constructor(file_area) {
@@ -21,7 +21,7 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Settings"-Button.
+   * Creates the "Settings" button
    * @returns {HTMLButtonElement}
    */
   create_settings_button() {
@@ -36,7 +36,7 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Save"-Button.
+   * Creates the "Save" button
    * @returns {HTMLButtonElement}
    */
   create_save_button() {
@@ -51,7 +51,7 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Import"-Button.
+   * Creates the "Import" button
    * @returns {HTMLButtonElement}
    */
   create_import_button() {
@@ -59,6 +59,7 @@ export class FileAreaToolsRight extends HTMLElement {
     const icon = document.createElement("i");
     icon.classList.add("fa-solid", "fa-file-import", "fa-fw");
     icon.setAttribute("alt", "Import");
+    icon.setAttribute("style", "margin-left: -2px");
     import_button.setAttribute("id", "import");
     import_button.appendChild(icon);
     import_button.appendChild(document.createTextNode("Import"));
@@ -66,7 +67,7 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 
   /**
-   * Erzeugt den "Export"-Button.
+   * Creates the "Export" button
    * @returns {HTMLButtonElement}
    */
   create_export_button() {
@@ -74,6 +75,7 @@ export class FileAreaToolsRight extends HTMLElement {
     const icon = document.createElement("i");
     icon.classList.add("fa-solid", "fa-file-export", "fa-fw");
     icon.setAttribute("alt", "Export");
+    icon.setAttribute("style", "margin-left: 2px");
     export_button.setAttribute("id", "export");
     export_button.appendChild(icon);
     export_button.appendChild(document.createTextNode("Export"));
@@ -81,7 +83,7 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 
   /**
-   * initializes the tool listeners
+   * Initializes the tool listeners
    */
   init() {
     this.export_button.addEventListener("click", () => {
@@ -93,4 +95,4 @@ export class FileAreaToolsRight extends HTMLElement {
   }
 }
 
-customElements.define("file-area-tools-right", FileAreaToolsRight);
+customElements.define("file-area-tools-right", FileAreaTools);

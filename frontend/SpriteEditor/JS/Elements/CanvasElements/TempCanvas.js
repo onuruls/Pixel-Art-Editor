@@ -28,7 +28,7 @@ export class TempCanvas extends CanvasElement {
     this.sprite_editor.addEventListener("draw_temp_shape", (event) => {
       this.draw_shape(event);
     });
-    this.sprite_editor.addEventListener("draw_shape", (event) => {
+    this.sprite_editor.addEventListener("draw_shape", () => {
       this.revert_canvas();
     });
     this.sprite_editor.addEventListener("update_selected_area", (event) => {
@@ -37,8 +37,8 @@ export class TempCanvas extends CanvasElement {
     this.sprite_editor.addEventListener("selected_area_copied", (event) => {
       this.selected_area_copied(event);
     });
-    this.sprite_editor.addEventListener("remove_selection", (event) => {
-      this.remove_selection(event);
+    this.sprite_editor.addEventListener("remove_selection", () => {
+      this.remove_selection();
     });
   }
 
@@ -87,9 +87,8 @@ export class TempCanvas extends CanvasElement {
 
   /**
    * Removes the selected area
-   * @param {Event} event
    */
-  remove_selection(event) {
+  remove_selection() {
     this.revert_canvas();
   }
 }

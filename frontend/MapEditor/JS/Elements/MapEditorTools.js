@@ -11,7 +11,6 @@ export class MapEditorTools extends MapEditorPart {
    */
   render() {
     return `
-      <h1 id="title">Map Editor</h1>
       <div class="toolbox">
         <button id="pen" class="tool-button active" data-tool="pen" title="Pen tool"><img src="img/icons/pen.svg" alt="Pen"></button>
         <button id="eraser" class="tool-button" data-tool="eraser" title="Eraser tool"><img src="img/icons/eraser.svg" alt="Eraser"></button>

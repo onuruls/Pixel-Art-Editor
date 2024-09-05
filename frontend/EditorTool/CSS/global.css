@@ -1,6 +1,11 @@
 body {
   margin: 0px;
-  font-family: "Arial", sans-serif;
+  font-family: "VT323", monospace;
+
+  button {
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+  }
 }
 
 :root {
@@ -8,17 +13,17 @@ body {
   --secondary-bg: #333;
   --container-bg: #444;
 
-  --button-bg: #eee;
-  --button-color: black;
-  --button-hover-bg: #ccc;
-  --button-border: #bbb;
+  --button-bg: #f2f2f2;
+  --button-color: #0d0d0d;
+  --button-hover-bg: #bfbfbf;
+  --button-border: #0d0d0d;
 
   --primary-border: white;
 
   --canvas-grid-line: #444;
   --canvas-border: #bbb;
 
-  --active-accent: gold;
+  --active-accent: #8f76d9;
   --neutral-accent: #777;
 
   --title: whitesmoke;
