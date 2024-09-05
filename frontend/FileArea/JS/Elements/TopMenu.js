@@ -1,13 +1,13 @@
 import { FileArea } from "./FileArea.js";
 
-export class UpperMenu extends HTMLElement {
+export class TopMenu extends HTMLElement {
   /**
    * Upper Menu in the FileArea
    * @param {FileArea} file_area
    */
   constructor(file_area) {
     super();
-    this.classList.add("upper-menu");
+    this.classList.add("top-menu");
     this.file_area = file_area;
     this.editor_name = "Map Editor";
     this.editor_button = this.create_editor_button();
@@ -75,4 +75,4 @@ export class UpperMenu extends HTMLElement {
   }
 }
 
-customElements.define("upper-menu", UpperMenu);
+customElements.define("top-menu", TopMenu);

@@ -20,7 +20,9 @@ file-area {
       cursor: pointer;
       transition: background-color 0.3s;
       width: 14.4vw;
-      text-align: left;
+      height: 100%;
+      text-align: center;
+      position: relative;
       border: var(--neutral-accent) solid 1px;
 
       &:hover {
@@ -32,16 +34,14 @@ file-area {
       }
 
       i {
-        width: 20px;
-        height: 20px;
-        font-size: large;
-        margin-right: 10px;
-        transition: transform 0.3s;
+        position: absolute;
+        left: 10px;
+        font-size: 20px;
       }
     }
   }
 
-  upper-menu {
+  top-menu {
     background-color: var(--container-bg);
     border-right: 1px solid var(--primary-border);
     position: absolute;

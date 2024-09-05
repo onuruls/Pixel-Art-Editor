@@ -59,6 +59,7 @@ export class FileAreaTools extends HTMLElement {
     const icon = document.createElement("i");
     icon.classList.add("fa-solid", "fa-file-import", "fa-fw");
     icon.setAttribute("alt", "Import");
+    icon.setAttribute("style", "margin-left: -2px");
     import_button.setAttribute("id", "import");
     import_button.appendChild(icon);
     import_button.appendChild(document.createTextNode("Import"));
@@ -74,6 +75,7 @@ export class FileAreaTools extends HTMLElement {
     const icon = document.createElement("i");
     icon.classList.add("fa-solid", "fa-file-export", "fa-fw");
     icon.setAttribute("alt", "Export");
+    icon.setAttribute("style", "margin-left: 2px");
     export_button.setAttribute("id", "export");
     export_button.appendChild(icon);
     export_button.appendChild(document.createTextNode("Export"));
