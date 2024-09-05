@@ -1,10 +1,10 @@
 file-area {
+  width: 100%;
   height: 16vh;
   display: flex;
   border-top: 1px solid var(--primary-border);
 
   .file-area-tools {
-    height: 100%;
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-bg);
@@ -13,13 +13,13 @@ file-area {
     button {
       display: flex;
       align-items: center;
+      justify-content: center;
       background-color: var(--secondary-bg);
       color: white;
-      border: none;
       padding: 0.5rem 1rem;
       cursor: pointer;
       transition: background-color 0.3s;
-      width: 138px;
+      width: 14.4vw;
       text-align: left;
       border: var(--neutral-accent) solid 1px;
 
@@ -41,35 +41,41 @@ file-area {
     }
   }
 
-  .item {
+  upper-menu {
+    background-color: var(--container-bg);
+    border-right: 1px solid var(--primary-border);
+    position: absolute;
+    width: 85.6vw;
+    height: 3em;
+    top: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    width: 80px;
-    margin: 0.5rem;
-    text-overflow: ellipsis;
-    padding-top: 1rem;
 
-    i {
-      font-size: 2.5rem;
-    }
-
-    p,
-    .rename-input {
-      font-size: 0.9rem;
-      text-align: center;
+    .project-name {
+      font-size: 1.2rem;
+      color: white;
       width: 100%;
-      margin-top: 0.5rem;
-      padding: 2px;
-      box-sizing: border-box;
+      text-align: center;
     }
 
-    .rename-input {
-      border: 1px solid transparent;
-      outline: none;
-      border-color: var(--neutral-accent);
-      background: var(--button-bg);
-      border-radius: 3px;
+    button {
+      background-color: var(--container-bg);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      padding: 1rem 2rem;
+      height: 3em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      width: 12em;
+      justify-content: space-between;
+      align-items: center;
+
+      &:hover {
+        background-color: var(--primary-bg);
+        color: var(--active-accent);
+      }
     }
   }
 }

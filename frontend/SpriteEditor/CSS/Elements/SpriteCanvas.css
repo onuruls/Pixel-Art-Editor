@@ -1,10 +1,9 @@
 sprite-canvas {
-  flex: 10;
+  width: 85vw;
   display: flex;
   align-items: center;
   background-color: var(--primary-bg);
-  border-left: 1px solid var(--primary-border);
-  border-right: 1px solid var(--primary-border);
+  margin-top: 3em;
 
   > .canvas-wrapper {
     position: relative;
