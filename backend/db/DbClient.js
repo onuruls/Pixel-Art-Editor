@@ -239,6 +239,61 @@ class DbClient {
   }
 
   /**
+   * Moves items (folders/files) to a different folder, ensuring unique names for folders.
+   * @param {Array<string>} item_ids
+   * @param {string} folder_id
+   * @returns {Promise<Object>}
+   */
+  async move_items_to_folder(item_ids, folder_id) {
+    try {
+      await sequelize.transaction(async (t) => {
+        for (const item_id of item_ids) {
+          // Prüfe, ob das zu verschiebende Item ein Ordner oder eine Datei ist
+          let item = await Folder.findByPk(item_id, { transaction: t });
+          if (item) {
+            // Überprüfe, ob ein Ordner mit demselben Namen im Zielordner existiert
+            const unique_name = await this.generate_unique_folder_name(
+              folder_id,
+              item.name
+            );
+            item.name = unique_name; // Stelle sicher, dass der Name eindeutig ist
+            item.parent_folder_id = folder_id;
+            await item.save({ transaction: t });
+          } else {
+            // Falls das Item eine Datei ist, wende dieselbe Logik an
+            const file = await File.findByPk(item_id, { transaction: t });
+            if (file) {
+              const existingFile = await File.findOne({
+                where: {
+                  name: file.name,
+                  folder_id: folder_id,
+                },
+                transaction: t,
+              });
+
+              if (existingFile) {
+                // Wenn eine Datei mit demselben Namen existiert, generiere einen eindeutigen Namen
+                file.name = await this.generate_unique_file_name(
+                  folder_id,
+                  file.name
+                );
+              }
+              file.folder_id = folder_id;
+              await file.save({ transaction: t });
+            }
+          }
+        }
+      });
+
+      // Rückgabe des Zielordners mit den aktualisierten Items
+      return await this.get_folder(folder_id);
+    } catch (error) {
+      console.error("Error moving items:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Deletes a folder by its ID.
    * This will cascade delete all child folders and files
    * due to the onDelete: "CASCADE" setting.

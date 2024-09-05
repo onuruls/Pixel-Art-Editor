@@ -14,13 +14,13 @@ export class Folder extends Item {
   }
 
   /**
-   * Builds the children of a folder from an array of objects
+   * Builds the children of a folder from an array of objects.
    * @param {Array<Object>} children
    */
   build_folder_structure(children) {
     this.children = children.map((child) => {
       if (child.children) {
-        const folder = new Folder(child.id, child.name, child.folder_id, null);
+        const folder = new Folder(child.id, child.name, child.folder_id);
         folder.build_folder_structure(child.children);
         return folder;
       } else {
@@ -28,13 +28,5 @@ export class Folder extends Item {
         return item;
       }
     });
-  }
-
-  /**
-   * Deletes an item in the folder by name
-   * @param {String} name
-   */
-  delete_item(name) {
-    console.log("Not implemented yet");
   }
 }

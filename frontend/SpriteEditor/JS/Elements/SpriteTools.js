@@ -15,14 +15,14 @@ export class SpriteTools extends SpriteEditorPart {
       .join("");
     return `
     <div class="pixel-size-options" title="Pixel size">
-      <button class="pixel-size-option active" data-size="1">
-        1x
+      <button class="pixel-size-option active" id="size_1" data-size="1">
+      <div class="bg"/>
       </button>
-      <button class="pixel-size-option" data-size="2">
-        2x
+      <button class="pixel-size-option" id="size_2" data-size="2">
+      <div class="bg"/>
       </button>
-      <button class="pixel-size-option" data-size="4">
-        4x
+      <button class="pixel-size-option" id="size_3" data-size="4">
+      <div class="bg"/>
       </button>
     </div>
 
@@ -188,10 +188,10 @@ export class SpriteTools extends SpriteEditorPart {
       });
     });
 
-    const pixelSizeOptions = document.querySelectorAll(".pixel-size-option");
-    pixelSizeOptions.forEach((button) => {
+    const pixel_size_options = document.querySelectorAll(".pixel-size-option");
+    pixel_size_options.forEach((button) => {
       button.addEventListener("click", () => {
-        pixelSizeOptions.forEach((btn) => btn.classList.remove("active"));
+        pixel_size_options.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
         this.sprite_editor.set_pixel_size(button.dataset.size);
       });

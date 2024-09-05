@@ -1,9 +1,12 @@
 import { ItemView } from "./ItemView.js";
 
+/**
+ * View-Class of a File in the FileAreaView.
+ * Extends the base ItemView class to customize behavior for files.
+ */
 export class FileItemView extends ItemView {
   /**
-   * View-Class of a File in the FileAreaView
-   * @param {String} name
+   * @param {string} name
    * @param {FileAreaView} file_area_view
    * @param {number} id
    */
@@ -21,6 +24,9 @@ export class FileItemView extends ItemView {
     return icon;
   }
 
+  /**
+   * Initializes the file item view with custom event listeners
+   */
   init() {
     super.init();
   }

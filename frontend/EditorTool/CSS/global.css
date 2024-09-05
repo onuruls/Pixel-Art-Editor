@@ -32,4 +32,6 @@ body {
 
   --tool-button-inactive-background-color: black;
   --tool-button-inactive-color: white;
+
+  --color-input-default: #a4a5a6;
 }
