@@ -1,6 +1,6 @@
 import { ContextMenu } from "./ContextMenu.js";
-import { RenameFolderAction } from "./RenameFolderAction.js";
-import { DeleteFolderAction } from "./DeleteFolderAction.js";
+import { RenameItemAction } from "./RenameItemAction.js";
+import { DeleteItemAction } from "./DeleteItemAction.js";
 
 /**
  * Context menu for a folder
@@ -15,8 +15,8 @@ export class FolderContextMenu extends ContextMenu {
     this.file_area = file_area;
 
     this.actions = {
-      rename_folder: new RenameFolderAction(this.file_area),
-      delete_folder: new DeleteFolderAction(this.file_area),
+      rename_item: new RenameItemAction(this.file_area),
+      delete_item: new DeleteItemAction(this.file_area),
     };
   }
 
@@ -28,11 +28,11 @@ export class FolderContextMenu extends ContextMenu {
   configure(target) {
     this.clearOptions();
     this.addOption(
-      () => this.actions.rename_folder.execute(target),
+      () => this.actions.rename_item.execute(target),
       "Rename Folder"
     );
     this.addOption(
-      () => this.actions.delete_folder.execute(target),
+      () => this.actions.delete_item.execute(target),
       "Delete Folder"
     );
   }

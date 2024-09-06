@@ -3,7 +3,7 @@ import { ContextMenuAction } from "./ContextMenuAction.js";
 /**
  * Action for deleting a folder
  */
-export class DeleteFolderAction extends ContextMenuAction {
+export class DeleteItemAction extends ContextMenuAction {
   /**
    * @param {FileArea} file_area
    */
@@ -17,6 +17,7 @@ export class DeleteFolderAction extends ContextMenuAction {
    * @returns {void}
    */
   execute() {
-    this.file_area.delete_selected_folder();
+    console.log("delete context executed");
+    this.file_area.delete_selected_items();
   }
 }

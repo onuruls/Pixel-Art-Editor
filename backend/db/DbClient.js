@@ -9,6 +9,7 @@ class DbClient {
 
   /**
    * Fetches all projects
+   * @returns {Promise<Array<Project>>}
    */
   async get_projects() {
     try {
@@ -22,6 +23,7 @@ class DbClient {
   /**
    * Fetches a project by its ID and retrieves its structure with the root folder.
    * @param {Number} id
+   * @returns {Promise<Object>}
    */
   async get_project(id) {
     try {
@@ -57,6 +59,7 @@ class DbClient {
   /**
    * Fetches a folder by its ID and retrieves its immediate children.
    * @param {Number} id
+   * @returns {Promise<Object>}
    */
   async get_folder(id) {
     try {
@@ -87,21 +90,19 @@ class DbClient {
   /**
    * Structures the folder data into a nested format.
    * @param {Object} folder
+   * @returns {Object}
    */
   structure_folder_data(folder) {
     const folderData = {
       id: folder.id,
       name: folder.name,
+      parent_folder_id: folder.parent_folder_id || null,
       children: [],
     };
 
     if (folder.children && folder.children.length > 0) {
       folder.children.forEach((childFolder) => {
-        folderData.children.push({
-          id: childFolder.id,
-          name: childFolder.name,
-          children: [],
-        });
+        folderData.children.push(this.structure_folder_data(childFolder));
       });
     }
 
@@ -122,6 +123,7 @@ class DbClient {
   /**
    * Creates a new project with a root folder and subfolders.
    * @param {String} name
+   * @returns {Promise<Project>}
    */
   async new_project(name) {
     try {
@@ -158,6 +160,7 @@ class DbClient {
    * Renames an existing project.
    * @param {Number} id
    * @param {String} new_name
+   * @returns {Promise<void>}
    */
   async rename_project(id, new_name) {
     try {
@@ -172,6 +175,7 @@ class DbClient {
   /**
    * Deletes a project by its ID.
    * @param {Number} id
+   * @returns {Promise<void>}
    */
   async delete_project(id) {
     try {
@@ -187,7 +191,7 @@ class DbClient {
    * Generates a unique folder name within the same parent folder.
    * @param {Number} parent_folder_id
    * @param {String} folder_name
-   * @returns {String}
+   * @returns {Promise<String>}
    */
   async generate_unique_folder_name(parent_folder_id, folder_name) {
     let unique_name = folder_name;
@@ -217,6 +221,7 @@ class DbClient {
    * Adds a new folder to a parent folder.
    * @param {Number} parent_folder_id
    * @param {String} [folder_name="New Folder"]
+   * @returns {Promise<Folder>}
    */
   async add_folder(parent_folder_id, folder_name = "New Folder") {
     try {
@@ -248,19 +253,16 @@ class DbClient {
     try {
       await sequelize.transaction(async (t) => {
         for (const item_id of item_ids) {
-          // Prüfe, ob das zu verschiebende Item ein Ordner oder eine Datei ist
           let item = await Folder.findByPk(item_id, { transaction: t });
           if (item) {
-            // Überprüfe, ob ein Ordner mit demselben Namen im Zielordner existiert
             const unique_name = await this.generate_unique_folder_name(
               folder_id,
               item.name
             );
-            item.name = unique_name; // Stelle sicher, dass der Name eindeutig ist
+            item.name = unique_name;
             item.parent_folder_id = folder_id;
             await item.save({ transaction: t });
           } else {
-            // Falls das Item eine Datei ist, wende dieselbe Logik an
             const file = await File.findByPk(item_id, { transaction: t });
             if (file) {
               const existingFile = await File.findOne({
@@ -272,7 +274,6 @@ class DbClient {
               });
 
               if (existingFile) {
-                // Wenn eine Datei mit demselben Namen existiert, generiere einen eindeutigen Namen
                 file.name = await this.generate_unique_file_name(
                   folder_id,
                   file.name
@@ -285,7 +286,6 @@ class DbClient {
         }
       });
 
-      // Rückgabe des Zielordners mit den aktualisierten Items
       return await this.get_folder(folder_id);
     } catch (error) {
       console.error("Error moving items:", error);
@@ -295,9 +295,8 @@ class DbClient {
 
   /**
    * Deletes a folder by its ID.
-   * This will cascade delete all child folders and files
-   * due to the onDelete: "CASCADE" setting.
    * @param {Number} folder_id
+   * @returns {Promise<void>}
    */
   async delete_folder(folder_id) {
     try {
@@ -315,6 +314,7 @@ class DbClient {
    * Renames an existing folder.
    * @param {Number} id
    * @param {String} new_name
+   * @returns {Promise<void>}
    */
   async rename_folder(id, new_name) {
     try {

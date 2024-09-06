@@ -1,14 +1,7 @@
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
-import { Project } from "../../../EditorTool/JS/Classes/Project.js";
-import { FileAreaView } from "../Elements/FileAreaView.js";
 import { File } from "../../../EditorTool/JS/Classes/File.js";
 
 export class FileSystemHandler {
-  /**
-   * Handles the "FileSystem" in the FileAreaView
-   * @param {FileAreaView} file_area_view
-   * @param {Project} project
-   */
   constructor(file_area_view, project) {
     this.file_area_view = file_area_view;
     this.file_area_view.file_system_handler = this;
@@ -19,7 +12,7 @@ export class FileSystemHandler {
   }
 
   /**
-   * Normalizes the entries to instances of Folder or File.
+   * Normalizes entries to Folder or File instances.
    * @param {Array<Object>} entries
    * @returns {Array<Folder|File>}
    */
@@ -28,7 +21,7 @@ export class FileSystemHandler {
   }
 
   /**
-   * Converts a raw entry into an instance of Folder or File.
+   * Converts an entry object to either Folder or File instance.
    * @param {Object} entry
    * @returns {Folder|File}
    */
@@ -37,8 +30,8 @@ export class FileSystemHandler {
       return entry;
     }
 
-    if (entry.type === "folder") {
-      const folder = new Folder(entry.id, entry.name, entry.folder_id);
+    if (entry.children) {
+      const folder = new Folder(entry.id, entry.name, entry.parent_folder_id);
       folder.children = this.normalize_entries(entry.children || []);
       return folder;
     } else if (entry.type === "file") {
@@ -49,10 +42,10 @@ export class FileSystemHandler {
   }
 
   /**
-   * Generic fetch method to centralize API calls.
+   * Fetches data from the API.
    * @param {string} url
    * @param {Object} [options={}]
-   * @returns {Promise<any>}
+   * @returns {Promise<Object>}
    */
   async fetch_api(url, options = {}) {
     try {
@@ -75,7 +68,7 @@ export class FileSystemHandler {
   }
 
   /**
-   * Reads the content of the current Folder and updates the UI.
+   * Reads and updates the directory content.
    */
   async read_directory_content() {
     if (!this.active_folder || !this.active_folder.children) {
@@ -88,6 +81,8 @@ export class FileSystemHandler {
         `http://localhost:3000/folders/${this.active_folder.id}`
       );
 
+      console.log(folder_data);
+
       this.active_folder.build_folder_structure(folder_data.children);
       this.entries = this.normalize_entries(this.active_folder.children);
       this.file_area_view.rebuild_view();
@@ -96,42 +91,66 @@ export class FileSystemHandler {
     }
   }
 
-  /**
-   * Handles directory navigation based on the name of the folder.
-   * @param {String} name
-   */
-  change_directory_handle(name) {
-    if (name === "..") {
+  change_directory_handle(folder_identifier) {
+    console.log("Navigating to:", folder_identifier);
+    console.log("Current folder history:", this.folder_history);
+
+    if (folder_identifier === -1) {
       this.load_prev_directory();
     } else {
-      this.load_new_directory(name);
+      console.log("Folder identifier is a number:", folder_identifier);
+      this.load_new_directory_by_id(folder_identifier);
     }
   }
 
   /**
-   * Navigates to the previous folder in the history.
+   * Loads the previous directory based on the folder history.
    */
   load_prev_directory() {
+    // Prüfe, ob mehr als ein Eintrag in der folder_history vorhanden ist
     if (this.folder_history.length > 1) {
+      // Entferne das aktuelle Verzeichnis und hole den vorherigen Ordner
       this.folder_history.pop();
-      this.active_folder = this.folder_history[this.folder_history.length - 1];
+      const previousFolder =
+        this.folder_history[this.folder_history.length - 1];
+
+      // Setze den aktiven Ordner auf den vorherigen Ordner
+      this.active_folder = previousFolder;
+      console.log("Navigating to previous folder:", previousFolder);
+
+      // Lies den Inhalt des vorherigen Ordners ein
       this.read_directory_content();
     } else {
-      console.warn("No previous directory to load.");
+      console.warn("No previous directory in history.");
     }
   }
 
   /**
-   * Navigates to a new folder based on its name.
-   * @param {String} name
+   * Returns the parent folder ID of the current folder.
+   * @returns {number|null}
    */
-  load_new_directory(name) {
+  get_parent_folder_id() {
+    if (this.folder_history.length > 1) {
+      return this.folder_history[this.folder_history.length - 2].id;
+    }
+
+    return this.active_folder.parent_folder_id || null;
+  }
+
+  /**
+   * Loads a new directory based on folder ID.
+   * @param {number} folder_id
+   */
+  load_new_directory_by_id(folder_id) {
+    console.log("load by id", folder_id);
     const folder_to_load = this.entries.find(
-      (item) => item instanceof Folder && item.name === name
+      (item) => item instanceof Folder && item.id === folder_id
     );
 
+    console.log(this.entries);
+
     if (!folder_to_load) {
-      console.error(`Folder with name ${name} not found.`);
+      console.error(`Folder with ID ${folder_id} not found.`);
       return;
     }
 
@@ -141,7 +160,7 @@ export class FileSystemHandler {
   }
 
   /**
-   * Creates a new folder in the database and updates the UI.
+   * Creates a new folder.
    * @param {string} folderName
    */
   async create_folder(folderName) {
@@ -161,7 +180,7 @@ export class FileSystemHandler {
       );
 
       this.active_folder.children.push(
-        new Folder(new_folder.id, new_folder.name, new_folder.folder_id)
+        new Folder(new_folder.id, new_folder.name, new_folder.parent_folder_id)
       );
       this.read_directory_content();
     } catch (error) {
@@ -170,8 +189,8 @@ export class FileSystemHandler {
   }
 
   /**
-   * Renames a folder by ID in the backend and updates the UI.
-   * @param {string} id
+   * Renames a folder by its ID.
+   * @param {number} id
    * @param {string} newName
    */
   async rename_folder_by_id(id, newName) {
@@ -193,8 +212,8 @@ export class FileSystemHandler {
   }
 
   /**
-   * Deletes a folder by ID in the backend and updates the UI.
-   * @param {string} folderId
+   * Deletes a folder by its ID.
+   * @param {number} folderId
    */
   async delete_folder_by_id(folderId) {
     try {
@@ -212,9 +231,9 @@ export class FileSystemHandler {
   }
 
   /**
-   * Moves the items to the specified folder and updates the UI.
-   * @param {Array<string>} item_ids
-   * @param {string} folder_id
+   * Moves items (files or folders) to another folder.
+   * @param {Array<number>} item_ids
+   * @param {number} folder_id
    */
   async move_items_to_folder(item_ids, folder_id) {
     try {
@@ -243,9 +262,9 @@ export class FileSystemHandler {
   }
 
   /**
-   * Adds the moved items to the specified folder.
-   * @param {Array} moved_items
-   * @param {string} folder_id
+   * Adds moved items to a target folder.
+   * @param {Array<Object>} moved_items
+   * @param {number} folder_id
    */
   add_moved_items_to_folder(moved_items, folder_id) {
     const target_folder = this.find_folder_by_id(folder_id);
@@ -270,17 +289,17 @@ export class FileSystemHandler {
   }
 
   /**
-   * Finds a folder or file by its ID.
-   * @param {string} id
-   * @returns {Folder|File|null}
+   * Finds an entry (folder or file) by its ID.
+   * @param {number} id
+   * @returns {Object|null}
    */
   find_entry_by_id(id) {
     return this.active_folder.children.find((entry) => entry.id === id);
   }
 
   /**
-   * Helper method to find a folder by its ID in the file structure.
-   * @param {string} folder_id
+   * Finds a folder by its ID.
+   * @param {number} folder_id
    * @returns {Folder|null}
    */
   find_folder_by_id(folder_id) {
@@ -295,12 +314,14 @@ export class FileSystemHandler {
       return null;
     };
 
+    console.log(this.root_folder);
+
     return search_folder(this.project.root_folder);
   }
 
   /**
-   * Deletes a file by ID and updates the UI.
-   * @param {string} fileId
+   * Deletes a file by its ID.
+   * @param {number} fileId
    */
   async delete_file_by_id(fileId) {
     try {
