@@ -2,6 +2,7 @@ import { MapEditorPart } from "./MapEditorPart.js";
 import { TempCanvas } from "./CanvasElements/TempCanvas.js";
 import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
 import { InputCanvas } from "./CanvasElements/InputCanvas.js";
+import { BackgroundCanvas } from "./CanvasElements/BackgroundCanvas.js";
 
 export class MapEditorCanvas extends MapEditorPart {
   /**
@@ -9,11 +10,18 @@ export class MapEditorCanvas extends MapEditorPart {
    */
   constructor(map_editor) {
     super(map_editor);
+    this.background_canvas = new BackgroundCanvas(this);
     this.temp_canvas = new TempCanvas(this);
     this.hover_canvas = new HoverCanvas(this);
     this.input_canvas = new InputCanvas(this);
     this.layer_canvases = [];
     this.canvas_wrapper = null;
+    this.canvas_array = [
+      this.background_canvas,
+      this.hover_canvas,
+      this.temp_canvas,
+      this.input_canvas,
+    ];
   }
 
   /**
@@ -30,23 +38,24 @@ export class MapEditorCanvas extends MapEditorPart {
   init() {
     this.canvas_wrapper = this.querySelector(".canvas-wrapper");
     this.canvas_wrapper.append(
+      this.background_canvas,
       this.temp_canvas,
       this.hover_canvas,
       this.input_canvas
     );
-    this.update_background();
-
-    // this.render_layers();
+    this.background_canvas.draw_background_grid();
   }
 
   /**
-   * Updates the background grid size and position based on the current scale
+   * Updates the size of all canvas objects
    */
-  update_background() {
-    this.canvas_wrapper.style.backgroundSize = `${
-      10 * this.map_editor.scale
-    }px ${10 * this.map_editor.scale}px`;
-    this.canvas_wrapper.style.backgroundPosition = `0px 0px`;
+  set_canvas_sizes(width, height) {
+    [...this.canvas_array, ...this.layer_canvases].forEach((canvas) => {
+      canvas.revert_canvas();
+      canvas.canvas.width = width;
+      canvas.canvas.height = height;
+    });
+    this.background_canvas.draw_background_grid();
   }
 
   /**

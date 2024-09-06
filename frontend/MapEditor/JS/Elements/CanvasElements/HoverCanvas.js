@@ -42,9 +42,10 @@ export class HoverCanvas extends CanvasElement {
   draw_hover(event) {
     this.revert_canvas();
     const scale = this.map_editor.scale;
+    const tile_size = this.map_editor.tile_size;
     const size = event.detail.size * scale;
-    const x = event.detail.x * 10 * scale;
-    const y = event.detail.y * 10 * scale;
+    const x = event.detail.x * tile_size * scale;
+    const y = event.detail.y * tile_size * scale;
     this.context.fillStyle = this.hover_color;
     this.context.fillRect(x, y, size, size);
   }
