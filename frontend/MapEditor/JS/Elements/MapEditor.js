@@ -19,8 +19,8 @@ export class MapEditor extends HTMLElement {
     this.editor_tool = editor_tool;
     this.selected_tool = null;
     this.layer_manager = new LayerManager();
-    this.width = 10;
-    this.height = 5;
+    this.width = 24;
+    this.height = 24;
     this.map_canvas_width = 0;
     this.map_canvas_height = 0;
     this.canvas_wrapper_width = 0;
@@ -70,6 +70,9 @@ export class MapEditor extends HTMLElement {
     size_obs.observe(this.map_canvas);
   }
 
+  /**
+   * Called when MapEditorCanvas is resized, resizes the wrapper
+   */
   resize_canvas_wrapper() {
     const max_height = this.map_canvas_height - 40;
     const max_width = this.map_canvas_width - 40;
@@ -135,6 +138,10 @@ export class MapEditor extends HTMLElement {
     });
   }
 
+  /**
+   * Returns the active layer
+   * @returns {Array}
+   */
   get_active_layer() {
     return this.layer_manager.get_active_layer();
   }
@@ -241,7 +248,6 @@ export class MapEditor extends HTMLElement {
    * @param {Number} mouseY
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
-    console.log("zoom changed");
     const current_mouseX =
       (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const current_mouseY =
@@ -318,7 +324,6 @@ export class MapEditor extends HTMLElement {
    * @param {Number} y
    */
   pen_change_matrix(x, y) {
-    console.log("x:", x);
     if (this.selected_asset) {
       this.load_image(this.selected_asset)
         .then((img) => {

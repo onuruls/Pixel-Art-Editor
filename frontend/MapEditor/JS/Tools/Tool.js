@@ -89,7 +89,6 @@ export class Tool {
    */
   hover(event) {
     const { x, y } = this.get_mouse_position(event);
-    // console.log(`x: ${x}, y: ${y}`);
     if (this.has_hover_position_changed(x, y)) {
       this.hover_position = { x: Math.abs(x), y: Math.abs(y) };
       this.map_editor.hover_canvas_matrix(x, y);

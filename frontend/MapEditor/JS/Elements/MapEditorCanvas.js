@@ -43,9 +43,7 @@ export class MapEditorCanvas extends MapEditorPart {
       this.hover_canvas,
       this.input_canvas
     );
-    // this.update_background();
     this.background_canvas.draw_background_grid();
-    // this.render_layers();
   }
 
   /**
@@ -58,16 +56,6 @@ export class MapEditorCanvas extends MapEditorPart {
       canvas.canvas.height = height;
     });
     this.background_canvas.draw_background_grid();
-  }
-
-  /**
-   * Updates the background grid size and position based on the current scale
-   */
-  update_background() {
-    this.canvas_wrapper.style.backgroundSize = `${
-      10 * this.map_editor.scale
-    }px ${10 * this.map_editor.scale}px`;
-    this.canvas_wrapper.style.backgroundPosition = `0px 0px`;
   }
 
   /**
