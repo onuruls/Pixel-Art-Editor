@@ -19,14 +19,19 @@ export class MapEditor extends HTMLElement {
     this.editor_tool = editor_tool;
     this.selected_tool = null;
     this.layer_manager = new LayerManager();
-    this.width = 64;
-    this.height = 64;
+    this.width = 10;
+    this.height = 5;
+    this.map_canvas_width = 0;
+    this.map_canvas_height = 0;
+    this.canvas_wrapper_width = 0;
+    this.canvas_wrapper_height = 0;
     this.initialized = false;
     this.selected_asset = null;
     this.action_buffer = [];
     this.image_cache = {};
     this.pixel_size = 1;
     this.scale = 1;
+    this.tile_size = 10;
   }
 
   /**
@@ -49,6 +54,33 @@ export class MapEditor extends HTMLElement {
     this.initialized = true;
     this.add_layer();
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    const size_obs = new ResizeObserver((entries) => {
+      entries.forEach((e) => {
+        this.map_canvas_width = e.contentRect.width;
+        this.map_canvas_height = e.contentRect.height;
+      });
+      this.resize_canvas_wrapper();
+      this.map_canvas.set_canvas_sizes(
+        this.canvas_wrapper_width,
+        this.canvas_wrapper_height
+      );
+      this.map_canvas.background_canvas.draw_background_grid();
+      this.layer_manager;
+    });
+    size_obs.observe(this.map_canvas);
+  }
+
+  resize_canvas_wrapper() {
+    const max_height = this.map_canvas_height - 40;
+    const max_width = this.map_canvas_width - 40;
+    const height_tile_size = max_height / this.height;
+    const width_tile_size = max_width / this.width;
+    this.tile_size = Math.min(height_tile_size, width_tile_size);
+
+    this.canvas_wrapper_width = this.tile_size * this.width;
+    this.canvas_wrapper_height = this.tile_size * this.height;
+    this.canvas_wrapper.style.width = this.canvas_wrapper_width;
+    this.canvas_wrapper.style.height = this.canvas_wrapper_height;
   }
 
   /**
@@ -127,7 +159,6 @@ export class MapEditor extends HTMLElement {
     const layerCanvas = new DrawingCanvas(this.map_canvas, new_layer_index);
     this.map_canvas.add_layer_canvas(layerCanvas);
     this.layer_manager.active_layer_index = new_layer_index;
-
     this.dispatchEvent(new CustomEvent("layers-updated"));
   }
 
@@ -210,6 +241,7 @@ export class MapEditor extends HTMLElement {
    * @param {Number} mouseY
    */
   apply_zoom(zoom_level, mouseX, mouseY) {
+    console.log("zoom changed");
     const current_mouseX =
       (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const current_mouseY =
@@ -219,16 +251,11 @@ export class MapEditor extends HTMLElement {
 
     const new_mouseX = (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const new_mouseY = (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
-    this.map_canvas.querySelectorAll("canvas").forEach((canvas) => {
-      canvas.width = 640 * this.scale;
-      canvas.height = 640 * this.scale;
-    });
 
-    this.canvas_wrapper.style.backgroundSize = `${10 * this.scale}px ${
-      10 * this.scale
-    }px`;
-    this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
-      .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
+    this.map_canvas.set_canvas_sizes(
+      this.canvas_wrapper_width * this.scale,
+      this.canvas_wrapper_height * this.scale
+    );
 
     const deltaX = (current_mouseX - new_mouseX) * this.scale;
     const deltaY = (current_mouseY - new_mouseY) * this.scale;
@@ -242,7 +269,7 @@ export class MapEditor extends HTMLElement {
           scale: this.scale,
           mouseX,
           mouseY,
-          size: this.pixel_size * 10,
+          size: this.pixel_size * this.tile_size,
         },
       })
     );
@@ -291,6 +318,7 @@ export class MapEditor extends HTMLElement {
    * @param {Number} y
    */
   pen_change_matrix(x, y) {
+    console.log("x:", x);
     if (this.selected_asset) {
       this.load_image(this.selected_asset)
         .then((img) => {
@@ -388,7 +416,7 @@ export class MapEditor extends HTMLElement {
         detail: {
           x: x,
           y: y,
-          size: this.pixel_size * 10,
+          size: this.pixel_size * this.tile_size,
         },
       })
     );

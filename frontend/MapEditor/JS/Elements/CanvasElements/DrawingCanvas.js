@@ -43,7 +43,8 @@ export class DrawingCanvas extends CanvasElement {
    */
   draw_pen_canvas(event) {
     const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
+    const pixelSize =
+      this.map_editor.tile_size * scale * this.map_editor.pixel_size;
     const asset = event.detail.asset;
     const x = event.detail.x * pixelSize;
     const y = event.detail.y * pixelSize;
@@ -56,7 +57,7 @@ export class DrawingCanvas extends CanvasElement {
    */
   erase_canvas(event) {
     const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
+    const pixelSize = this.map_editor.tile_size * scale;
     const x = event.detail.x * pixelSize;
     const y = event.detail.y * pixelSize;
     this.context.clearRect(x, y, pixelSize, pixelSize);

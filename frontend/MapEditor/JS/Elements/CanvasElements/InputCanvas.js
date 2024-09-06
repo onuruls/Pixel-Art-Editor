@@ -28,23 +28,23 @@ export class InputCanvas extends CanvasElement {
       this.canvas.height = event.detail.height;
     });
 
-    const handleHover = (event) => {
-      const rect = this.canvas.getBoundingClientRect();
-      const x = Math.floor(
-        (event.clientX - rect.left) / (10 * this.map_editor.scale)
-      );
-      const y = Math.floor(
-        (event.clientY - rect.top) / (10 * this.map_editor.scale)
-      );
-      this.map_editor.hover_canvas_matrix(x, y);
-    };
+    // const handleHover = (event) => {
+    //   const rect = this.canvas.getBoundingClientRect();
+    //   const x = Math.floor(
+    //     (event.clientX - rect.left) / (10 * this.map_editor.scale)
+    //   );
+    //   const y = Math.floor(
+    //     (event.clientY - rect.top) / (10 * this.map_editor.scale)
+    //   );
+    //   this.map_editor.hover_canvas_matrix(x, y);
+    // };
 
     this.canvas.addEventListener("mousedown", (event) => {
       this.map_editor.selected_tool.mouse_down(event);
     });
     this.canvas.addEventListener("mousemove", (event) => {
       this.map_editor.selected_tool.mouse_move(event);
-      handleHover(event);
+      // handleHover(event);
     });
     this.canvas.addEventListener("mouseup", (event) => {
       this.map_editor.selected_tool.mouse_up(event);

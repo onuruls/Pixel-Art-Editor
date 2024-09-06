@@ -89,6 +89,7 @@ export class Tool {
    */
   hover(event) {
     const { x, y } = this.get_mouse_position(event);
+    // console.log(`x: ${x}, y: ${y}`);
     if (this.has_hover_position_changed(x, y)) {
       this.hover_position = { x: Math.abs(x), y: Math.abs(y) };
       this.map_editor.hover_canvas_matrix(x, y);
@@ -116,8 +117,12 @@ export class Tool {
         this.map_editor.layer_manager.active_layer_index
       ];
     const rect = activeLayerCanvas.getBoundingClientRect();
-    const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
-    const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);
+    const mouseX =
+      (event.clientX - rect.left) /
+      (this.map_editor.tile_size * this.map_editor.scale);
+    const mouseY =
+      (event.clientY - rect.top) /
+      (this.map_editor.tile_size * this.map_editor.scale);
     const x = Math.floor(mouseX);
     const y = Math.floor(mouseY);
     return { x, y };
