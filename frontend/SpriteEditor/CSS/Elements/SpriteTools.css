@@ -5,7 +5,6 @@ sprite-tools {
   row-gap: 1em;
   padding: 1em;
   background-color: var(--primary-bg);
-  margin-top: 3em;
   align-items: center;
 
   .pixel-size-options {

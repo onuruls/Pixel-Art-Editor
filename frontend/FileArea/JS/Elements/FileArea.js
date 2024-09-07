@@ -1,5 +1,4 @@
 import { FileSystemHandler } from "../Classes/FileSystemHandler.js";
-import { TopMenu } from "./TopMenu.js";
 import { FileAreaTools } from "./FileAreaTools.js";
 import { FileAreaView } from "./FileAreaView.js";
 import { FolderItemView } from "./FolderItemView.js";
@@ -17,11 +16,9 @@ export class FileArea extends HTMLElement {
     this.css = this.create_css_link();
     this.appendChild(this.css);
 
-    this.file_tools_left = new TopMenu(this);
     this.file_view = new FileAreaView(this);
     this.file_tools_right = new FileAreaTools(this);
 
-    this.appendChild(this.file_tools_left);
     this.appendChild(this.file_view);
     this.appendChild(this.file_tools_right);
 

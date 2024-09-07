@@ -3,7 +3,6 @@ sprite-canvas {
   display: flex;
   align-items: center;
   background-color: var(--primary-bg);
-  margin-top: 3em;
 
   > .canvas-wrapper {
     position: relative;

@@ -40,41 +40,4 @@ file-area {
       }
     }
   }
-
-  top-menu {
-    background-color: var(--container-bg);
-    position: absolute;
-    width: 85.2vw;
-    height: 3em;
-    top: 0;
-    display: flex;
-    align-items: center;
-
-    .project-name {
-      font-size: 1.2rem;
-      color: white;
-      width: 100%;
-      text-align: center;
-    }
-
-    button {
-      background-color: var(--container-bg);
-      border: none;
-      color: white;
-      font-size: 1rem;
-      padding: 1rem 2rem;
-      height: 3em;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      display: flex;
-      width: 12em;
-      justify-content: space-between;
-      align-items: center;
-
-      &:hover {
-        background-color: var(--primary-bg);
-        color: var(--active-accent);
-      }
-    }
-  }
 }

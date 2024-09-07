@@ -1,8 +1,8 @@
 import { SpriteEditor } from "../../../SpriteEditor/JS/Elements/SpriteEditor.js";
+import { TopMenu } from "./EditorTool/TopMenu.js";
 import { FileArea } from "../../../FileArea/JS/Elements/FileArea.js";
 import { MapEditor } from "../../../MapEditor/JS/Elements/MapEditor.js";
 import { TitleScreen } from "./TitleScreen.js";
-import { Folder } from "../Classes/Folder.js";
 import { Project } from "../Classes/Project.js";
 
 export class EditorTool extends HTMLElement {
@@ -12,6 +12,7 @@ export class EditorTool extends HTMLElement {
     this.css = this.create_css_link();
     this.editor_container = this.create_editor_container();
     this.title_screen = new TitleScreen(this);
+    this.top_menu = new TopMenu(this);
     this.sprite_editor = new SpriteEditor(this);
     this.map_editor = new MapEditor(this);
     this.file_area = new FileArea(this);
@@ -69,10 +70,10 @@ export class EditorTool extends HTMLElement {
       `http://localhost:3000/projects/${project.id}`
     );
     const resp_project = await response.json();
-    console.log(resp_project);
     project.build_project_structure(resp_project.root_folder);
     this.project = project;
     this.title_screen.remove();
+    this.appendChild(this.top_menu);
     this.editor_container.appendChild(this.sprite_editor);
     this.appendChild(this.editor_container);
     this.appendChild(this.file_area);
@@ -85,11 +86,11 @@ export class EditorTool extends HTMLElement {
     if (this.sprite_editor.isConnected) {
       this.sprite_editor.remove();
       this.editor_container.appendChild(this.map_editor);
-      this.file_area.file_tools_left.set_editor_name("Sprite Editor");
+      this.top_menu.set_editor_name("Sprite Editor");
     } else {
       this.map_editor.remove();
       this.editor_container.appendChild(this.sprite_editor);
-      this.file_area.file_tools_left.set_editor_name("Map Editor");
+      this.top_menu.set_editor_name("Map Editor");
     }
   }
 }
