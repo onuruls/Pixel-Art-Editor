@@ -39,6 +39,7 @@ export class SameColorBucket extends Tool {
    */
   draw(event) {
     const position = this.get_mouse_position(event);
-    this.sprite_editor.fill_same_color_matrix(position.x, position.y);
+    const mousekey = event.buttons;
+    this.sprite_editor.fill_same_color_matrix(position.x, position.y, mousekey);
   }
 }
