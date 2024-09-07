@@ -1,3 +1,6 @@
+/**
+ * Header bar for the editor tool
+ */
 export class TopMenu extends HTMLElement {
   constructor(editor_tool) {
     super();
@@ -15,6 +18,18 @@ export class TopMenu extends HTMLElement {
     this.init();
   }
 
+  init() {
+    this.editor_button.addEventListener(
+      "click",
+      this.editor_tool.change_editor.bind(this.editor_tool)
+    );
+    const project_container = this.create_project_container();
+    this.appendChild(project_container);
+  }
+
+  /**
+   * @returns {HTMLButtonElement}
+   * */
   create_editor_button() {
     const editor_button = document.createElement("button");
     const icon = document.createElement("i");
@@ -26,6 +41,9 @@ export class TopMenu extends HTMLElement {
     return editor_button;
   }
 
+  /**
+   * @returns {HTMLDivElement}
+   * */
   create_project_container() {
     this.project_container = document.createElement("div");
     this.project_container.classList.add("project-container");
@@ -47,15 +65,9 @@ export class TopMenu extends HTMLElement {
     return this.project_container;
   }
 
-  init() {
-    this.editor_button.addEventListener(
-      "click",
-      this.editor_tool.change_editor.bind(this.editor_tool)
-    );
-    const project_container = this.create_project_container();
-    this.appendChild(project_container);
-  }
-
+  /**
+   * Shows the input field for renaming the project
+   */
   show_input_field() {
     const input_container = document.createElement("div");
     input_container.classList.add("input-container");
@@ -65,14 +77,12 @@ export class TopMenu extends HTMLElement {
     input.classList.add("rename-input");
     input.value = this.project_name;
 
-    // Create submit and cancel icons
     const submit_icon = document.createElement("i");
     submit_icon.classList.add("fa-solid", "fa-check", "submit-icon");
 
     const cancel_icon = document.createElement("i");
     cancel_icon.classList.add("fa-solid", "fa-xmark", "cancel-icon");
 
-    // Append input and icons to container
     input_container.appendChild(input);
     input_container.appendChild(submit_icon);
     input_container.appendChild(cancel_icon);
@@ -81,7 +91,6 @@ export class TopMenu extends HTMLElement {
       this.project_container.querySelector("span:last-child");
     project_label.replaceWith(input_container);
 
-    // Add event listeners for input, submit, and cancel
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         this.rename_project(input_container);
@@ -101,6 +110,10 @@ export class TopMenu extends HTMLElement {
     input.focus();
   }
 
+  /**
+   * Renames the project
+   * @param {HTMLDivElement} input_container
+   * */
   async rename_project(input_container) {
     const input = input_container.querySelector("input");
     const new_name = input.value.trim();
@@ -131,6 +144,10 @@ export class TopMenu extends HTMLElement {
     input_container.replaceWith(this.project_name_element);
   }
 
+  /**
+   * Sets the editor name after switch
+   * @param {string} name
+   */
   set_editor_name(name) {
     this.querySelector("#switch_to i").alt = name;
     this.querySelector("#switch_to").lastChild.textContent = name;
