@@ -10,6 +10,7 @@ import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { Stroke } from "../Tools/Stroke.js";
 import { Rectangle } from "../Tools/Rectangle.js";
+import { Circle } from "../Tools/Circle.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -454,6 +455,8 @@ export class MapEditor extends HTMLElement {
         return new Stroke(this);
       case "rectangle":
         return new Rectangle(this);
+      case "circle":
+        return new Circle(this);
     }
   }
 
@@ -501,6 +504,20 @@ export class MapEditor extends HTMLElement {
       end_y
     );
     this.draw_shape_matrix(rectangle_points, final);
+  }
+
+  /**
+   * DUPLICATE -- merge with SpriteEditor
+   * Draws a circle on the Canvas
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @param {Boolean} final
+   */
+  draw_circle_matrix(x1, y1, x2, y2, final = false) {
+    const circle_points = this.calculate_circle_points(x1, y1, x2, y2);
+    this.draw_shape_matrix(circle_points, final);
   }
 
   /**
@@ -590,6 +607,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * DUPLICATE -- merge with SpriteEditor
    * Calculates the matrix points included in the rectangle
    * @param {Number} x1
    * @param {Number} y1
@@ -613,6 +631,36 @@ export class MapEditor extends HTMLElement {
     ) {
       points.push({ x: x1, y: j, prev_asset: layer_matrix[x1][j] });
       points.push({ x: x2, y: j, prev_asset: layer_matrix[x2][j] });
+    }
+    return points;
+  }
+
+  /**
+   * DUPLICATE -- merge with SpriteEditor
+   * Calculates the matrix points included in the circle
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>}>}
+   */
+  calculate_circle_points(x1, y1, x2, y2) {
+    const points = [];
+    const added_points = [];
+    const radiusX = Math.abs(x2 - x1) / 2;
+    const radiusY = Math.abs(y2 - y1) / 2;
+    const centerX = Math.min(x1, x2) + radiusX;
+    const centerY = Math.min(y1, y2) + radiusY;
+    const step = 1 / Math.max(radiusX, radiusY);
+    const content = this.layer_manager.get_active_layer();
+    for (let a = 0; a < 2 * Math.PI; a += step) {
+      const x = Math.round(centerX + radiusX * Math.cos(a));
+      const y = Math.round(centerY + radiusY * Math.sin(a));
+      const pointKey = `${x},${y}`;
+      if (!added_points[pointKey]) {
+        points.push({ x: x, y: y, prev_asset: content[x][y] });
+        added_points[pointKey] = true;
+      }
     }
     return points;
   }
