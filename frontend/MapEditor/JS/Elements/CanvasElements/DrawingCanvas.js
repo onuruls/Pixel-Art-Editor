@@ -35,6 +35,9 @@ export class DrawingCanvas extends CanvasElement {
     this.map_editor.addEventListener("zoom_changed", () =>
       this.redraw_canvas()
     );
+    this.map_editor.addEventListener("draw_shape", (event) =>
+      this.draw_shape(event)
+    );
   }
 
   /**

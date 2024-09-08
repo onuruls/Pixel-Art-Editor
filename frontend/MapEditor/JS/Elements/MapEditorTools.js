@@ -16,6 +16,7 @@ export class MapEditorTools extends MapEditorPart {
         <button id="eraser" class="tool-button" data-tool="eraser" title="Eraser tool"><img src="img/icons/eraser.svg" alt="Eraser"></button>
         <button id="zoom-in" class="tool-button zoom-tool" data-tool="zoom-in" title="Zoom In tool"><img src="img/icons/zoom_in.svg" alt="Zoom In"></button>
         <button id="zoom-out" class="tool-button zoom-tool" data-tool="zoom-out" title="Zoom Out tool"><img src="img/icons/zoom_out.svg" alt="Zoom Out"></button>
+        <button id="stroke" class="tool-button" data-tool="stroke" title="Line tool"><img src="img/icons/stroke.svg" alt="Stroke"></button>
       </div>
       <div class="assetbox">
         ${this.renderAssetButtons()}

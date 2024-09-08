@@ -81,4 +81,23 @@ export class CanvasElement extends HTMLElement {
   revert_canvas() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
+
+  /**
+   * Draws a shape to the canvas (Stroke, Rectangle, Circle)
+   * @param {Event} event
+   */
+  draw_shape(event) {
+    const selected_assset = event.detail.asset;
+    const points = event.detail.points;
+    const tile_size = this.map_editor.tile_size;
+    points.forEach((point) => {
+      this.context.drawImage(
+        selected_assset,
+        point.x * tile_size,
+        point.y * tile_size,
+        tile_size,
+        tile_size
+      );
+    });
+  }
 }
