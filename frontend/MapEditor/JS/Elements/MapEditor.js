@@ -9,6 +9,7 @@ import { ZoomIn } from "../Tools/ZoomIn.js";
 import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { Stroke } from "../Tools/Stroke.js";
+import { Bucket } from "../Tools/Bucket.js";
 import { Rectangle } from "../Tools/Rectangle.js";
 import { Circle } from "../Tools/Circle.js";
 
@@ -35,6 +36,7 @@ export class MapEditor extends HTMLElement {
     this.pixel_size = 1;
     this.scale = 1;
     this.tile_size = 10;
+    this.fill_visited = {};
   }
 
   /**
@@ -453,6 +455,8 @@ export class MapEditor extends HTMLElement {
         return new ZoomOut(this);
       case "stroke":
         return new Stroke(this);
+      case "bucket":
+        return new Bucket(this);
       case "rectangle":
         return new Rectangle(this);
       case "circle":
@@ -473,6 +477,71 @@ export class MapEditor extends HTMLElement {
       x < this.layer_manager.get_active_layer().length &&
       y < this.layer_manager.get_active_layer()[0].length
     );
+  }
+
+  /**
+   * DUPLICATE -- merge with SpriteEditor
+   * @param {Number} x
+   * @param {Number} y
+   */
+  fill_change_matrix(x, y) {
+    if (this.selected_asset) {
+      this.load_image(this.selected_asset).then((img) => {
+        this.start_action_buffer();
+        const content = this.layer_manager.get_active_layer();
+        const fill_pixels = this.recursive_fill_matrix(x, y, content[x][y]);
+        this.fill_visited = {};
+        fill_pixels.forEach((pixel) => {
+          this.action_buffer.push({
+            x: pixel.x,
+            y: pixel.y,
+            layer: this.layer_manager.active_layer_index,
+            prev_asset: content[pixel.x][pixel.y],
+            asset: this.selected_asset,
+          });
+          content[pixel.x][pixel.y] = this.selected_asset;
+        });
+        this.dispatchEvent(
+          new CustomEvent("fill_matrix_changed", {
+            detail: {
+              asset: img,
+              points: fill_pixels,
+            },
+          })
+        );
+        this.end_action_buffer();
+      });
+    }
+  }
+
+  /**
+   * DUPLICATE -- merge with SpriteEditor
+   * @param {Number} x
+   * @param {Number} y
+   * @returns {Array}
+   */
+  recursive_fill_matrix(x, y, sprite) {
+    const content = this.layer_manager.get_active_layer();
+    if (
+      this.fill_visited[`${x}_${y}`] === undefined &&
+      x >= 0 &&
+      x < this.width &&
+      y >= 0 &&
+      y < this.height &&
+      content[x][y] === sprite
+    ) {
+      const self = { x: x, y: y };
+      this.fill_visited[`${x}_${y}`] = false;
+      return [
+        self,
+        ...this.recursive_fill_matrix(x + 1, y, sprite),
+        ...this.recursive_fill_matrix(x - 1, y, sprite),
+        ...this.recursive_fill_matrix(x, y + 1, sprite),
+        ...this.recursive_fill_matrix(x, y - 1, sprite),
+      ];
+    } else {
+      return [];
+    }
   }
 
   /**
