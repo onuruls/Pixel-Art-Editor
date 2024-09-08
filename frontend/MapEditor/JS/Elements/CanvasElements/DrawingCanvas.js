@@ -38,6 +38,9 @@ export class DrawingCanvas extends CanvasElement {
     this.map_editor.addEventListener("draw_shape", (event) =>
       this.draw_shape(event)
     );
+    this.map_editor.addEventListener("fill_matrix_changed", (event) => {
+      this.fill_matrix_changed(event);
+    });
   }
 
   /**
@@ -112,6 +115,28 @@ export class DrawingCanvas extends CanvasElement {
           this.paint_single_pixel(x, y, pixel);
         }
       });
+    });
+  }
+
+  /**
+   * FIlls a section of the canvas
+   * @param {Event} event
+   */
+  fill_matrix_changed(event) {
+    const tile_size = this.map_editor.tile_size;
+    const points = event.detail.points;
+    const asset = event.detail.asset;
+    points.forEach((point) => {
+      const x = point.x * tile_size;
+      const y = point.y * tile_size;
+      this.context.clearRect(x, y, tile_size, tile_size);
+      this.context.drawImage(
+        asset,
+        point.x * tile_size,
+        point.y * tile_size,
+        tile_size,
+        tile_size
+      );
     });
   }
 }
