@@ -36,16 +36,9 @@ export class FolderItemView extends ItemView {
   init() {
     super.init();
     this.icon.addEventListener("dblclick", this.open_folder.bind(this));
-    this.addEventListener("dragstart", (e) => {
-      this.file_area_view.drag_handler.handle_drag_start(e);
-    });
   }
 
   open_folder() {
-    // Verwende die ID, um zum Ordner zu navigieren
-    console.log(this.id);
-    console.log(typeof this.id);
-
     this.file_area_view.navigate_to_folder(Number(this.id));
   }
 

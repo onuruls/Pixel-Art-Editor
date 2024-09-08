@@ -5,7 +5,7 @@ import { DeleteItemAction } from "./DeleteItemAction.js";
 /**
  * Context menu for a folder
  */
-export class FolderContextMenu extends ContextMenu {
+export class ItemContextMenu extends ContextMenu {
   /**
    * @param {FileArea} file_area
    * @param {HTMLElement} menu_element
@@ -27,13 +27,7 @@ export class FolderContextMenu extends ContextMenu {
    */
   configure(target) {
     this.clearOptions();
-    this.addOption(
-      () => this.actions.rename_item.execute(target),
-      "Rename Folder"
-    );
-    this.addOption(
-      () => this.actions.delete_item.execute(target),
-      "Delete Folder"
-    );
+    this.addOption(() => this.actions.rename_item.execute(target), "Rename");
+    this.addOption(() => this.actions.delete_item.execute(target), "Delete");
   }
 }

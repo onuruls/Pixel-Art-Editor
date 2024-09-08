@@ -42,6 +42,32 @@ export class FileSystemHandler {
   }
 
   /**
+   * Finds a folder by its ID.
+   * @param {number} folder_id
+   * @returns {Folder|null}
+   */
+  get_folder_by_id(folder_id) {
+    return (
+      this.entries.find(
+        (entry) => entry instanceof Folder && entry.id === folder_id
+      ) || null
+    );
+  }
+
+  /**
+   * Finds a file by its ID.
+   * @param {number} file_id
+   * @returns {File|null}
+   */
+  get_file_by_id(file_id) {
+    return (
+      this.entries.find(
+        (entry) => entry instanceof File && entry.id === file_id
+      ) || null
+    );
+  }
+
+  /**
    * Fetches data from the API.
    * @param {string} url
    * @param {Object} [options={}]
@@ -107,18 +133,12 @@ export class FileSystemHandler {
    * Loads the previous directory based on the folder history.
    */
   load_prev_directory() {
-    // Prüfe, ob mehr als ein Eintrag in der folder_history vorhanden ist
     if (this.folder_history.length > 1) {
-      // Entferne das aktuelle Verzeichnis und hole den vorherigen Ordner
       this.folder_history.pop();
       const previousFolder =
         this.folder_history[this.folder_history.length - 1];
-
-      // Setze den aktiven Ordner auf den vorherigen Ordner
       this.active_folder = previousFolder;
       console.log("Navigating to previous folder:", previousFolder);
-
-      // Lies den Inhalt des vorherigen Ordners ein
       this.read_directory_content();
     } else {
       console.warn("No previous directory in history.");
@@ -133,7 +153,6 @@ export class FileSystemHandler {
     if (this.folder_history.length > 1) {
       return this.folder_history[this.folder_history.length - 2].id;
     }
-
     return this.active_folder.parent_folder_id || null;
   }
 
@@ -142,12 +161,7 @@ export class FileSystemHandler {
    * @param {number} folder_id
    */
   load_new_directory_by_id(folder_id) {
-    console.log("load by id", folder_id);
-    const folder_to_load = this.entries.find(
-      (item) => item instanceof Folder && item.id === folder_id
-    );
-
-    console.log(this.entries);
+    const folder_to_load = this.get_folder_by_id(folder_id);
 
     if (!folder_to_load) {
       console.error(`Folder with ID ${folder_id} not found.`);
@@ -203,7 +217,7 @@ export class FileSystemHandler {
         body: JSON.stringify({ new_name: newName }),
       });
 
-      const folder = this.find_entry_by_id(id);
+      const folder = this.get_folder_by_id(id);
       if (folder) folder.name = newName;
       this.read_directory_content();
     } catch (error) {
@@ -231,92 +245,107 @@ export class FileSystemHandler {
   }
 
   /**
-   * Moves items (files or folders) to another folder.
-   * @param {Array<number>} item_ids
-   * @param {number} folder_id
+   * Verschiebt einen Ordner in einen Zielordner.
+   * @param {number} folder_id - ID des zu verschiebenden Ordners.
+   * @param {number} target_folder_id - ID des Zielordners.
    */
-  async move_items_to_folder(item_ids, folder_id) {
+  async move_folder_by_id(folder_id, target_folder_id) {
     try {
-      const moved_items = await this.fetch_api(
+      const result = await this.fetch_api(
         `http://localhost:3000/folders/move`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ item_ids, folder_id }),
+          body: JSON.stringify({
+            folder_id: folder_id,
+            target_folder_id: target_folder_id,
+          }),
         }
       );
-
-      const items = Array.isArray(moved_items) ? moved_items : [moved_items];
-
-      this.active_folder.children = this.active_folder.children.filter(
-        (child) => !item_ids.includes(String(child.id))
-      );
-
-      this.add_moved_items_to_folder(items, folder_id);
+      console.log(result);
       this.read_directory_content();
     } catch (error) {
-      console.error("Error moving items:", error);
+      console.error("Error moving folder:", error);
     }
   }
 
   /**
-   * Adds moved items to a target folder.
-   * @param {Array<Object>} moved_items
-   * @param {number} folder_id
+   * Verschiebt eine Datei in einen Zielordner.
+   * @param {number} file_id
+   * @param {number} target_folder_id
    */
-  add_moved_items_to_folder(moved_items, folder_id) {
-    const target_folder = this.find_folder_by_id(folder_id);
-
-    if (target_folder) {
-      moved_items.forEach((item) => {
-        if (item.children) {
-          const folder = new Folder(
-            item.id,
-            item.name,
-            item.parent_folder_id || null
-          );
-          folder.build_folder_structure(item.children);
-          target_folder.children.push(folder);
-        } else {
-          target_folder.children.push(
-            new File(item.id, item.name, item.folder_id, item.type)
-          );
-        }
+  async move_file_by_id(file_id, target_folder_id) {
+    try {
+      const result = await this.fetch_api(`http://localhost:3000/files/move`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file_id: file_id,
+          target_folder_id: target_folder_id,
+        }),
       });
+      console.log(result);
+      this.read_directory_content();
+    } catch (error) {
+      console.error("Error moving file:", error);
     }
   }
 
   /**
-   * Finds an entry (folder or file) by its ID.
-   * @param {number} id
-   * @returns {Object|null}
+   * Creates a new file.
+   * @param {string} fileName - The name of the file.
+   * @param {string} fileType - The type of the file (e.g., 'text', 'image').
    */
-  find_entry_by_id(id) {
-    return this.active_folder.children.find((entry) => entry.id === id);
+  async create_file(fileName, fileType = "file") {
+    try {
+      const new_file = await this.fetch_api(
+        `http://localhost:3000/folders/${this.active_folder.id}/files`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fileName,
+            type: fileType,
+          }),
+        }
+      );
+
+      this.active_folder.children.push(
+        new File(new_file.id, new_file.name, new_file.folder_id, new_file.type)
+      );
+      this.read_directory_content();
+    } catch (error) {
+      console.error("Error creating file:", error);
+    }
   }
 
   /**
-   * Finds a folder by its ID.
-   * @param {number} folder_id
-   * @returns {Folder|null}
+   * Renames a file by its ID.
+   * @param {number} id
+   * @param {string} new_name
    */
-  find_folder_by_id(folder_id) {
-    const search_folder = (folder) => {
-      if (folder.id === folder_id) return folder;
-      for (const child of folder.children) {
-        if (child instanceof Folder) {
-          const found = search_folder(child);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
+  async rename_file_by_id(id, new_name) {
+    try {
+      await this.fetch_api(`http://localhost:3000/files/${id}/rename`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ new_name }),
+      });
 
-    console.log(this.root_folder);
-
-    return search_folder(this.project.root_folder);
+      const file = this.get_file_by_id(id);
+      if (file) file.name = new_name;
+      this.file_area_view.rebuild_view();
+    } catch (error) {
+      console.error("Failed to rename file:", error);
+    }
   }
 
   /**

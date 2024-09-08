@@ -2,15 +2,8 @@ const { Project, Folder, File } = require("./db");
 const { sequelize } = require("./db");
 
 class DbClient {
-  /**
-   * Handles all the db queries
-   */
   constructor() {}
 
-  /**
-   * Fetches all projects
-   * @returns {Promise<Array<Project>>}
-   */
   async get_projects() {
     try {
       return await Project.findAll();
@@ -20,11 +13,6 @@ class DbClient {
     }
   }
 
-  /**
-   * Fetches a project by its ID and retrieves its structure with the root folder.
-   * @param {Number} id
-   * @returns {Promise<Object>}
-   */
   async get_project(id) {
     try {
       const project = await Project.findOne({
@@ -56,11 +44,6 @@ class DbClient {
     }
   }
 
-  /**
-   * Fetches a folder by its ID and retrieves its immediate children.
-   * @param {Number} id
-   * @returns {Promise<Object>}
-   */
   async get_folder(id) {
     try {
       const folder = await Folder.findOne({
@@ -87,11 +70,6 @@ class DbClient {
     }
   }
 
-  /**
-   * Structures the folder data into a nested format.
-   * @param {Object} folder
-   * @returns {Object}
-   */
   structure_folder_data(folder) {
     const folderData = {
       id: folder.id,
@@ -120,11 +98,6 @@ class DbClient {
     return folderData;
   }
 
-  /**
-   * Creates a new project with a root folder and subfolders.
-   * @param {String} name
-   * @returns {Promise<Project>}
-   */
   async new_project(name) {
     try {
       return await sequelize.transaction(async (t) => {
@@ -156,43 +129,70 @@ class DbClient {
     }
   }
 
-  /**
-   * Renames an existing project.
-   * @param {Number} id
-   * @param {String} new_name
-   * @returns {Promise<void>}
-   */
-  async rename_project(id, new_name) {
+  async move_folder_to_folder(folder_id, target_folder_id) {
     try {
-      await Project.update({ name: new_name }, { where: { id } });
-      console.log(`Project with ID ${id} renamed to ${new_name}.`);
+      const folder = await Folder.findByPk(folder_id);
+
+      if (!folder) {
+        throw new Error("Folder not found");
+      }
+
+      const existingFolder = await Folder.findOne({
+        where: {
+          name: folder.name,
+          parent_folder_id: target_folder_id,
+        },
+      });
+
+      if (existingFolder) {
+        folder.name = await this.generate_unique_folder_name(
+          target_folder_id,
+          folder.name
+        );
+      }
+
+      folder.parent_folder_id = target_folder_id;
+      await folder.save();
+
+      return folder;
     } catch (err) {
-      console.error("Error renaming project:", err);
+      console.error("Error moving folder:", err);
       throw err;
     }
   }
 
-  /**
-   * Deletes a project by its ID.
-   * @param {Number} id
-   * @returns {Promise<void>}
-   */
-  async delete_project(id) {
+  async move_file_to_folder(file_id, target_folder_id) {
     try {
-      await Project.destroy({ where: { id } });
-      console.log(`Project with ID ${id} deleted.`);
+      const file = await File.findByPk(file_id);
+
+      if (!file) {
+        throw new Error("File not found");
+      }
+
+      const existingFile = await File.findOne({
+        where: {
+          name: file.name,
+          folder_id: target_folder_id,
+        },
+      });
+
+      if (existingFile) {
+        file.name = await this.generate_unique_file_name(
+          target_folder_id,
+          file.name
+        );
+      }
+
+      file.folder_id = target_folder_id;
+      await file.save();
+
+      return file;
     } catch (err) {
-      console.error("Error deleting project:", err);
+      console.error("Error moving file:", err);
       throw err;
     }
   }
 
-  /**
-   * Generates a unique folder name within the same parent folder.
-   * @param {Number} parent_folder_id
-   * @param {String} folder_name
-   * @returns {Promise<String>}
-   */
   async generate_unique_folder_name(parent_folder_id, folder_name) {
     let unique_name = folder_name;
     let counter = 1;
@@ -217,87 +217,57 @@ class DbClient {
     return unique_name;
   }
 
-  /**
-   * Adds a new folder to a parent folder.
-   * @param {Number} parent_folder_id
-   * @param {String} [folder_name="New Folder"]
-   * @returns {Promise<Folder>}
-   */
-  async add_folder(parent_folder_id, folder_name = "New Folder") {
-    try {
-      const unique_name = await this.generate_unique_folder_name(
-        parent_folder_id,
-        folder_name
-      );
+  async generate_unique_file_name(folder_id, file_name) {
+    let unique_name = file_name;
+    let counter = 1;
+    let is_unique = false;
 
-      const newFolder = await Folder.create({
-        name: unique_name,
+    while (!is_unique) {
+      const existingFile = await File.findOne({
+        where: {
+          name: unique_name,
+          folder_id: folder_id,
+        },
+      });
+
+      if (!existingFile) {
+        is_unique = true;
+      } else {
+        unique_name = `${file_name} (${counter})`;
+        counter++;
+      }
+    }
+
+    return unique_name;
+  }
+
+  async add_folder(parent_folder_id, folder_name) {
+    try {
+      let existingFolder = await Folder.findOne({
+        where: {
+          name: folder_name,
+          parent_folder_id: parent_folder_id,
+        },
+      });
+
+      if (existingFolder) {
+        folder_name = await this.generate_unique_folder_name(
+          parent_folder_id,
+          folder_name
+        );
+      }
+      const new_folder = await Folder.create({
+        name: folder_name,
         parent_folder_id: parent_folder_id,
       });
 
-      console.log(`New folder created with ID: ${newFolder.id}`);
-      return newFolder;
+      return new_folder;
     } catch (err) {
-      console.error("Error creating folder:", err);
+      console.error("Error adding folder:", err);
       throw err;
     }
   }
 
-  /**
-   * Moves items (folders/files) to a different folder, ensuring unique names for folders.
-   * @param {Array<string>} item_ids
-   * @param {string} folder_id
-   * @returns {Promise<Object>}
-   */
-  async move_items_to_folder(item_ids, folder_id) {
-    try {
-      await sequelize.transaction(async (t) => {
-        for (const item_id of item_ids) {
-          let item = await Folder.findByPk(item_id, { transaction: t });
-          if (item) {
-            const unique_name = await this.generate_unique_folder_name(
-              folder_id,
-              item.name
-            );
-            item.name = unique_name;
-            item.parent_folder_id = folder_id;
-            await item.save({ transaction: t });
-          } else {
-            const file = await File.findByPk(item_id, { transaction: t });
-            if (file) {
-              const existingFile = await File.findOne({
-                where: {
-                  name: file.name,
-                  folder_id: folder_id,
-                },
-                transaction: t,
-              });
-
-              if (existingFile) {
-                file.name = await this.generate_unique_file_name(
-                  folder_id,
-                  file.name
-                );
-              }
-              file.folder_id = folder_id;
-              await file.save({ transaction: t });
-            }
-          }
-        }
-      });
-
-      return await this.get_folder(folder_id);
-    } catch (error) {
-      console.error("Error moving items:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Deletes a folder by its ID.
-   * @param {Number} folder_id
-   * @returns {Promise<void>}
-   */
   async delete_folder(folder_id) {
     try {
       await Folder.destroy({
@@ -310,12 +280,6 @@ class DbClient {
     }
   }
 
-  /**
-   * Renames an existing folder.
-   * @param {Number} id
-   * @param {String} new_name
-   * @returns {Promise<void>}
-   */
   async rename_folder(id, new_name) {
     try {
       const [updated] = await Folder.update(
@@ -330,6 +294,58 @@ class DbClient {
       console.log(`Folder with ID ${id} renamed to ${new_name}.`);
     } catch (err) {
       console.error("Error renaming folder:", err);
+      throw err;
+    }
+  }
+
+  async add_file(folder_id, name, type = "file") {
+    try {
+      let existingFile = await File.findOne({
+        where: {
+          name: name,
+          folder_id: folder_id,
+        },
+      });
+
+      if (existingFile) {
+        name = await this.generate_unique_file_name(folder_id, name);
+      }
+      const new_file = await File.create({
+        name,
+        type,
+        folder_id,
+      });
+
+      return new_file;
+    } catch (err) {
+      console.error("Error creating file:", err);
+      throw err;
+    }
+  }
+
+  async get_file(id) {
+    try {
+      return await File.findByPk(id);
+    } catch (err) {
+      console.error("Error fetching file:", err);
+      throw err;
+    }
+  }
+
+  async rename_file(id, new_name) {
+    try {
+      await File.update({ name: new_name }, { where: { id } });
+    } catch (err) {
+      console.error("Error renaming file:", err);
+      throw err;
+    }
+  }
+
+  async delete_file(id) {
+    try {
+      await File.destroy({ where: { id } });
+    } catch (err) {
+      console.error("Error deleting file:", err);
       throw err;
     }
   }

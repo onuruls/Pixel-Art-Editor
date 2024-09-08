@@ -1,5 +1,6 @@
 import { ContextMenu } from "./ContextMenu.js";
 import { AddFolderAction } from "./AddFolderAction.js";
+import { AddFileAction } from "./AddFileAction.js";
 
 /**
  * Context menu for the file area
@@ -15,6 +16,7 @@ export class FileAreaContextMenu extends ContextMenu {
 
     this.actions = {
       add_folder: new AddFolderAction(this.file_area),
+      add_file: new AddFileAction(this.file_area),
     };
   }
 
@@ -25,5 +27,6 @@ export class FileAreaContextMenu extends ContextMenu {
   configure() {
     this.clearOptions();
     this.addOption(() => this.actions.add_folder.execute(), "Add Folder");
+    this.addOption(() => this.actions.add_file.execute(), "Add File");
   }
 }

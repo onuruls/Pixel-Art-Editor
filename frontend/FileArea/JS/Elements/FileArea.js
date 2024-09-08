@@ -1,9 +1,11 @@
 import { FileSystemHandler } from "../Classes/FileSystemHandler.js";
-import { RenameInputHandler } from "../Classes/RenameInputHandler.js";
-import { CreateFolderHandler } from "../Classes/CreateFolderHandler.js";
+import { RenameItemHandler } from "../Classes/RenameItemHandler.js";
+import { CreateItemHandler } from "../Classes/CreateItemHandler.js";
 import { TopMenu } from "./TopMenu.js";
 import { FileAreaTools } from "./FileAreaTools.js";
 import { FileAreaView } from "./FileAreaView.js";
+import { FolderItemView } from "./FolderItemView.js";
+import { FileItemView } from "./FileItemView.js";
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../EditorTool/JS/Classes/File.js";
 
@@ -51,11 +53,11 @@ export class FileArea extends HTMLElement {
 
     await this.file_system_handler.read_directory_content();
 
-    this.rename_handler = new RenameInputHandler(
+    this.rename_handler = new RenameItemHandler(
       this.file_system_handler,
       this.file_view
     );
-    this.create_folder_handler = new CreateFolderHandler(
+    this.create_handler = new CreateItemHandler(
       this.file_system_handler,
       this.file_view
     );
@@ -98,7 +100,11 @@ export class FileArea extends HTMLElement {
    * Creates a new folder element using the CreateFolderHandler.
    */
   async create_new_folder() {
-    await this.create_folder_handler.create_new_folder();
+    await this.create_handler.create_new_item("folder");
+  }
+
+  async create_new_file() {
+    await this.create_handler.create_new_item("file");
   }
 
   /**
@@ -110,7 +116,7 @@ export class FileArea extends HTMLElement {
         this.file_view.selection_handler.selected_items
       )[0];
       const id = this.get_selected_item_id(selected_item);
-      const item = this.get_item_by_id(id);
+      const item = this.get_item_by_type(selected_item);
 
       if (item) {
         this.rename_handler.start_rename(item, selected_item);
@@ -124,22 +130,23 @@ export class FileArea extends HTMLElement {
    * General method to delete selected items (both files and folders).
    */
   async delete_selected_items() {
-    console.log("delete gets called");
     const selected_items = Array.from(
       this.file_view.selection_handler.selected_items
     );
 
     if (selected_items.length > 0) {
-      console.log("selected items are selected");
       await Promise.all(
         selected_items.map(async (selected_item) => {
           const id = this.get_selected_item_id(selected_item);
-          const item = this.get_item_by_id(id);
+          console.log(id);
+          const item = this.get_item_by_type(selected_item);
 
           if (item instanceof Folder) {
             await this.file_system_handler.delete_folder_by_id(id);
           } else if (item instanceof File) {
             await this.file_system_handler.delete_file_by_id(id);
+          } else {
+            console.log("yikes");
           }
           selected_item.remove();
         })
@@ -148,6 +155,28 @@ export class FileArea extends HTMLElement {
       this.file_view.rebuild_view();
     } else {
       console.warn("No items selected to delete.");
+    }
+  }
+
+  /**
+   * Moves selected items (both files and folders) to a target folder.
+   * @param {number} target_folder_id
+   */
+  async move_selected_items_to_folder(target_folder_id) {
+    const { selected_items } = this.file_view.selection_handler;
+
+    for (const item of selected_items) {
+      if (item instanceof FolderItemView) {
+        await this.file_system_handler.move_folder_by_id(
+          item.id,
+          target_folder_id
+        );
+      } else if (item instanceof FileItemView) {
+        await this.file_system_handler.move_file_by_id(
+          item.id,
+          target_folder_id
+        );
+      }
     }
   }
 
@@ -161,12 +190,22 @@ export class FileArea extends HTMLElement {
   }
 
   /**
-   * Gets an item from the file system handler by ID.
-   * @param {number} id
-   * @returns {Object}
+   * Gets the item (folder or file) based on its type (FolderItemView or FileItemView).
+   * @param {ItemView} selected_item
+   * @returns {Folder|File}
    */
-  get_item_by_id(id) {
-    return this.file_system_handler.entries.find((entry) => entry.id === id);
+  get_item_by_type(selected_item) {
+    const id = this.get_selected_item_id(selected_item);
+
+    console.log(selected_item.constructor.name);
+
+    if (selected_item instanceof FolderItemView) {
+      return this.file_system_handler.get_folder_by_id(id);
+    } else if (selected_item instanceof FileItemView) {
+      return this.file_system_handler.get_file_by_id(id);
+    }
+
+    return null;
   }
 }
 

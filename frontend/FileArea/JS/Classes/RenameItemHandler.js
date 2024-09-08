@@ -1,4 +1,7 @@
-export class RenameInputHandler {
+import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
+import { File } from "../../../EditorTool/JS/Classes/File.js";
+
+export class RenameItemHandler {
   constructor(file_system_handler, file_view) {
     this.file_system_handler = file_system_handler;
     this.file_view = file_view;
@@ -6,9 +9,9 @@ export class RenameInputHandler {
   }
 
   /**
-   * Starts the renaming process by replacing the text element with an input field.
-   * @param {Object} item
-   * @param {HTMLElement} selected_item
+   * Starts the renaming process for a file or folder.
+   * @param {Object} item - The item to rename.
+   * @param {HTMLElement} selected_item - The selected item view in the UI.
    */
   start_rename(item, selected_item) {
     const p_element = selected_item.querySelector("p");
@@ -47,18 +50,23 @@ export class RenameInputHandler {
   }
 
   /**
-   * Handles the renaming of an item.
-   * @param {HTMLInputElement} input_field
-   * @param {HTMLElement} p_element
-   * @param {Object} item
-   * @param {string} original_name
+   * Handles the renaming process for a file or folder.
+   * @param {HTMLInputElement} input_field - The input field for renaming.
+   * @param {HTMLElement} p_element - The original paragraph element.
+   * @param {Object} item - The item being renamed.
+   * @param {string} original_name - The original name of the item.
    */
   async handle_rename(input_field, p_element, item, original_name) {
     const new_name = input_field.value.trim();
 
     if (new_name && new_name !== original_name) {
       try {
-        await this.file_system_handler.rename_folder_by_id(item.id, new_name);
+        console.log(item.constructor.name);
+        if (item instanceof Folder) {
+          await this.file_system_handler.rename_folder_by_id(item.id, new_name);
+        } else {
+          await this.file_system_handler.rename_file_by_id(item.id, new_name);
+        }
         item.name = new_name;
         p_element.textContent = new_name;
         this.file_view.rebuild_view();
@@ -74,8 +82,8 @@ export class RenameInputHandler {
   }
 
   /**
-   * Creates an input field for renaming.
-   * @param {string} value
+   * Creates an input field for renaming an item.
+   * @param {string} value - The current name of the item.
    * @returns {HTMLInputElement}
    */
   create_rename_input(value) {

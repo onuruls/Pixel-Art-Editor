@@ -1,9 +1,9 @@
 export class ItemView extends HTMLElement {
   /**
    * @constructor
-   * @param {string} name - The name of the item.
-   * @param {FileAreaView} file_area_view - The parent FileAreaView instance.
-   * @param {number} id - The unique ID of the item.
+   * @param {string} name
+   * @param {FileAreaView} file_area_view
+   * @param {number} id
    */
   constructor(name, file_area_view, id) {
     super();

@@ -1,5 +1,5 @@
 import { FileAreaContextMenu } from "./FileAreaContextMenu.js";
-import { FolderContextMenu } from "./FolderContextmenu.js";
+import { ItemContextMenu } from "./ItemContextMenu.js";
 import { MultipleItemsContextMenu } from "./MultipleItemsContextMenu.js";
 
 export class ContextMenuFactory {
@@ -13,7 +13,7 @@ export class ContextMenuFactory {
       this.file_area,
       context_menu_element
     );
-    this.folder_context_menu = new FolderContextMenu(
+    this.item_context_menu = new ItemContextMenu(
       this.file_area,
       context_menu_element
     );
@@ -29,13 +29,14 @@ export class ContextMenuFactory {
    * @returns {ContextMenu}
    */
   getContextMenu(selected_items) {
+    console.log(selected_items);
     if (selected_items.size > 1) {
       this.multiple_items_context_menu.configure(Array.from(selected_items));
       return this.multiple_items_context_menu;
     } else if (selected_items.size === 1) {
       const target = Array.from(selected_items)[0];
-      this.folder_context_menu.configure(target);
-      return this.folder_context_menu;
+      this.item_context_menu.configure(target);
+      return this.item_context_menu;
     } else {
       this.file_area_context_menu.configure();
       return this.file_area_context_menu;

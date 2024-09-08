@@ -1,4 +1,5 @@
 import { FolderItemView } from "../Elements/FolderItemView.js";
+import { FileItemView } from "../Elements/FileItemView.js";
 
 export class FileDragHandler {
   constructor(file_area_view) {
@@ -15,8 +16,6 @@ export class FileDragHandler {
       this.file_area_view.selection_handler.select_item(target);
     }
 
-    const selected_ids = this.get_selected_item_ids();
-    this.set_drag_data(event, selected_ids);
     event.dataTransfer.dropEffect = "move";
   }
 
@@ -35,24 +34,21 @@ export class FileDragHandler {
 
     if (this.is_valid_drop_target(target)) {
       const folder_id = this.get_folder_id(target);
-      const selected_ids = this.get_selected_item_ids();
 
-      if (this.is_valid_move(selected_ids, folder_id)) {
+      if (this.is_valid_move(folder_id)) {
         if (target.name === "..") {
           const parent_folder_id =
             this.file_area_view.file_area.file_system_handler.get_parent_folder_id();
 
           if (parent_folder_id) {
-            await this.file_area_view.file_area.file_system_handler.move_items_to_folder(
-              selected_ids,
+            await this.file_area_view.file_area.move_selected_items_to_folder(
               parent_folder_id
             );
           } else {
             console.warn("No parent folder found.");
           }
         } else {
-          await this.file_area_view.file_area.file_system_handler.move_items_to_folder(
-            selected_ids,
+          await this.file_area_view.file_area.move_selected_items_to_folder(
             folder_id
           );
         }
@@ -75,24 +71,15 @@ export class FileDragHandler {
     return target.id;
   }
 
-  get_selected_item_ids() {
-    return Array.from(this.file_area_view.selection_handler.selected_items).map(
-      (item) => item.id
-    );
-  }
+  is_valid_move(target_folder_id) {
+    const { selected_items } = this.file_area_view.selection_handler;
 
-  set_drag_data(event, selected_ids) {
-    event.dataTransfer.setData(
-      "application/json",
-      JSON.stringify(selected_ids)
-    );
-  }
-
-  is_valid_move(selected_ids, folder_id) {
-    if (selected_ids.includes(folder_id)) {
-      console.warn("Cannot move folder into itself.");
-      return false;
+    for (const item of selected_items) {
+      if (item instanceof FolderItemView && item.id === target_folder_id) {
+        return false;
+      }
     }
+
     return true;
   }
 }

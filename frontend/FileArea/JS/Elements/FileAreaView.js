@@ -5,6 +5,7 @@ import { ContextMenuFactory } from "../Classes/ContextMenu/ContextMenuFactory.js
 import { FolderItemView } from "../Elements/FolderItemView.js";
 import { FileItemView } from "../Elements/FileItemView.js";
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
+import { File } from "../../../EditorTool/JS/Classes/File.js";
 
 export class FileAreaView extends HTMLElement {
   /**
@@ -18,7 +19,6 @@ export class FileAreaView extends HTMLElement {
     this.context_menu_element = this.create_context_menu_element();
     this.css = this.create_css_link();
 
-    // Initialize the context menu factory
     this.context_menu_factory = new ContextMenuFactory(
       this.file_area,
       this.context_menu_element
@@ -140,12 +140,19 @@ export class FileAreaView extends HTMLElement {
     return new_folder;
   }
 
+  create_new_file() {
+    const new_file = new FileItemView("New File", this, -1);
+    this.items.push(new_file);
+    this.appendChild(new_file);
+    return new_file;
+  }
+
   /**
    * Navigates to the folder by its ID.
-   * @param {number|string} folder_id
+   * @param {number} folder_id
    */
   navigate_to_folder(folder_id) {
-    console.log("Navigation fortgeführt mit:", folder_id);
+    this.selection_handler.clear_selection();
     this.file_area.file_system_handler.change_directory_handle(folder_id);
   }
 }
