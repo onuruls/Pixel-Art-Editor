@@ -10,6 +10,7 @@ import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { Stroke } from "../Tools/Stroke.js";
 import { Bucket } from "../Tools/Bucket.js";
+import { Rectangle } from "../Tools/Rectangle.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -455,6 +456,8 @@ export class MapEditor extends HTMLElement {
         return new Stroke(this);
       case "bucket":
         return new Bucket(this);
+      case "rectangle":
+        return new Rectangle(this);
     }
   }
 
@@ -547,13 +550,40 @@ export class MapEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_line_matrix(x1, y1, x2, y2, final = false) {
+    const line_points = this.calculate_line_points(x1, y1, x2, y2);
+    this.draw_shape_matrix(line_points, final);
+  }
+
+  /**
+   *  Draws a rectangle on the Canvas
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @param {Boolean} final
+   */
+  draw_rectangle_matrix(end_x, end_y, start_x, start_y, final = false) {
+    const rectangle_points = this.calculate_rectangle_points(
+      start_x,
+      start_y,
+      end_x,
+      end_y
+    );
+    this.draw_shape_matrix(rectangle_points, final);
+  }
+
+  /**
+   *  Draws a straight Line on the Canvas
+   * @param {Array<{x: Number, y: Number, prev_asset: Array<Number>}>} shape_points
+   * @param {Boolean} final
+   */
+  draw_shape_matrix(shape_points, final) {
     if (this.selected_asset) {
       this.load_image(this.selected_asset).then((img) => {
-        const line_points = this.calculate_line_points(x1, y1, x2, y2);
         if (final) {
           this.start_action_buffer();
           const content = this.layer_manager.get_active_layer();
-          line_points.forEach((point) => {
+          shape_points.forEach((point) => {
             const prev_asset = content[point.x][point.y];
             this.action_buffer.push({
               x: point.x,
@@ -567,7 +597,7 @@ export class MapEditor extends HTMLElement {
           this.dispatchEvent(
             new CustomEvent("draw_shape", {
               detail: {
-                points: line_points,
+                points: shape_points,
                 asset: img,
               },
             })
@@ -578,7 +608,7 @@ export class MapEditor extends HTMLElement {
           this.dispatchEvent(
             new CustomEvent("draw_temp_shape", {
               detail: {
-                points: line_points,
+                points: shape_points,
                 asset: img,
               },
             })
@@ -626,6 +656,66 @@ export class MapEditor extends HTMLElement {
       }
     }
     return line_points;
+  }
+
+  /**
+   * Calculates the matrix points included in the rectangle
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>}>}
+   */
+  calculate_rectangle_points(x1, y1, x2, y2) {
+    const points = [];
+    const y_direction = y1 - y2 > 0 ? -1 : 1;
+    const x_direction = x1 - x2 > 0 ? -1 : 1;
+    const layer_matrix = this.layer_manager.get_active_layer();
+    for (let i = x1; x_direction > 0 ? i <= x2 : i >= x2; i += x_direction) {
+      points.push({ x: i, y: y1, prev_asset: layer_matrix[i][y1] });
+      points.push({ x: i, y: y2, prev_asset: layer_matrix[i][x2] });
+    }
+    for (
+      let j = y1 + y_direction;
+      y_direction > 0 ? j < y2 : j > y2;
+      j += y_direction
+    ) {
+      points.push({ x: x1, y: j, prev_asset: layer_matrix[x1][j] });
+      points.push({ x: x2, y: j, prev_asset: layer_matrix[x2][j] });
+    }
+    return points;
+  }
+
+  /**
+   * DUPLICATE -- merge later with SpriteEditor
+   * Adjusts the aspect ratio of a shape to maintain a 1:1 ratio if the Shift key is held.
+   * @param {number} start_x
+   * @param {number} start_y
+   * @param {number} end_x
+   * @param {number} end_y
+   * @param {boolean} shiftKey
+   * @returns {{ end_x: number, end_y: number }}
+   */
+
+  calculate_aspect_ratio(start_x, start_y, end_x, end_y, shiftKey) {
+    if (shiftKey) {
+      const width = Math.abs(end_x - start_x);
+      const height = Math.abs(end_y - start_y);
+      const size = Math.min(width, height);
+
+      if (end_x < start_x) {
+        end_x = start_x - size;
+      } else {
+        end_x = start_x + size;
+      }
+
+      if (end_y < start_y) {
+        end_y = start_y - size;
+      } else {
+        end_y = start_y + size;
+      }
+    }
+    return { end_x, end_y };
   }
 }
 
