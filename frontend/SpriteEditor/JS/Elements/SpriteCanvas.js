@@ -55,6 +55,9 @@ export class SpriteCanvas extends SpriteEditorPart {
         })
       );
     });
+    this.canvas_wrapper.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+    });
   }
 }
 
