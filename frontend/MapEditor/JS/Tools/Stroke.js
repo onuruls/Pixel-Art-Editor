@@ -1,6 +1,10 @@
 import { Tool } from "./Tool.js";
 
 export class Stroke extends Tool {
+  /**
+   *
+   * @param {HTMLCanvasElement} canvas
+   */
   constructor(canvas) {
     super(canvas);
     this.cursor_icon_url = "./img/cursors/stroke.png";
