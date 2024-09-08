@@ -25,6 +25,18 @@ export class TempCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
+    this.map_editor.addEventListener("draw_temp_shape", (e) => {
+      this.draw_temp_shape(e);
+    });
+  }
+
+  /**
+   * Draws a temporary shape while mousebutton is down
+   * @param {Event} event
+   */
+  draw_temp_shape(event) {
+    this.revert_canvas();
+    this.draw_shape(event);
   }
 }
 

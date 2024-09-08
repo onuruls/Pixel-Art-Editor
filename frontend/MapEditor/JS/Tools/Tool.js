@@ -126,4 +126,13 @@ export class Tool {
     const y = Math.floor(mouseY);
     return { x, y };
   }
+
+  /**
+   * DUPLICATE -- merge later with SpriteEditor
+   * Sets the cursor-icon on the canvas element.
+   */
+  activate_cursor_icon() {
+    const canvas = this.map_editor.map_canvas.input_canvas.canvas;
+    canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
+  }
 }

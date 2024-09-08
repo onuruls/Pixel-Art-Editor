@@ -8,6 +8,7 @@ import { Eraser } from "../Tools/Eraser.js";
 import { ZoomIn } from "../Tools/ZoomIn.js";
 import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
+import { Stroke } from "../Tools/Stroke.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -448,6 +449,8 @@ export class MapEditor extends HTMLElement {
         return new ZoomIn(this);
       case "zoom-out":
         return new ZoomOut(this);
+      case "stroke":
+        return new Stroke(this);
     }
   }
 
@@ -464,6 +467,96 @@ export class MapEditor extends HTMLElement {
       x < this.layer_manager.get_active_layer().length &&
       y < this.layer_manager.get_active_layer()[0].length
     );
+  }
+
+  /**
+   *  Draws a straight Line on the Canvas
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @param {Boolean} final
+   */
+  draw_line_matrix(x1, y1, x2, y2, final = false) {
+    if (this.selected_asset) {
+      this.load_image(this.selected_asset).then((img) => {
+        const line_points = this.calculate_line_points(x1, y1, x2, y2);
+        if (final) {
+          this.start_action_buffer();
+          const content = this.layer_manager.get_active_layer();
+          line_points.forEach((point) => {
+            const prev_asset = content[point.x][point.y];
+            this.action_buffer.push({
+              x: point.x,
+              y: point.y,
+              layer: this.layer_manager.active_layer_index,
+              prev_asset: prev_asset,
+              asset: this.selected_asset,
+            });
+            content[point.x][point.y] = this.selected_asset;
+          });
+          this.dispatchEvent(
+            new CustomEvent("draw_shape", {
+              detail: {
+                points: line_points,
+                asset: img,
+              },
+            })
+          );
+          this.end_action_buffer();
+          this.map_canvas.temp_canvas.revert_canvas();
+        } else {
+          this.dispatchEvent(
+            new CustomEvent("draw_temp_shape", {
+              detail: {
+                points: line_points,
+                asset: img,
+              },
+            })
+          );
+        }
+      });
+    }
+  }
+
+  /**
+   * DUPLICATE -- merge with SpriteEditor
+   * Calculates the linepoints include in the line with Bresenham
+   * @param {Number} x1
+   * @param {Number} y1
+   * @param {Number} x2
+   * @param {Number} y2
+   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>}>}
+   */
+  calculate_line_points(x1, y1, x2, y2) {
+    const line_points = [];
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    const step_x = x1 < x2 ? 1 : -1;
+    const step_y = y1 < y2 ? 1 : -1;
+    let err = dx - dy;
+    let x = x1;
+    let y = y1;
+    while (true) {
+      line_points.push({
+        x: x,
+        y: y,
+        prev_asset: this.layer_manager.get_active_layer()[x][y],
+      });
+
+      if (x === x2 && y === y2) break;
+
+      const e2 = 2 * err;
+      if (e2 > -dy) {
+        err -= dy;
+        x += step_x;
+      }
+      if (e2 < dx) {
+        err += dx;
+        y += step_y;
+      }
+    }
+    return line_points;
   }
 }
 
