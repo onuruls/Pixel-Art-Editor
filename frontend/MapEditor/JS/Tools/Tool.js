@@ -135,4 +135,14 @@ export class Tool {
     const canvas = this.map_editor.map_canvas.input_canvas.canvas;
     canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
   }
+
+  /**
+   * DUPLICATE -- merge later with SpriteEditor
+   * @param {Number} x
+   * @param {Number} y
+   * @returns {Boolean}
+   */
+  has_mouse_position_changed(x, y) {
+    return !(x === this.last_position.x && y === this.last_position.y);
+  }
 }
