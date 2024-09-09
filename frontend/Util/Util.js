@@ -58,44 +58,4 @@ export class Util {
     }
     return button;
   }
-
-  /**
-   * Creates and displays tool info
-   * @param {HTMLElement} parent
-   * @param {Array<String>} info
-   */
-  static create_tool_info(parent, info) {
-    parent.addEventListener("mouseover", (e) => {
-      const tool_info = Util.create_element("div", "", ["tool-info"], "");
-      info.forEach((line) => {
-        const first_word = line.split(" ")[0];
-        const rest_of_line = line.substring(first_word.length);
-        const line_element = Util.create_element("p", "lines", [], "");
-        const first_word_element = Util.create_element(
-          "span",
-          "first_word",
-          [],
-          first_word
-        );
-        line_element.appendChild(first_word_element);
-        const rest_element = document.createTextNode(rest_of_line);
-        line_element.appendChild(rest_element);
-        tool_info.appendChild(line_element);
-      });
-
-      document.querySelector("#editor_container").appendChild(tool_info);
-
-      tool_info.style.left = `${e.pageX + 10}px`;
-      tool_info.style.top = `${e.pageY + 10}px`;
-
-      parent.addEventListener("mousemove", (e) => {
-        tool_info.style.left = `${e.pageX + 10}px`;
-        tool_info.style.top = `${e.pageY + 10}px`;
-      });
-
-      parent.addEventListener("mouseout", () => {
-        tool_info.remove();
-      });
-    });
-  }
 }
