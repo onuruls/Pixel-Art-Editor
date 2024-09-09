@@ -7,6 +7,27 @@ body {
   #editor_container {
     height: 78vh;
     width: 100%;
+
+    .tool-info {
+      font-family: "Pixelify Sans", sans-serif;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0 0.6rem;
+      line-height: 0.6rem;
+      font-size: 0.8rem;
+      word-spacing: 0.2rem;
+      z-index: 1000;
+
+      #lines:first-child {
+        font-size: 0.9rem;
+      }
+
+      #paren_word {
+        color: var(--active-accent);
+        font-weight: 500;
+      }
+    }
   }
 
   top-menu {
