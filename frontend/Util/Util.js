@@ -67,19 +67,27 @@ export class Util {
   static create_tool_info(parent, info) {
     parent.addEventListener("mouseover", (e) => {
       const tool_info = Util.create_element("div", "", ["tool-info"], "");
+
       info.forEach((line) => {
-        const first_word = line.split(" ")[0];
-        const rest_of_line = line.substring(first_word.length);
+        const match = line.match(/\(([^)]+)\)/);
+        const paren_word = match ? match[1] : "";
+        const rest_of_line = match ? line.replace(match[0], "") : line;
+
         const line_element = Util.create_element("p", "lines", [], "");
-        const first_word_element = Util.create_element(
-          "span",
-          "first_word",
-          [],
-          first_word
-        );
-        line_element.appendChild(first_word_element);
+
+        if (paren_word) {
+          const paren_word_element = Util.create_element(
+            "span",
+            "paren_word",
+            [],
+            paren_word
+          );
+          line_element.appendChild(paren_word_element);
+        }
+
         const rest_element = document.createTextNode(rest_of_line);
         line_element.appendChild(rest_element);
+
         tool_info.appendChild(line_element);
       });
 

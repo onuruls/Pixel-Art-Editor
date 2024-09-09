@@ -23,7 +23,7 @@ body {
         font-size: 0.9rem;
       }
 
-      #first_word {
+      #paren_word {
         color: var(--active-accent);
         font-weight: 500;
       }
