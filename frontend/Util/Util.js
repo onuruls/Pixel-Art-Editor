@@ -60,9 +60,9 @@ export class Util {
   }
 
   /**
-   * Creates and displays tool info
    * @param {HTMLElement} parent
    * @param {Array<String>} info
+   * @returns {HTMLButtonElement}
    */
   static create_tool_info(parent, info) {
     parent.addEventListener("mouseover", (e) => {
