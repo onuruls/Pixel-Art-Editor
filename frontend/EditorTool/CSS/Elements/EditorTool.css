@@ -5,7 +5,99 @@ body {
   padding: 0px;
 
   #editor_container {
-    height: 84vh;
+    height: 78vh;
     width: 100%;
+
+    .tool-info {
+      font-family: "Pixelify Sans", sans-serif;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0 0.6rem;
+      line-height: 0.6rem;
+      font-size: 0.8rem;
+      word-spacing: 0.2rem;
+      z-index: 1000;
+
+      #lines:first-child {
+        font-size: 0.9rem;
+      }
+
+      #paren_word {
+        color: var(--active-accent);
+        font-weight: 500;
+      }
+    }
+  }
+
+  top-menu {
+    background-color: var(--secondary-bg);
+    width: 100%;
+    height: 6vh;
+    display: flex;
+    align-items: center;
+    column-gap: 35%;
+    border-bottom: 1px solid var(--primary-border);
+
+    .project-container {
+      font-size: 1.2rem;
+      color: white;
+      text-align: center;
+      display: flex;
+      align-items: center;
+
+      .input-container {
+        display: flex;
+        align-items: center;
+        background: var(--container-bg);
+        padding: 0.2rem 0.4rem;
+
+        .rename-input {
+          font-size: 1.2rem;
+          font-family: "VT323", monospace;
+          color: white;
+          background: none;
+          border: none;
+
+          &:focus {
+            outline: none;
+            text-decoration: underline;
+          }
+        }
+
+        .submit-icon,
+        .cancel-icon {
+          cursor: pointer;
+          margin-left: 5px;
+          color: white;
+          font-size: 1.2rem;
+        }
+
+        .submit-icon:hover,
+        .cancel-icon:hover {
+          color: var(--active-accent);
+        }
+      }
+    }
+
+    button {
+      background-color: var(--secondary-bg);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      padding: 1rem 2rem;
+      height: 100%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      width: 12em;
+      justify-content: space-between;
+      align-items: center;
+
+      &:hover {
+        background-color: var(--primary-bg);
+        color: var(--active-accent);
+      }
+    }
   }
 }

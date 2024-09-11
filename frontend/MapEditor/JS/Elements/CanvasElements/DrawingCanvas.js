@@ -35,6 +35,12 @@ export class DrawingCanvas extends CanvasElement {
     this.map_editor.addEventListener("zoom_changed", () =>
       this.redraw_canvas()
     );
+    this.map_editor.addEventListener("draw_shape", (event) =>
+      this.draw_shape(event)
+    );
+    this.map_editor.addEventListener("fill_matrix_changed", (event) => {
+      this.fill_matrix_changed(event);
+    });
   }
 
   /**
@@ -43,7 +49,8 @@ export class DrawingCanvas extends CanvasElement {
    */
   draw_pen_canvas(event) {
     const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
+    const pixelSize =
+      this.map_editor.tile_size * scale * this.map_editor.pixel_size;
     const asset = event.detail.asset;
     const x = event.detail.x * pixelSize;
     const y = event.detail.y * pixelSize;
@@ -56,7 +63,7 @@ export class DrawingCanvas extends CanvasElement {
    */
   erase_canvas(event) {
     const scale = this.map_editor.scale;
-    const pixelSize = 10 * scale;
+    const pixelSize = this.map_editor.tile_size * scale;
     const x = event.detail.x * pixelSize;
     const y = event.detail.y * pixelSize;
     this.context.clearRect(x, y, pixelSize, pixelSize);
@@ -108,6 +115,28 @@ export class DrawingCanvas extends CanvasElement {
           this.paint_single_pixel(x, y, pixel);
         }
       });
+    });
+  }
+
+  /**
+   * FIlls a section of the canvas
+   * @param {Event} event
+   */
+  fill_matrix_changed(event) {
+    const tile_size = this.map_editor.tile_size;
+    const points = event.detail.points;
+    const asset = event.detail.asset;
+    points.forEach((point) => {
+      const x = point.x * tile_size;
+      const y = point.y * tile_size;
+      this.context.clearRect(x, y, tile_size, tile_size);
+      this.context.drawImage(
+        asset,
+        point.x * tile_size,
+        point.y * tile_size,
+        tile_size,
+        tile_size
+      );
     });
   }
 }

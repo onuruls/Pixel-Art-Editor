@@ -116,10 +116,33 @@ export class Tool {
         this.map_editor.layer_manager.active_layer_index
       ];
     const rect = activeLayerCanvas.getBoundingClientRect();
-    const mouseX = (event.clientX - rect.left) / (10 * this.map_editor.scale);
-    const mouseY = (event.clientY - rect.top) / (10 * this.map_editor.scale);
+    const mouseX =
+      (event.clientX - rect.left) /
+      (this.map_editor.tile_size * this.map_editor.scale);
+    const mouseY =
+      (event.clientY - rect.top) /
+      (this.map_editor.tile_size * this.map_editor.scale);
     const x = Math.floor(mouseX);
     const y = Math.floor(mouseY);
     return { x, y };
+  }
+
+  /**
+   * DUPLICATE -- merge later with SpriteEditor
+   * Sets the cursor-icon on the canvas element.
+   */
+  activate_cursor_icon() {
+    const canvas = this.map_editor.map_canvas.input_canvas.canvas;
+    canvas.style.cursor = `url('${this.cursor_icon_url}'), auto`;
+  }
+
+  /**
+   * DUPLICATE -- merge later with SpriteEditor
+   * @param {Number} x
+   * @param {Number} y
+   * @returns {Boolean}
+   */
+  has_mouse_position_changed(x, y) {
+    return !(x === this.last_position.x && y === this.last_position.y);
   }
 }

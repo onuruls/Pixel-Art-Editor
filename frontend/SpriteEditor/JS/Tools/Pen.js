@@ -45,6 +45,7 @@ export class Pen extends Tool {
    */
   draw(event) {
     const position = this.get_mouse_position(event);
-    this.sprite_editor.pen_change_matrix(position.x, position.y);
+    const mousekey = event.buttons;
+    this.sprite_editor.pen_change_matrix(position.x, position.y, mousekey);
   }
 }

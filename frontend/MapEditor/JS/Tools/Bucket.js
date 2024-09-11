@@ -1,9 +1,9 @@
 import { Tool } from "./Tool.js";
 
-export class SameColorBucket extends Tool {
+export class Bucket extends Tool {
   /**
    *
-   * @param {HTMLCanvasElement} canvas
+   * @param {MapEditorCanvas} canvas
    */
   constructor(canvas) {
     super(canvas);
@@ -39,7 +39,6 @@ export class SameColorBucket extends Tool {
    */
   draw(event) {
     const position = this.get_mouse_position(event);
-    const mousekey = event.buttons;
-    this.sprite_editor.fill_same_color_matrix(position.x, position.y, mousekey);
+    this.map_editor.fill_change_matrix(position.x, position.y);
   }
 }

@@ -58,4 +58,52 @@ export class Util {
     }
     return button;
   }
+
+  /**
+   * @param {HTMLElement} parent
+   * @param {Array<String>} info
+   * @returns {HTMLButtonElement}
+   */
+  static create_tool_info(parent, info) {
+    parent.addEventListener("mouseover", (e) => {
+      const tool_info = Util.create_element("div", "", ["tool-info"], "");
+
+      info.forEach((line) => {
+        const match = line.match(/\(([^)]+)\)/);
+        const paren_word = match ? match[1] : "";
+        const rest_of_line = match ? line.replace(match[0], "") : line;
+
+        const line_element = Util.create_element("p", "lines", [], "");
+
+        if (paren_word) {
+          const paren_word_element = Util.create_element(
+            "span",
+            "paren_word",
+            [],
+            paren_word
+          );
+          line_element.appendChild(paren_word_element);
+        }
+
+        const rest_element = document.createTextNode(rest_of_line);
+        line_element.appendChild(rest_element);
+
+        tool_info.appendChild(line_element);
+      });
+
+      document.querySelector("#editor_container").appendChild(tool_info);
+
+      tool_info.style.left = `${e.pageX + 10}px`;
+      tool_info.style.top = `${e.pageY + 10}px`;
+
+      parent.addEventListener("mousemove", (e) => {
+        tool_info.style.left = `${e.pageX + 10}px`;
+        tool_info.style.top = `${e.pageY + 10}px`;
+      });
+
+      parent.addEventListener("mouseout", () => {
+        tool_info.remove();
+      });
+    });
+  }
 }

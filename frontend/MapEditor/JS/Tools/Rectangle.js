@@ -1,19 +1,18 @@
 import { Tool } from "./Tool.js";
 
-export class Circle extends Tool {
+export class Rectangle extends Tool {
   /**
    *
    * @param {HTMLCanvasElement} canvas
    */
   constructor(canvas) {
     super(canvas);
-    this.cursor_icon_url = "./img/cursors/circle.png";
+    this.cursor_icon_url = "./img/cursors/rectangle.png";
     this.start_x = 0;
     this.start_y = 0;
     this.end_x = 0;
     this.end_y = 0;
   }
-
   /**
    *
    * @param {Event} event
@@ -53,7 +52,7 @@ export class Circle extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    const { end_x, end_y } = this.sprite_editor.calculate_aspect_ratio(
+    const { end_x, end_y } = this.map_editor.calculate_aspect_ratio(
       this.start_x,
       this.start_y,
       this.end_x,
@@ -61,7 +60,7 @@ export class Circle extends Tool {
       event.shiftKey
     );
 
-    this.sprite_editor.draw_circle_matrix(
+    this.map_editor.draw_rectangle_matrix(
       end_x,
       end_y,
       this.start_x,

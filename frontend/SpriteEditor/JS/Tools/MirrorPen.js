@@ -51,6 +51,7 @@ export class MirrorPen extends Tool {
     const x = Math.floor(mouseX / 10);
     const y = Math.floor(mouseY / 10);
     const half_of_pixel = (this.sprite_editor.pixel_size * 10) / 2;
+    const mousekey = event.buttons;
 
     const desired_mirror = this.is_shift_pressed ? "horizontal" : "vertical";
     const switch_state = this.current_mirror !== desired_mirror;
@@ -59,11 +60,25 @@ export class MirrorPen extends Tool {
     if (this.is_shift_pressed) {
       const middleY = rect.height / 2 - half_of_pixel;
       const { y1, y2 } = this.calculateHorizontalMirrorCoords(mouseY, middleY);
-      this.sprite_editor.mirror_pen_change_matrix(x, x, y1, y2, switch_state);
+      this.sprite_editor.mirror_pen_change_matrix(
+        x,
+        x,
+        y1,
+        y2,
+        switch_state,
+        mousekey
+      );
     } else {
       const middleX = rect.width / 2 - half_of_pixel;
       const { x1, x2 } = this.calculateVerticalMirrorCoords(mouseX, middleX);
-      this.sprite_editor.mirror_pen_change_matrix(x1, x2, y, y, switch_state);
+      this.sprite_editor.mirror_pen_change_matrix(
+        x1,
+        x2,
+        y,
+        y,
+        switch_state,
+        mousekey
+      );
     }
   }
 

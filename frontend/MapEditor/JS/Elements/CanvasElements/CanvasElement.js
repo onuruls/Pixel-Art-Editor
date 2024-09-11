@@ -1,3 +1,4 @@
+import { Util } from "../../../../Util/Util.js";
 import { MapEditorCanvas } from "../MapEditorCanvas.js";
 
 export class CanvasElement extends HTMLElement {
@@ -21,8 +22,8 @@ export class CanvasElement extends HTMLElement {
 
   update_canvas_size() {
     const scale = this.map_editor.scale;
-    this.canvas.width = 640 * scale;
-    this.canvas.height = 640 * scale;
+    this.canvas.width = this.map_editor.canvas_wrapper_width * scale;
+    this.canvas.height = this.map_editor.canvas_wrapper_height * scale;
   }
 
   /**
@@ -38,10 +39,10 @@ export class CanvasElement extends HTMLElement {
       const img = this.map_editor.image_cache[asset];
       this.context.drawImage(
         img,
-        x * 10 * scale,
-        y * 10 * scale,
-        10 * scale,
-        10 * scale
+        x * this.map_editor.tile_size * scale,
+        y * this.map_editor.tile_size * scale,
+        this.map_editor.tile_size * scale,
+        this.map_editor.tile_size * scale
       );
     } else {
       const img = new Image();
@@ -50,10 +51,10 @@ export class CanvasElement extends HTMLElement {
         this.map_editor.image_cache[asset] = img;
         this.context.drawImage(
           img,
-          x * 10 * scale,
-          y * 10 * scale,
-          10 * scale,
-          10 * scale
+          x * this.map_editor.tile_size * scale,
+          y * this.map_editor.tile_size * scale,
+          this.map_editor.tile_size * scale,
+          this.map_editor.tile_size * scale
         );
       };
     }
@@ -67,10 +68,10 @@ export class CanvasElement extends HTMLElement {
   erase_single_pixel(x, y) {
     const scale = this.map_editor.scale;
     this.context.clearRect(
-      x * 10 * scale,
-      y * 10 * scale,
-      10 * scale,
-      10 * scale
+      x * this.map_editor.tile_size * scale,
+      y * this.map_editor.tile_size * scale,
+      this.map_editor.tile_size * scale,
+      this.map_editor.tile_size * scale
     );
   }
 
@@ -79,5 +80,24 @@ export class CanvasElement extends HTMLElement {
    */
   revert_canvas() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+   * Draws a shape to the canvas (Stroke, Rectangle, Circle)
+   * @param {Event} event
+   */
+  draw_shape(event) {
+    const selected_assset = event.detail.asset;
+    const points = event.detail.points;
+    const tile_size = this.map_editor.tile_size;
+    points.forEach((point) => {
+      this.context.drawImage(
+        selected_assset,
+        point.x * tile_size,
+        point.y * tile_size,
+        tile_size,
+        tile_size
+      );
+    });
   }
 }
