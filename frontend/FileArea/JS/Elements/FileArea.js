@@ -94,14 +94,27 @@ export class FileArea extends HTMLElement {
   }
 
   /**
-   * Creates a new folder element using the CreateFolderHandler.
+   * Creates a new folder or file element using the CreateItemHandler.
+   * If no file type is specified, it defaults to creating a folder.
+   * @param {string} fileType - The type of file to create, or 'folder'.
    */
-  async create_new_folder() {
-    await this.create_handler.create_new_item("folder");
+  async create_new_item(fileType = "folder") {
+    await this.create_handler.create_new_item(fileType);
   }
 
-  async create_new_file() {
-    await this.create_handler.create_new_item("file");
+  /**
+   * Creates a new file.
+   * @param {string} fileType - The type of file to create (e.g., 'png', 'tmx').
+   */
+  async create_new_file(fileType) {
+    await this.create_new_item(fileType);
+  }
+
+  /**
+   * Creates a new folder by calling create_new_item with 'folder' as the type.
+   */
+  async create_new_folder() {
+    await this.create_new_item("folder");
   }
 
   /**
@@ -135,7 +148,6 @@ export class FileArea extends HTMLElement {
       await Promise.all(
         selected_items.map(async (selected_item) => {
           const id = this.get_selected_item_id(selected_item);
-          console.log(id);
           const item = this.get_item_by_type(selected_item);
 
           if (item instanceof Folder) {
@@ -193,8 +205,6 @@ export class FileArea extends HTMLElement {
    */
   get_item_by_type(selected_item) {
     const id = this.get_selected_item_id(selected_item);
-
-    console.log(selected_item.constructor.name);
 
     if (selected_item instanceof FolderItemView) {
       return this.file_system_handler.get_folder_by_id(id);

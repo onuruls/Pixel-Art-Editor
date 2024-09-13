@@ -7,7 +7,7 @@ const sequelize = new Sequelize({
 });
 
 /**
- * Define the Project, Folder, and File models.
+ * Define the Project, Folder, and File models
  */
 
 const Project = sequelize.define("Project", {
@@ -71,7 +71,12 @@ const File = sequelize.define(
       allowNull: false,
     },
     type: {
+      type: DataTypes.ENUM("png", "tmx"),
+      allowNull: false,
+    },
+    filepath: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     folder_id: {
       type: DataTypes.INTEGER,
@@ -94,9 +99,8 @@ const File = sequelize.define(
 );
 
 /**
- * Define the relationships between the models.
+ * Define the relationships between the models
  */
-
 Project.belongsTo(Folder, { as: "rootFolder", foreignKey: "root_folder_id" });
 
 Folder.hasMany(Folder, {

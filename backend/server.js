@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 
@@ -174,7 +176,7 @@ app.put("/files/move", async (req, res) => {
 });
 
 /**
- * Adds a new File to a folder
+ * Adds a new File to a folder with a dummy file
  */
 app.post("/folders/:folder_id/files", async (req, res) => {
   const { name, type } = req.body;
@@ -184,8 +186,27 @@ app.post("/folders/:folder_id/files", async (req, res) => {
     return res.status(400).send("File name is required");
   }
 
+  const validTypes = ["png", "tmx"];
+  if (!type || !validTypes.includes(type)) {
+    return res
+      .status(400)
+      .send("Invalid file type. Only 'png' and 'tmx' are allowed.");
+  }
+
   try {
-    const file = await db_client.add_file(folder_id, name, type);
+    // Create a dummy file based on the type
+    const uploadDir = path.resolve(__dirname, "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filePath = path.join(uploadDir, `${name}.${type}`);
+    const dummyContent =
+      type === "png" ? "Dummy PNG content" : "Dummy TMX content";
+    fs.writeFileSync(filePath, dummyContent);
+
+    // Store file in the database
+    const file = await db_client.add_file(folder_id, name, type, filePath);
     res.status(201).send(file);
   } catch (error) {
     console.error("Error creating file:", error);
@@ -207,6 +228,24 @@ app.get("/files/:id", async (req, res) => {
     res.status(200).send(file);
   } catch (error) {
     console.error("Error fetching file:", error);
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * Serves the file content by file ID
+ */
+app.get("/files/:id/content", async (req, res) => {
+  const file_id = req.params.id;
+
+  try {
+    const file = await db_client.get_file(file_id);
+    if (!file) {
+      return res.status(404).send("File not found");
+    }
+    res.sendFile(file.filepath);
+  } catch (error) {
+    console.error("Error serving file:", error);
     res.status(500).send(error);
   }
 });

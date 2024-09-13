@@ -110,7 +110,7 @@ export class FileAreaView extends HTMLElement {
    */
   create_view_item(item) {
     if (item instanceof File) {
-      return new FileItemView(item.name, this, item.id);
+      return new FileItemView(item.name, this, item.id, item.type);
     } else if (item instanceof Folder) {
       return new FolderItemView(item.name, this, item.id);
     }

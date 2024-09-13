@@ -15,7 +15,7 @@ export class CreateItemHandler {
     const newItem =
       itemType === "folder"
         ? this.file_view.create_new_folder()
-        : this.file_view.create_new_file();
+        : this.file_view.create_new_file(itemType);
 
     this.replace_name_with_input(newItem);
     newItem.edit_name_input.focus();
@@ -47,18 +47,19 @@ export class CreateItemHandler {
 
   /**
    * Handles the creation process for a file or folder.
+   * Does not store the file extension in the internal name.
    * @param {HTMLElement} newItem - The new item (file or folder) to be created.
    * @param {string} itemType - The type of the item ('file' or 'folder').
    */
   async handle_create_item(newItem, itemType) {
-    console.log(itemType);
-    const item_name = newItem.edit_name_input.value.trim();
+    let item_name = newItem.edit_name_input.value.trim(); // Nur der reine Name, ohne Endung
+
     if (item_name) {
       try {
         if (itemType === "folder") {
           await this.file_system_handler.create_folder(item_name);
         } else {
-          await this.file_system_handler.create_file(item_name, "file");
+          await this.file_system_handler.create_file(item_name, itemType);
         }
         newItem.remove();
         this.file_view.rebuild_view();
@@ -89,7 +90,7 @@ export class CreateItemHandler {
   create_rename_input(value) {
     const input_field = document.createElement("input");
     input_field.type = "text";
-    input_field.value = value;
+    input_field.value = value; // Zeige nur den Namen ohne die Endung an
     input_field.classList.add("rename-input");
 
     setTimeout(() => {

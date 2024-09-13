@@ -15,9 +15,9 @@ export class RenameItemHandler {
    */
   start_rename(item, selected_item) {
     const p_element = selected_item.querySelector("p");
-    const original_name = item.name;
-
+    const original_name = item.name; // Ohne die Dateiendung
     const input_field = this.create_rename_input(original_name);
+
     selected_item.replaceChild(input_field, p_element);
     input_field.focus();
 
@@ -57,15 +57,14 @@ export class RenameItemHandler {
    * @param {string} original_name - The original name of the item.
    */
   async handle_rename(input_field, p_element, item, original_name) {
-    const new_name = input_field.value.trim();
+    let new_name = input_field.value.trim(); // Nur der Name, ohne Endung
 
     if (new_name && new_name !== original_name) {
       try {
-        console.log(item.constructor.name);
         if (item instanceof Folder) {
           await this.file_system_handler.rename_folder_by_id(item.id, new_name);
         } else {
-          await this.file_system_handler.rename_file_by_id(item.id, new_name);
+          await this.file_system_handler.rename_file_by_id(item.id, new_name); // Endung bleibt gleich, nur der Name ändert sich
         }
         item.name = new_name;
         p_element.textContent = new_name;
@@ -89,7 +88,7 @@ export class RenameItemHandler {
   create_rename_input(value) {
     const input_field = document.createElement("input");
     input_field.type = "text";
-    input_field.value = value;
+    input_field.value = value; // Nur der Name, ohne Endung
     input_field.classList.add("rename-input");
 
     setTimeout(() => {

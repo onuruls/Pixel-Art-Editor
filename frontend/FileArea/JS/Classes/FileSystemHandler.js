@@ -35,7 +35,14 @@ export class FileSystemHandler {
       folder.children = this.normalize_entries(entry.children || []);
       return folder;
     } else if (entry.type === "file") {
-      return new File(entry.id, entry.name, entry.folder_id, entry.type);
+      // Anpassung: URL des Files im Frontend speichern
+      return new File(
+        entry.id,
+        entry.name,
+        entry.folder_id,
+        entry.type,
+        entry.url
+      );
     } else {
       console.error("Unknown entry type", entry);
     }
@@ -106,8 +113,6 @@ export class FileSystemHandler {
       const folder_data = await this.fetch_api(
         `http://localhost:3000/folders/${this.active_folder.id}`
       );
-
-      console.log(folder_data);
 
       this.active_folder.build_folder_structure(folder_data.children);
       this.entries = this.normalize_entries(this.active_folder.children);
@@ -300,7 +305,7 @@ export class FileSystemHandler {
    * @param {string} fileName - The name of the file.
    * @param {string} fileType - The type of the file (e.g., 'text', 'image').
    */
-  async create_file(fileName, fileType = "file") {
+  async create_file(fileName, fileType) {
     try {
       const new_file = await this.fetch_api(
         `http://localhost:3000/folders/${this.active_folder.id}/files`,
@@ -317,7 +322,13 @@ export class FileSystemHandler {
       );
 
       this.active_folder.children.push(
-        new File(new_file.id, new_file.name, new_file.folder_id, new_file.type)
+        new File(
+          new_file.id,
+          new_file.name,
+          new_file.folder_id,
+          new_file.type,
+          new_file.url
+        )
       );
       this.read_directory_content();
     } catch (error) {

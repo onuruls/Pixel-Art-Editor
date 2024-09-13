@@ -7,9 +7,11 @@ export class File extends Item {
    * @param {String} name
    * @param {Number} folder_id
    * @param {String} type
+   * @param {String} url
    */
-  constructor(id, name, folder_id, type) {
+  constructor(id, name, folder_id, type, url) {
     super(id, name, folder_id);
     this.type = type;
+    this.url = url;
   }
 }
