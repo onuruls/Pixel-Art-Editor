@@ -87,6 +87,7 @@ export class CanvasElement extends HTMLElement {
    * @param {Event} event
    */
   draw_shape(event) {
+    if (!this._active) return;
     const selected_assset = event.detail.asset;
     const points = event.detail.points;
     const tile_size = this.map_editor.tile_size;
@@ -99,5 +100,15 @@ export class CanvasElement extends HTMLElement {
         tile_size
       );
     });
+  }
+
+  /**
+   *
+   * @param {Array<Number>} color_array
+   */
+  color_array_to_string(color_array) {
+    return `rgba(${color_array[0]},${color_array[1]},${color_array[2]},${
+      color_array[3] / 255
+    })`;
   }
 }

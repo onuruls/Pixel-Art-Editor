@@ -11,6 +11,11 @@ export class DrawingCanvas extends CanvasElement {
   constructor(canvas, layerIndex) {
     super(canvas);
     this.layerIndex = layerIndex;
+    this._active = true;
+  }
+
+  set active(value) {
+    this._active = value;
   }
 
   /**
@@ -26,21 +31,92 @@ export class DrawingCanvas extends CanvasElement {
    */
   init() {
     this.context = this.querySelector("canvas").getContext("2d");
-    this.addEventListener("pen_matrix_changed", (event) =>
-      this.draw_pen_canvas(event)
+    this.enable_listeners();
+  }
+
+  /**
+   * Sets the active/inactive state of the DrawingCanvas, when layers are updated
+   * @param {Event} event
+   */
+  layers_updated(event) {
+    if (this.map_editor.layer_manager.active_layer_index === this.layerIndex) {
+      this.active = true;
+    } else {
+      this.active = false;
+    }
+  }
+
+  /**
+   * Enables all the EventlIsteners of the DrawingCanvas
+   */
+  enable_listeners() {
+    this.map_editor.addEventListener(
+      "layers-updated",
+      this.layers_updated.bind(this)
     );
-    this.addEventListener("eraser_matrix_changed", (event) =>
-      this.erase_canvas(event)
+    this.map_editor.addEventListener(
+      "pen_matrix_changed",
+      this.draw_pen_canvas.bind(this)
     );
-    this.map_editor.addEventListener("zoom_changed", () =>
-      this.redraw_canvas()
+    this.map_editor.addEventListener(
+      "eraser_matrix_changed",
+      this.erase_canvas.bind(this)
     );
-    this.map_editor.addEventListener("draw_shape", (event) =>
-      this.draw_shape(event)
+    this.map_editor.addEventListener(
+      "zoom_changed",
+      this.redraw_canvas.bind(this)
     );
-    this.map_editor.addEventListener("fill_matrix_changed", (event) => {
-      this.fill_matrix_changed(event);
-    });
+    this.map_editor.addEventListener("draw_shape", this.draw_shape.bind(this));
+    this.map_editor.addEventListener(
+      "fill_matrix_changed",
+      this.fill_matrix_changed.bind(this)
+    );
+    this.map_editor.addEventListener(
+      "paste_selected_area",
+      this.paste_selected_area.bind(this)
+    );
+    this.map_editor.addEventListener(
+      "cut_selected_area",
+      this.cut_selected_area.bind(this)
+    );
+  }
+
+  /**
+   * DIsables all the EventListeners of the DrawingCanvas
+   */
+  disable_listeners() {
+    this.map_editor.addEventListener(
+      "layers-updated",
+      this.layers_updated.bind(this)
+    );
+    this.removeEventListener(
+      "pen_matrix_changed",
+      this.draw_pen_canvas.bind(this)
+    );
+    this.removeEventListener(
+      "eraser_matrix_changed",
+      this.erase_canvas.bind(this)
+    );
+    this.map_editor.removeEventListener(
+      "zoom_changed",
+      this.redraw_canvas.bind(this)
+    );
+    this.map_editor.removeEventListener(
+      "draw_shape",
+      this.draw_shape.bind(this)
+    );
+    this.map_editor.removeEventListener(
+      "fill_matrix_changed",
+      this.fill_matrix_changed.bind(this)
+    );
+    this.map_editor.removeEventListener(
+      "paste_selected_area",
+      this.paste_selected_area.bind(this)
+    );
+    this.map_editor.removeEventListener(
+      "cut_selected_area",
+      this.cut_selected_area.bind(this)
+    );
   }
 
   /**
@@ -48,6 +124,7 @@ export class DrawingCanvas extends CanvasElement {
    * @param {Event} event
    */
   draw_pen_canvas(event) {
+    if (!this._active) return;
     const scale = this.map_editor.scale;
     const pixelSize =
       this.map_editor.tile_size * scale * this.map_editor.pixel_size;
@@ -62,6 +139,7 @@ export class DrawingCanvas extends CanvasElement {
    * @param {Event} event
    */
   erase_canvas(event) {
+    if (!this._active) return;
     const scale = this.map_editor.scale;
     const pixelSize = this.map_editor.tile_size * scale;
     const x = event.detail.x * pixelSize;
@@ -74,6 +152,7 @@ export class DrawingCanvas extends CanvasElement {
    * @param {Event} point
    */
   revert_redo(point) {
+    if (!this._active) return;
     this.erase_single_pixel(point.x, point.y);
     this.paint_single_pixel(point.x, point.y, point.asset);
   }
@@ -83,6 +162,7 @@ export class DrawingCanvas extends CanvasElement {
    * @param {Event} point
    */
   revert_undo(point) {
+    if (!this._active) return;
     this.erase_single_pixel(point.x, point.y);
     this.paint_single_pixel(point.x, point.y, point.prev_asset);
   }
@@ -123,6 +203,7 @@ export class DrawingCanvas extends CanvasElement {
    * @param {Event} event
    */
   fill_matrix_changed(event) {
+    if (!this._active) return;
     const tile_size = this.map_editor.tile_size;
     const points = event.detail.points;
     const asset = event.detail.asset;
@@ -137,6 +218,32 @@ export class DrawingCanvas extends CanvasElement {
         tile_size,
         tile_size
       );
+    });
+  }
+
+  /**
+   * Pastes the selected tiles into the map
+   * @param {Event} event
+   */
+  paste_selected_area(event) {
+    if (!this._active) return;
+    const points = event.detail.points;
+    points.forEach((point) => {
+      const asset = point.original_asset;
+      this.erase_single_pixel(point.x, point.y);
+      this.paint_single_pixel(point.x, point.y, asset);
+    });
+  }
+
+  /**
+   * Rerenders the selected points that have been cut out of the map
+   * @param {Event} event
+   */
+  cut_selected_area(event) {
+    if (!this._active) return;
+    const points = event.detail.points;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
     });
   }
 }
