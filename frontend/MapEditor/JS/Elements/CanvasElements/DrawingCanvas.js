@@ -120,6 +120,15 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
+   * Checks if the DrawingCanvas is active
+   * Draws the shape on the canvas
+   */
+
+  draw_shape(event) {
+    if (!this._active) return;
+    super.draw_shape(event);
+  }
+  /**
    * Handles drawing with the pen tool
    * @param {Event} event
    */
