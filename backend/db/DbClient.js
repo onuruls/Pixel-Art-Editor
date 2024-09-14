@@ -1,4 +1,5 @@
 const { Project, Folder, File } = require("./db");
+const { sequelize } = require("./db");
 const fs = require("fs");
 const path = require("path");
 
@@ -41,6 +42,70 @@ class DbClient {
       };
     } catch (err) {
       console.error("Error fetching project:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Creates a new project with a root folder and subfolders.
+   * @param {String} name
+   */
+  async new_project(name) {
+    try {
+      return await sequelize.transaction(async (t) => {
+        const rootFolder = await Folder.create(
+          { name: "Root" },
+          { transaction: t }
+        );
+        const project = await Project.create(
+          {
+            name,
+            root_folder_id: rootFolder.id,
+          },
+          { transaction: t }
+        );
+
+        await Folder.bulkCreate(
+          [
+            { name: "Maps", parent_folder_id: rootFolder.id },
+            { name: "Sprites", parent_folder_id: rootFolder.id },
+          ],
+          { transaction: t }
+        );
+
+        return project;
+      });
+    } catch (err) {
+      console.error("Error creating project:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Renames an existing project.
+   * @param {Number} id
+   * @param {String} new_name
+   */
+  async rename_project(id, new_name) {
+    try {
+      await Project.update({ name: new_name }, { where: { id } });
+      console.log(`Project with ID ${id} renamed to ${new_name}.`);
+    } catch (err) {
+      console.error("Error renaming project:", err);
+      throw err;
+    }
+  }
+
+  /**
+   * Deletes a project by its ID.
+   * @param {Number} id
+   */
+  async delete_project(id) {
+    try {
+      await Project.destroy({ where: { id } });
+      console.log(`Project with ID ${id} deleted.`);
+    } catch (err) {
+      console.error("Error deleting project:", err);
       throw err;
     }
   }
