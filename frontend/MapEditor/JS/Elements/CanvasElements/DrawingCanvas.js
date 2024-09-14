@@ -230,8 +230,11 @@ export class DrawingCanvas extends CanvasElement {
     const points = event.detail.points;
     points.forEach((point) => {
       const asset = point.original_asset;
-      this.erase_single_pixel(point.x, point.y);
-      this.paint_single_pixel(point.x, point.y, asset);
+      // Check if there is an asset to paste
+      if (asset && asset !== "") {
+        this.erase_single_pixel(point.x, point.y);
+        this.paint_single_pixel(point.x, point.y, asset);
+      }
     });
   }
 
