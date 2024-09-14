@@ -165,12 +165,13 @@ class DbClient {
     return folderData;
   }
 
-  async add_file(folder_id, name, type, filePath) {
+  async add_file(folder_id, name, type) {
     try {
       if (!["png", "tmx"].includes(type)) {
         throw new Error("Invalid file type. Only 'png' and 'tmx' are allowed.");
       }
 
+      // Überprüfen, ob eine Datei mit dem gleichen Namen existiert
       let existingFile = await File.findOne({
         where: {
           name: name,
@@ -178,9 +179,18 @@ class DbClient {
         },
       });
 
+      // Wenn die Datei bereits existiert, generiere einen eindeutigen Namen
       if (existingFile) {
         name = await this.generate_unique_name(folder_id, name, true);
       }
+
+      // Bestimme den Dateipfad mit dem eindeutigen Namen
+      const uploadDir = path.resolve(__dirname, "uploads");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, `${name}.${type}`);
 
       const new_file = await File.create({
         name,

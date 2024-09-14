@@ -48,6 +48,42 @@ app.get("/projects", async (req, res) => {
 });
 
 /**
+ * Renames a project
+ */
+app.put("/projects/:id/rename", async (req, res) => {
+  const project_id = req.params.id;
+  const { new_name } = req.body;
+
+  if (!new_name) {
+    return res.status(400).send("New project name is required");
+  }
+
+  console.log("Renaming project with ID:", project_id);
+
+  try {
+    await db_client.rename_project(project_id, new_name);
+    res.status(200).send("Project renamed");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
+ * Deletes a project
+ */
+app.delete("/projects/:id", async (req, res) => {
+  const project_id = req.params.id;
+  console.log("Deleting project with ID:", project_id);
+
+  try {
+    await db_client.delete_project(project_id);
+    res.status(200).send("Project deleted");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+/**
  * Gets a project and its root folder
  */
 app.get("/projects/:id", async (req, res) => {
@@ -194,19 +230,14 @@ app.post("/folders/:folder_id/files", async (req, res) => {
   }
 
   try {
-    // Create a dummy file based on the type
-    const uploadDir = path.resolve(__dirname, "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    // Zuerst wird der Dateieintrag in der Datenbank erstellt
+    const file = await db_client.add_file(folder_id, name, type);
 
-    const filePath = path.join(uploadDir, `${name}.${type}`);
+    // Danach wird die Datei im Dateisystem erstellt
     const dummyContent =
       type === "png" ? "Dummy PNG content" : "Dummy TMX content";
-    fs.writeFileSync(filePath, dummyContent);
+    fs.writeFileSync(file.filepath, dummyContent);
 
-    // Store file in the database
-    const file = await db_client.add_file(folder_id, name, type, filePath);
     res.status(201).send(file);
   } catch (error) {
     console.error("Error creating file:", error);
