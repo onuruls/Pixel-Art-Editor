@@ -44,6 +44,7 @@ export class MapEditor extends HTMLElement {
     this.selection_start_point = { x: 0, y: 0 };
     this.selection_move_start_point = { x: 0, y: 0 };
     this.selection_copied = false;
+    this.previous_changed = { x: null, y: null };
   }
 
   /**
@@ -342,25 +343,33 @@ export class MapEditor extends HTMLElement {
         .then((img) => {
           this.apply_to_pixel_block(x, y, (xi, yj) => {
             const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
-            if (prev_asset === this.selected_asset) return;
-            this.layer_manager.get_active_layer()[xi][yj] = this.selected_asset;
-            this.action_buffer.push({
-              x: xi,
-              y: yj,
-              layer: this.layer_manager.active_layer_index,
-              prev_asset: prev_asset,
-              asset: this.selected_asset,
-            });
-            this.dispatchEvent(
-              new CustomEvent("pen_matrix_changed", {
-                detail: {
-                  x: xi,
-                  y: yj,
-                  asset: img,
-                },
-              })
+            if (prev_asset === this.selected_asset) {
+              this.previous_changed = { x: x, y: y };
+              return;
+            }
+            // this.action_buffer.push({
+            //   x: xi,
+            //   y: yj,
+            //   layer: this.layer_manager.active_layer_index,
+            //   prev_asset: prev_asset,
+            //   asset: this.selected_asset,
+            // });
+            this.update_line(
+              [this.previous_changed, { x, y }],
+              this.selected_asset,
+              "pen_matrix_changed"
             );
+            // this.dispatchEvent(
+            //   new CustomEvent("pen_matrix_changed", {
+            //     detail: {
+            //       x: xi,
+            //       y: yj,
+            //       asset: img,
+            //     },
+            //   })
+            // );
           });
+          this.previous_changed = { x: x, y: y };
         })
         .catch((error) => {
           console.error("Error loading image:", error);
@@ -397,23 +406,13 @@ export class MapEditor extends HTMLElement {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
       if (prev_asset !== "") {
-        this.layer_manager.get_active_layer()[xi][yj] = "";
-        this.action_buffer.push({
-          x: xi,
-          y: yj,
-          layer: this.layer_manager.active_layer_index,
-          prev_asset: prev_asset,
-          asset: "",
-        });
-        this.dispatchEvent(
-          new CustomEvent("eraser_matrix_changed", {
-            detail: {
-              x: xi,
-              y: yj,
-            },
-          })
+        this.update_line(
+          [this.previous_changed, { x, y }],
+          "",
+          "eraser_matrix_changed"
         );
       }
+      this.previous_changed = { x: x, y: y };
     });
   }
 
@@ -1093,6 +1092,65 @@ export class MapEditor extends HTMLElement {
         },
       })
     );
+  }
+
+  /**
+   * DUPLICATE SpriteEditor
+   * Updates a single point on the canvas.
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Array<Number>} prev_color
+   * @param {Array<Number>} color
+   * @param {String} event_name
+   */
+  update_point(x, y, prev_asset, asset, event_name) {
+    const content = this.layer_manager.get_active_layer();
+    content[x][y] = asset;
+    this.action_buffer.push({
+      x: x,
+      y: y,
+      layer: this.layer_manager.active_layer_index,
+      prev_asset: prev_asset,
+      asset: asset,
+    });
+    let detail = {};
+    detail.x = x;
+    detail.y = y;
+    if (event_name === "pen_matrix_changed") {
+      detail.asset = this.image_cache[asset];
+    }
+    this.dispatchEvent(
+      new CustomEvent(event_name, {
+        detail: detail,
+      })
+    );
+  }
+
+  /**
+   * DUPLICATE SpriteEditor
+   * Updates a line of points on the canvas.
+   * @param {Array<{x: Number, y: Number}>} points
+   * @param {Array<Number>} color
+   * @param {String} event_name
+   */
+  update_line(points, asset, event_name) {
+    const [last_point, current_point] = points.slice(-2);
+    const content = this.layer_manager.get_active_layer();
+    const line_points = this.calculate_line_points(
+      last_point.x,
+      last_point.y,
+      current_point.x,
+      current_point.y
+    );
+
+    line_points.forEach(({ x, y }) => {
+      this.apply_to_pixel_block(x, y, (xi, yj) => {
+        const prev_asset = content[xi][yj];
+        if (prev_asset !== asset) {
+          this.update_point(xi, yj, prev_asset, asset, event_name);
+        }
+      });
+    });
   }
 }
 

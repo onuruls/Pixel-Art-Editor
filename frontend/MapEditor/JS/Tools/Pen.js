@@ -16,6 +16,8 @@ export class Pen extends Tool {
    */
   mouse_down(event) {
     this.is_drawing = true;
+    const { x, y } = this.get_mouse_position(event);
+    this.map_editor.previous_changed = { x: x, y: y };
     this.map_editor.start_action_buffer();
     this.draw(event);
   }
