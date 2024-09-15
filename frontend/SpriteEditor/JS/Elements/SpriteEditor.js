@@ -1277,7 +1277,6 @@ export class SpriteEditor extends HTMLElement {
     this.selection_copied = true;
     this.selected_points = this.selected_points.map((point) => {
       const original_color = this.canvas_matrix[point.x][point.y];
-
       return {
         ...point,
         original_color: original_color,

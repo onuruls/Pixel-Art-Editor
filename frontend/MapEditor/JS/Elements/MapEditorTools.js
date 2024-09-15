@@ -18,6 +18,9 @@ export class MapEditorTools extends MapEditorPart {
         <button id="bucket" class="tool-button" data-tool="bucket" title="Fill tool"><img src="img/icons/bucket.svg" alt="Fill"></button>
         <button id="rectangle" class="tool-button" data-tool="rectangle" title="Rectangle tool"><img src="img/icons/rectangle.svg" alt="Rectangle"></button>
         <button id="circle" class="tool-button" data-tool="circle" title="Circle tool"><img src="img/icons/circle.svg" alt="Circle"></button>
+        <button id="rectangle_selection" class="tool-button" data-tool="rectangle_selection" title="Rectangle Selection"><img src="img/icons/rectangle_selection.svg" alt="Rectangle Selection"></button>
+        <button id="irregular_selection" class="tool-button" data-tool="irregular_selection" title="Irregular Selection"><img src="img/icons/irregular_selection.svg" alt="Irregular Selection"></button>
+        <button id="shape_selection" class="tool-button" data-tool="shape_selection" title="Shape Selection"><img src="img/icons/fill_shape.svg" alt="Shape Selection"></button>
       </div>
       <div class="assetbox">
         ${this.renderAssetButtons()}

@@ -100,4 +100,14 @@ export class CanvasElement extends HTMLElement {
       );
     });
   }
+
+  /**
+   *
+   * @param {Array<Number>} color_array
+   */
+  color_array_to_string(color_array) {
+    return `rgba(${color_array[0]},${color_array[1]},${color_array[2]},${
+      color_array[3] / 255
+    })`;
+  }
 }

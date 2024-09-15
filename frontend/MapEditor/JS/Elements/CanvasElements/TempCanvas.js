@@ -10,6 +10,7 @@ export class TempCanvas extends CanvasElement {
    */
   constructor(canvas) {
     super(canvas);
+    this.selection_color = [196, 252, 250, 123];
   }
 
   /**
@@ -28,6 +29,12 @@ export class TempCanvas extends CanvasElement {
     this.map_editor.addEventListener("draw_temp_shape", (e) => {
       this.draw_temp_shape(e);
     });
+    this.map_editor.addEventListener("update_selected_area", (e) => {
+      this.update_selected_area(e);
+    });
+    this.map_editor.addEventListener("remove_selection", (e) => {
+      this.remove_selection(e);
+    });
   }
 
   /**
@@ -37,6 +44,56 @@ export class TempCanvas extends CanvasElement {
   draw_temp_shape(event) {
     this.revert_canvas();
     this.draw_shape(event);
+  }
+
+  /**
+   * Draws the selected area
+   * @param {Event} event
+   */
+  update_selected_area(event) {
+    this.revert_canvas();
+    const points = event.detail.points;
+    const tile_size = this.map_editor.tile_size;
+    const scale = this.map_editor.scale;
+    points.forEach((point) => {
+      this.erase_single_pixel(point.x, point.y);
+      const asset = point.original_asset;
+      const x = point.x * tile_size * scale;
+      const y = point.y * tile_size * scale;
+      const color_str = this.color_array_to_string(this.selection_color);
+      if (asset && asset !== "") {
+        this.paint_single_pixel(point.x, point.y, asset);
+      }
+      this.context.fillStyle = color_str;
+      this.context.fillRect(x, y, tile_size * scale, tile_size * scale);
+    });
+  }
+
+  /**
+   * Draws the selected Area, when selection is copied
+   * @param {Event} event
+   */
+  selected_area_copied(event) {
+    const points = event.detail.points;
+    const tile_size = this.map_editor.tile_size;
+    const scale = this.map_editor.scale;
+    this.revert_canvas();
+    points.forEach((point) => {
+      const x = point.x * tile_size * scale;
+      const y = point.y * tile_size * scale;
+      this.paint_single_pixel(x, y, point.original_asset);
+      const color_str = this.color_array_to_string(this.selection_color);
+      this.context.fillStyle = color_str;
+      this.context.fillRect(x, y, tile_size * scale, tile_size * scale);
+    });
+  }
+
+  /**
+   * Removes the selected area
+   * @param {Event} event
+   */
+  remove_selection(event) {
+    this.revert_canvas();
   }
 }
 
