@@ -234,11 +234,17 @@ class DbClient {
       const file = await File.findByPk(id);
       if (file) {
         const oldFilePath = file.filepath;
-        const newFilePath = path.join(path.dirname(oldFilePath), new_name);
+        w;
+        const ext = path.extname(oldFilePath);
+
+        const newFilePath = path.join(
+          path.dirname(oldFilePath),
+          path.basename(new_name, path.extname(new_name)) + ext
+        );
 
         await fs.promises.rename(oldFilePath, newFilePath);
 
-        file.name = new_name;
+        file.name = path.basename(newFilePath);
         file.filepath = newFilePath;
         await file.save();
       }
