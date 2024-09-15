@@ -10,21 +10,23 @@ const sequelize = new Sequelize({
  * Define the Project, Folder, and File models
  */
 
-const Project = sequelize.define("Project", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
+const Project = sequelize.define(
+  "Project",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.NOW,
-  },
-});
+  {
+    paranoid: true,
+  }
+);
 
 const Folder = sequelize.define(
   "Folder",
@@ -49,6 +51,7 @@ const Folder = sequelize.define(
     },
   },
   {
+    paranoid: true,
     indexes: [
       {
         unique: true,
@@ -89,10 +92,11 @@ const File = sequelize.define(
     },
   },
   {
+    paranoid: true,
     indexes: [
       {
         unique: true,
-        fields: ["name", "type", "folder_id"], // Unique index on name, type, and folder_id
+        fields: ["name", "type", "folder_id"],
       },
     ],
   }

@@ -19,7 +19,7 @@ class ProjectService {
     return {
       id: project.id,
       name: project.name,
-      created_at: project.created_at,
+      created_at: project.createdAt,
       root_folder_id: project.rootFolder?.id || null,
       root_folder: {
         id: project.rootFolder.id,
