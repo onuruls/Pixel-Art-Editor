@@ -5,8 +5,6 @@ import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 import { Pen } from "../Tools/Pen.js";
 import { Eraser } from "../Tools/Eraser.js";
-import { ZoomIn } from "../Tools/ZoomIn.js";
-import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { Stroke } from "../Tools/Stroke.js";
 import { Bucket } from "../Tools/Bucket.js";
@@ -145,9 +143,11 @@ export class MapEditor extends HTMLElement {
       }
     });
 
-    this.canvas_wrapper.addEventListener("scroll", () => {
-      this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
-        .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
+    this.canvas_wrapper.addEventListener("wheel", (event) => {
+      if (event.ctrlKey) {
+        event.preventDefault();
+        this.mouse_wheel_used_on_canvas(event);
+      }
     });
   }
 
@@ -257,17 +257,27 @@ export class MapEditor extends HTMLElement {
 
   /**
    * Adjusts the zoom level and location
-   * @param {Number} zoom_level
+   * @param {Boolean} zoom_up
    * @param {Number} mouseX
    * @param {Number} mouseY
    */
-  apply_zoom(zoom_level, mouseX, mouseY) {
+  apply_zoom(zoom_up, mouseX, mouseY) {
     const current_mouseX =
       (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const current_mouseY =
       (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
 
-    this.scale = Math.min(Math.max(this.scale + zoom_level, 1.0), 2.0);
+    let new_scale;
+    if (zoom_up) {
+      new_scale = this.scale - 0.1;
+    } else {
+      new_scale = this.scale + 0.1;
+    }
+    if (new_scale >= 1 && new_scale <= 3) {
+      this.scale = new_scale;
+    } else {
+      return;
+    }
 
     const new_mouseX = (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const new_mouseY = (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
@@ -452,10 +462,6 @@ export class MapEditor extends HTMLElement {
         return new Pen(this);
       case "eraser":
         return new Eraser(this);
-      case "zoom-in":
-        return new ZoomIn(this);
-      case "zoom-out":
-        return new ZoomOut(this);
       case "stroke":
         return new Stroke(this);
       case "bucket":
@@ -1092,6 +1098,44 @@ export class MapEditor extends HTMLElement {
         },
       })
     );
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_wheel_used_on_canvas(event) {
+    const { x, y } = this.get_mouse_position(event);
+    if (event.deltaY > 0) {
+      this.apply_zoom(
+        true,
+        x * this.tile_size * this.scale,
+        y * this.tile_size * this.scale
+      );
+    } else {
+      this.apply_zoom(
+        false,
+        x * this.tile_size * this.scale,
+        y * this.tile_size * this.scale
+      );
+    }
+  }
+
+  /**
+   * DUPLICATE Tool
+   * Calculates mouse position from event.
+   * @param {Event} event
+   * @returns {{x: Number, y: Number}}
+   */
+  get_mouse_position(event) {
+    const activeLayerCanvas =
+      this.map_canvas.layer_canvases[this.layer_manager.active_layer_index];
+    const rect = activeLayerCanvas.getBoundingClientRect();
+    const mouseX = (event.clientX - rect.left) / (this.tile_size * this.scale);
+    const mouseY = (event.clientY - rect.top) / (this.tile_size * this.scale);
+    const x = Math.floor(mouseX);
+    const y = Math.floor(mouseY);
+    return { x, y };
   }
 
   /**
