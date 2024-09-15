@@ -171,17 +171,18 @@ class DbClient {
         throw new Error("Invalid file type. Only 'png' and 'tmx' are allowed.");
       }
 
-      // Überprüfen, ob eine Datei mit dem gleichen Namen existiert
+      // Überprüfen, ob eine Datei mit dem gleichen Namen und Typ existiert
       let existingFile = await File.findOne({
         where: {
           name: name,
           folder_id: folder_id,
+          type: type, // Der Dateityp wird berücksichtigt
         },
       });
 
       // Wenn die Datei bereits existiert, generiere einen eindeutigen Namen
       if (existingFile) {
-        name = await this.generate_unique_name(folder_id, name, true);
+        name = await this.generate_unique_name(folder_id, name, true, type); // Den Dateityp in die Methode übergeben
       }
 
       // Bestimme den Dateipfad mit dem eindeutigen Namen
@@ -280,7 +281,7 @@ class DbClient {
     }
   }
 
-  async generate_unique_name(parent_id, name, is_file) {
+  async generate_unique_name(parent_id, name, is_file, type = null) {
     let unique_name = name;
     let counter = 1;
     let is_unique = false;
@@ -292,6 +293,7 @@ class DbClient {
           where: {
             name: unique_name,
             folder_id: parent_id,
+            type: type,
           },
         });
       } else {

@@ -92,7 +92,7 @@ const File = sequelize.define(
     indexes: [
       {
         unique: true,
-        fields: ["name", "folder_id"],
+        fields: ["name", "type", "folder_id"], // Unique index on name, type, and folder_id
       },
     ],
   }
