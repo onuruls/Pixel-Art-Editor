@@ -1,4 +1,5 @@
 import { Item } from "./Item.js";
+import { File } from "./File.js";
 
 export class Folder extends Item {
   /**
@@ -20,11 +21,17 @@ export class Folder extends Item {
   build_folder_structure(children) {
     this.children = children.map((child) => {
       if (child.children) {
-        const folder = new Folder(child.id, child.name, child.folder_id);
+        const folder = new Folder(child.id, child.name, child.parent_folder_id);
         folder.build_folder_structure(child.children);
         return folder;
       } else {
-        const item = new Item(child.id, child.name, child.folder_id);
+        const item = new File(
+          child.id,
+          child.name,
+          child.folder_id,
+          child.type
+        );
+        console.log("item", item);
         return item;
       }
     });

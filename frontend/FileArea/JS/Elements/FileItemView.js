@@ -9,13 +9,20 @@ export class FileItemView extends ItemView {
    * @param {string} name
    * @param {FileAreaView} file_area_view
    * @param {number} id
+   * @param {string} type
    */
-  constructor(name, file_area_view, id) {
+  constructor(name, file_area_view, id, type) {
     super(name, file_area_view, id);
+    this.type = type;
+
+    this.setAttribute("draggable", true);
+
+    this.edit_name_input = this.create_edit_name_input();
+    this.update_name_field();
   }
 
   /**
-   * Creates an icon for the file
+   * Creates an icon for the file based on its type.
    * @returns {HTMLElement}
    */
   create_icon() {
@@ -25,10 +32,34 @@ export class FileItemView extends ItemView {
   }
 
   /**
-   * Initializes the file item view with custom event listeners
+   * Adds the file extension to the name for display purposes.
    */
-  init() {
-    super.init();
+  update_name_field() {
+    this.name_field.textContent = `${this.name}.${this.type}`;
+  }
+
+  /**
+   * Creates an input field for editing the file name, excluding the extension.
+   * @returns {HTMLInputElement}
+   */
+  create_edit_name_input() {
+    const input = document.createElement("input");
+    input.setAttribute("type", "text");
+    input.classList.add("edit-name-input");
+    input.value = this.name;
+    return input;
+  }
+
+  /**
+   * Replaces the name field with an input field for renaming.
+   * The file extension is not editable.
+   */
+  replace_name_with_input() {
+    this.replaceChild(this.edit_name_input, this.name_field);
+    this.edit_name_input.addEventListener("blur", () => {
+      this.name = this.edit_name_input.value;
+      this.update_name_field();
+    });
   }
 }
 

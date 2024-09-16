@@ -3,7 +3,7 @@ import { ContextMenuAction } from "./ContextMenuAction.js";
 /**
  * Action for renaming a folder
  */
-export class RenameFolderAction extends ContextMenuAction {
+export class RenameItemAction extends ContextMenuAction {
   /**
    * @param {FileArea} file_area
    */
@@ -17,6 +17,6 @@ export class RenameFolderAction extends ContextMenuAction {
    * @returns {void}
    */
   execute() {
-    this.file_area.rename_selected_folder();
+    this.file_area.rename_selected_items();
   }
 }

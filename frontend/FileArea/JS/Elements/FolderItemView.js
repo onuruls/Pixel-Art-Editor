@@ -10,9 +10,14 @@ export class FolderItemView extends ItemView {
    * @param {FileAreaView} file_area_view
    * @param {number} id
    */
-  constructor(name, file_area_view, id) {
+  constructor(name, file_area_view, id = -1) {
     super(name, file_area_view, id);
+
     this.edit_name_input = this.create_edit_name_input();
+    this.id = id;
+    this.name = name;
+    this.file_area_view = file_area_view;
+    this.setAttribute("draggable", true);
   }
 
   /**
@@ -33,11 +38,20 @@ export class FolderItemView extends ItemView {
     this.icon.addEventListener("dblclick", this.open_folder.bind(this));
   }
 
-  /**
-   * Opens the folder when it is double-clicked
-   */
   open_folder() {
-    this.file_area_view.navigate_to_folder(this.name);
+    this.file_area_view.navigate_to_folder(Number(this.id));
+  }
+
+  /**
+   * Creates an input field for editing the folder name
+   * @returns {HTMLInputElement}
+   */
+  create_edit_name_input() {
+    const input = document.createElement("input");
+    input.setAttribute("type", "text");
+    input.classList.add("edit-name-input");
+    input.value = this.name;
+    return input;
   }
 
   /**
