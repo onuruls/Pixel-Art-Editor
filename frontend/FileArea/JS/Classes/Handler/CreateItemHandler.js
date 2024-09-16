@@ -32,7 +32,6 @@ export class CreateItemHandler {
     if (item_name) {
       try {
         await this.create_item_in_file_system(item_name, item_type);
-        this.file_view.rebuild_view();
       } catch (error) {
         console.error(`Failed to create ${item_type}:`, error);
       }

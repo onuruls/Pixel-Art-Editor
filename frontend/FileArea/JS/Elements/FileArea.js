@@ -160,11 +160,10 @@ export class FileArea extends HTMLElement {
           selected_item.remove();
         })
       );
-
-      this.file_view.rebuild_view();
     } else {
       console.warn("No items selected to delete.");
     }
+    this.file_system_handler.read_directory_content();
   }
 
   /**
@@ -187,6 +186,7 @@ export class FileArea extends HTMLElement {
         );
       }
     }
+    this.file_system_handler.read_directory_content();
   }
 
   /**

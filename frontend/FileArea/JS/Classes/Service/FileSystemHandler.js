@@ -5,8 +5,8 @@ export class FileSystemHandler {
   /**
    * Manages file system operations for the FileArea.
    *
-   * @param {FileAreaView} file_area_view - The view for the file area.
-   * @param {Project} project - The current project.
+   * @param {FileAreaView} file_area_view
+   * @param {Project} project
    */
   constructor(file_area_view, project) {
     this.file_area_view = file_area_view;
@@ -209,7 +209,6 @@ export class FileSystemHandler {
 
       const folder = this.get_folder_by_id(id);
       if (folder) folder.name = new_name;
-      this.read_directory_content();
     } catch (error) {
       console.error("Failed to rename folder:", error);
     }
@@ -227,7 +226,6 @@ export class FileSystemHandler {
       this.active_folder.children = this.active_folder.children.filter(
         (child) => child.id !== folder_id
       );
-      this.read_directory_content();
     } catch (error) {
       console.error("Error deleting folder:", error);
     }
@@ -248,7 +246,6 @@ export class FileSystemHandler {
           target_folder_id: target_folder_id,
         }),
       });
-      this.read_directory_content();
     } catch (error) {
       console.error("Error moving folder:", error);
     }
@@ -269,7 +266,6 @@ export class FileSystemHandler {
           target_folder_id: target_folder_id,
         }),
       });
-      this.read_directory_content();
     } catch (error) {
       console.error("Error moving file:", error);
     }
@@ -324,7 +320,6 @@ export class FileSystemHandler {
 
       const file = this.get_file_by_id(id);
       if (file) file.name = new_name;
-      this.file_area_view.rebuild_view();
     } catch (error) {
       console.error("Failed to rename file:", error);
     }
@@ -342,7 +337,6 @@ export class FileSystemHandler {
       this.active_folder.children = this.active_folder.children.filter(
         (child) => child.id !== file_id
       );
-      this.read_directory_content();
     } catch (error) {
       console.error("Error deleting file:", error);
     }

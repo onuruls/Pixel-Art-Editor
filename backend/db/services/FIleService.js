@@ -5,6 +5,9 @@ const path = require("path");
 const { Op } = require("sequelize");
 
 class FileService {
+  /**
+   * Service for managing file-related operations
+   */
   async add_file(folder_id, name, type) {
     if (!["png", "tmx"].includes(type)) {
       throw new Error("Invalid file type. Only 'png' and 'tmx' are allowed.");
@@ -30,6 +33,9 @@ class FileService {
     return new_file;
   }
 
+  /**
+   * Service to delete a file and its record
+   */
   async delete_file(id) {
     const file = await File.findByPk(id);
     if (file) {
@@ -38,6 +44,9 @@ class FileService {
     }
   }
 
+  /**
+   * Service to rename a file and update its filepath
+   */
   async rename_file(id, new_name) {
     const file = await File.findByPk(id);
     if (!file) {
@@ -75,6 +84,9 @@ class FileService {
     await file.save();
   }
 
+  /**
+   * Service to move a file to a new folder
+   */
   async move_file_to_folder(file_id, target_folder_id) {
     const file = await File.findByPk(file_id);
 

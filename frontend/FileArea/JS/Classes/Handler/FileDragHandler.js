@@ -61,7 +61,6 @@ export class FileDragHandler {
     }
 
     this.file_area_view.selection_handler.clear_selection();
-    this.file_area_view.rebuild_view();
   }
 
   /**

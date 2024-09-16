@@ -51,7 +51,7 @@ const Folder = sequelize.define(
     },
   },
   {
-    paranoid: true,
+    // paranoid: true,
     indexes: [
       {
         unique: true,
@@ -92,7 +92,7 @@ const File = sequelize.define(
     },
   },
   {
-    paranoid: true,
+    // paranoid: true,
     indexes: [
       {
         unique: true,

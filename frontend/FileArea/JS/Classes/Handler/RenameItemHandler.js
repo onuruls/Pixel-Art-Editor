@@ -2,9 +2,9 @@ import { Folder } from "../../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../../EditorTool/JS/Classes/File.js";
 
 export class RenameItemHandler {
-  constructor(file_system_handler, file_view) {
+  constructor(file_system_handler, file_area_view) {
     this.file_system_handler = file_system_handler;
-    this.file_view = file_view;
+    this.file_area_view = file_area_view;
     this.operation_in_progress = false;
   }
 
@@ -46,7 +46,7 @@ export class RenameItemHandler {
       try {
         await this.rename_item(item, new_name);
         item.name = new_name;
-        this.file_view.rebuild_view();
+        this.file_area_view.rebuild_view();
       } catch (error) {
         console.error("Failed to rename the item:", error);
         p_element.textContent = original_name;

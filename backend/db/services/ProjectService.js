@@ -2,10 +2,16 @@ const { Project, Folder } = require("../db");
 const { sequelize } = require("../db");
 
 class ProjectService {
+  /**
+   * Service for managing project-related operations
+   */
   async get_projects() {
     return await Project.findAll();
   }
 
+  /**
+   * Retrieves a project by ID along with its root folder
+   */
   async get_project_by_id(id) {
     const project = await Project.findOne({
       where: { id },
@@ -29,6 +35,9 @@ class ProjectService {
     };
   }
 
+  /**
+   * Creates a new project with a root folder
+   */
   async create_project(name) {
     return await sequelize.transaction(async (t) => {
       const root_folder = await Folder.create(
@@ -52,10 +61,16 @@ class ProjectService {
     });
   }
 
+  /**
+   * Renames a project by ID
+   */
   async rename_project(id, new_name) {
     await Project.update({ name: new_name }, { where: { id } });
   }
 
+  /**
+   * Deletes a project by ID
+   */
   async delete_project(id) {
     await Project.destroy({ where: { id } });
   }
