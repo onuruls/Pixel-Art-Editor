@@ -1,7 +1,7 @@
-import { FileDragHandler } from "../Classes/FileDragHandler.js";
-import { FileSelectionHandler } from "../Classes/FileSelectionHandler.js";
-import { FileContextMenuHandler } from "../Classes/FileContextMenuHandler.js";
-import { ContextMenuFactory } from "../Classes/ContextMenu/ContextMenuFactory.js";
+import { FileDragHandler } from "../Classes/Handler/FileDragHandler.js";
+import { FileSelectionHandler } from "../Classes/Handler/FileSelectionHandler.js";
+import { FileContextMenuHandler } from "../Classes/Handler/FileContextMenuHandler.js";
+import { ContextMenuFactory } from "../Classes/ContextMenu/Core/ContextMenuFactory.js";
 import { FolderItemView } from "../Elements/FolderItemView.js";
 import { FileItemView } from "../Elements/FileItemView.js";
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
@@ -9,8 +9,7 @@ import { File } from "../../../EditorTool/JS/Classes/File.js";
 
 export class FileAreaView extends HTMLElement {
   /**
-   * The view of the folders and files in the FileArea
-   * @param {FileArea} file_area
+   * Initializes the view of folders and files in the FileArea.
    */
   constructor(file_area) {
     super();
@@ -35,7 +34,6 @@ export class FileAreaView extends HTMLElement {
 
   /**
    * Creates the CSS link element for the view.
-   * @returns {HTMLLinkElement}
    */
   create_css_link() {
     const css = document.createElement("link");
@@ -47,7 +45,6 @@ export class FileAreaView extends HTMLElement {
 
   /**
    * Creates the context menu element for the view.
-   * @returns {HTMLElement}
    */
   create_context_menu_element() {
     const menu_element = document.createElement("div");
@@ -105,8 +102,6 @@ export class FileAreaView extends HTMLElement {
 
   /**
    * Creates a view item (file or folder).
-   * @param {File|Folder} item
-   * @returns {HTMLElement|null}
    */
   create_view_item(item) {
     if (item instanceof File) {
@@ -131,7 +126,6 @@ export class FileAreaView extends HTMLElement {
 
   /**
    * Creates a new folder element.
-   * @returns {FolderItemView}
    */
   create_new_folder() {
     const new_folder = new FolderItemView("New Folder", this, null);
@@ -149,7 +143,6 @@ export class FileAreaView extends HTMLElement {
 
   /**
    * Navigates to the folder by its ID.
-   * @param {number} folder_id
    */
   navigate_to_folder(folder_id) {
     this.selection_handler.clear_selection();

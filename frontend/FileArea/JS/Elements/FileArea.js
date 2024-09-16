@@ -1,6 +1,6 @@
-import { FileSystemHandler } from "../Classes/FileSystemHandler.js";
-import { RenameItemHandler } from "../Classes/RenameItemHandler.js";
-import { CreateItemHandler } from "../Classes/CreateItemHandler.js";
+import { FileSystemHandler } from "../Classes/Service/FileSystemHandler.js";
+import { RenameItemHandler } from "../Classes/Handler/RenameItemHandler.js";
+import { CreateItemHandler } from "../Classes/Handler/CreateItemHandler.js";
 import { FileAreaTools } from "./FileAreaTools.js";
 import { FileAreaView } from "./FileAreaView.js";
 import { FolderItemView } from "./FolderItemView.js";
@@ -96,7 +96,7 @@ export class FileArea extends HTMLElement {
   /**
    * Creates a new folder or file element using the CreateItemHandler.
    * If no file type is specified, it defaults to creating a folder.
-   * @param {string} fileType - The type of file to create, or 'folder'.
+   * @param {string} fileType
    */
   async create_new_item(fileType = "folder") {
     await this.create_handler.create_new_item(fileType);
@@ -155,7 +155,7 @@ export class FileArea extends HTMLElement {
           } else if (item instanceof File) {
             await this.file_system_handler.delete_file_by_id(id);
           } else {
-            console.log("yikes");
+            console.warn("Unknown item type:", item);
           }
           selected_item.remove();
         })

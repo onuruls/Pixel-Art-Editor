@@ -1,6 +1,6 @@
-import { ContextMenu } from "./ContextMenu.js";
-import { AddFolderAction } from "./AddFolderAction.js";
-import { AddFileAction } from "./AddFileAction.js";
+import { ContextMenu } from "../Shared/ContextMenu.js";
+import { AddFolderAction } from "../Actions/AddFolderAction.js";
+import { AddFileAction } from "../Actions/AddFileAction.js";
 
 /**
  * Context menu for the file area

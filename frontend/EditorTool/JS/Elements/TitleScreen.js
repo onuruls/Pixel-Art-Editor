@@ -67,7 +67,7 @@ export class TitleScreen extends HTMLElement {
     const new_project = new Project(
       projectData.id,
       projectData.name,
-      projectData.created_at,
+      projectData.createdAt,
       projectData.root_folder_id,
       projectData.root_folder
     );
@@ -89,7 +89,7 @@ export class TitleScreen extends HTMLElement {
       return new Project(
         project.id,
         project.name,
-        project.created_at,
+        project.createdAt,
         project.root_folder_id
       );
     });

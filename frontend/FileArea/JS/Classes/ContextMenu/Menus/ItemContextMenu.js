@@ -1,6 +1,6 @@
-import { ContextMenu } from "./ContextMenu.js";
-import { RenameItemAction } from "./RenameItemAction.js";
-import { DeleteItemAction } from "./DeleteItemAction.js";
+import { ContextMenu } from "../Shared/ContextMenu.js";
+import { RenameItemAction } from "../Actions/RenameItemAction.js";
+import { DeleteItemAction } from "../Actions/DeleteItemAction.js";
 
 /**
  * Context menu for a folder
