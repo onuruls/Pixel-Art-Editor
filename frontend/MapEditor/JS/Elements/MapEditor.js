@@ -25,9 +25,9 @@ export class MapEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.layer_manager = new LayerManager();
-    this.width = 24;
-    this.height = 24;
+    this.layer_manager = new LayerManager(this);
+    this.width = 100;
+    this.height = 100;
     this.map_canvas_width = 0;
     this.map_canvas_height = 0;
     this.canvas_wrapper_width = 0;
@@ -189,6 +189,7 @@ export class MapEditor extends HTMLElement {
     this.layer_manager.remove_layer(index);
     this.map_canvas.remove_layer_canvas(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -202,6 +203,7 @@ export class MapEditor extends HTMLElement {
       this.layer_manager.is_layer_visible(index)
     );
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -211,6 +213,7 @@ export class MapEditor extends HTMLElement {
   switch_layer(index) {
     this.layer_manager.switch_layer(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -221,6 +224,7 @@ export class MapEditor extends HTMLElement {
       this.apply_undo(point);
     });
     this.destroy_selection();
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -230,6 +234,7 @@ export class MapEditor extends HTMLElement {
     this.layer_manager.redo_last_action((point) => {
       this.apply_redo(point);
     });
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -330,6 +335,7 @@ export class MapEditor extends HTMLElement {
       current_stack.push(this.action_buffer);
     }
     this.action_buffer = [];
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
