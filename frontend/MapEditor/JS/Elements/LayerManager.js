@@ -1,7 +1,13 @@
 import { ActionStack } from "../../../MapEditor/JS/Classes/ActionStack.js";
+import { MapEditor } from "./MapEditor.js";
 
 export class LayerManager {
-  constructor() {
+  /**
+   *
+   * @param {MapEditor} map_editor
+   */
+  constructor(map_editor) {
+    this.map_editor = map_editor;
     this.layers = [];
     this.active_layer_index = 0;
     this.layer_stacks = new Map();
@@ -145,5 +151,42 @@ export class LayerManager {
         apply_redo(point);
       });
     }
+  }
+
+  /**
+   * Combines all the layers into one layer
+   * so that the lower layers get overwritten by the upper ones
+   * @returns {Array<Array<String>>}
+   */
+  combine_layers() {
+    let remaining_entries = [];
+    let index = 1;
+    const matrix = this.layers[this.layers.length - index].content.map(
+      (row) => [...row]
+    );
+
+    matrix.forEach((col, col_i) =>
+      col.forEach((row, row_i) => {
+        if (!row) {
+          remaining_entries.push({ x: col_i, y: row_i });
+        }
+      })
+    );
+
+    while (this.layers.length - index > 0) {
+      index++;
+      const rest = [];
+      const content = this.layers[this.layers.length - index].content;
+      remaining_entries.forEach((entry) => {
+        const _entry = content[entry.x][entry.y];
+        if (_entry) {
+          matrix[entry.x][entry.y] = _entry;
+        } else {
+          rest.push({ x: entry.x, y: entry.y });
+        }
+      });
+      remaining_entries = rest;
+    }
+    return matrix;
   }
 }
