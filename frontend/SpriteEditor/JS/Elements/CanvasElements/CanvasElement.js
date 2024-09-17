@@ -29,8 +29,9 @@ export class CanvasElement extends HTMLElement {
     const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
       color[3] / 255
     })`;
+    const tile_size = this.sprite_editor.tile_size;
     this.context.fillStyle = color_str;
-    this.context.fillRect(x * 10, y * 10, 10, 10);
+    this.context.fillRect(x * tile_size, y * tile_size, tile_size, tile_size);
   }
 
   /**
@@ -39,7 +40,8 @@ export class CanvasElement extends HTMLElement {
    * @param {Number} y
    */
   erase_single_pixel(x, y) {
-    this.context.clearRect(x * 10, y * 10, 10, 10);
+    const tile_size = this.sprite_editor.tile_size;
+    this.context.clearRect(x * tile_size, y * tile_size, tile_size, tile_size);
   }
 
   /**

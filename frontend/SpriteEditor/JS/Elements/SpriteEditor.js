@@ -100,6 +100,7 @@ export class SpriteEditor extends HTMLElement {
         this.canvas_wrapper_width,
         this.canvas_wrapper_height
       );
+      this.sprite_canvas.background_canvas.draw_background_grid();
     });
     size_obs.observe(this.sprite_canvas);
   }
