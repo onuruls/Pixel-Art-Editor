@@ -324,6 +324,14 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Sets the pixel size for drawing.
+   * @param {Number} size
+   */
+  set_pixel_size(size) {
+    this.pixel_size = size;
+  }
+
+  /**
    * Starts gouping pen points for the action stack
    */
   start_action_buffer() {
@@ -357,27 +365,11 @@ export class MapEditor extends HTMLElement {
               this.previous_changed = { x: x, y: y };
               return;
             }
-            // this.action_buffer.push({
-            //   x: xi,
-            //   y: yj,
-            //   layer: this.layer_manager.active_layer_index,
-            //   prev_asset: prev_asset,
-            //   asset: this.selected_asset,
-            // });
             this.update_line(
               [this.previous_changed, { x, y }],
               this.selected_asset,
               "pen_matrix_changed"
             );
-            // this.dispatchEvent(
-            //   new CustomEvent("pen_matrix_changed", {
-            //     detail: {
-            //       x: xi,
-            //       y: yj,
-            //       asset: img,
-            //     },
-            //   })
-            // );
           });
           this.previous_changed = { x: x, y: y };
         })
@@ -605,31 +597,34 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   *  Draws a straight Line on the Canvas
-   * @param {Array<{x: Number, y: Number, prev_asset: Array<Number>}>} shape_points
+   * Draws a shape to the matrix used for rectangles, circles, and lines
+   * @param {Array<{x: Number, y: Number}>} shape_points
    * @param {Boolean} final
    */
-  draw_shape_matrix(shape_points, final) {
+  draw_shape_matrix(shape_points, final = false) {
     if (this.selected_asset) {
       this.load_image(this.selected_asset).then((img) => {
+        const expanded_shape_points = this.expand_shape_points(shape_points);
         if (final) {
           this.start_action_buffer();
           const content = this.layer_manager.get_active_layer();
-          shape_points.forEach((point) => {
+          expanded_shape_points.forEach((point) => {
             const prev_asset = content[point.x][point.y];
-            this.action_buffer.push({
-              x: point.x,
-              y: point.y,
-              layer: this.layer_manager.active_layer_index,
-              prev_asset: prev_asset,
-              asset: this.selected_asset,
-            });
-            content[point.x][point.y] = this.selected_asset;
+            if (prev_asset !== this.selected_asset) {
+              this.action_buffer.push({
+                x: point.x,
+                y: point.y,
+                layer: this.layer_manager.active_layer_index,
+                prev_asset: prev_asset,
+                asset: this.selected_asset,
+              });
+              content[point.x][point.y] = this.selected_asset;
+            }
           });
           this.dispatchEvent(
             new CustomEvent("draw_shape", {
               detail: {
-                points: shape_points,
+                points: expanded_shape_points,
                 asset: img,
               },
             })
@@ -640,7 +635,7 @@ export class MapEditor extends HTMLElement {
           this.dispatchEvent(
             new CustomEvent("draw_temp_shape", {
               detail: {
-                points: shape_points,
+                points: expanded_shape_points,
                 asset: img,
               },
             })
@@ -648,6 +643,21 @@ export class MapEditor extends HTMLElement {
         }
       });
     }
+  }
+
+  /**
+   * Expands the given shape points according to the pixel size
+   * @param {Array<{x: Number, y: Number}>} shape_points
+   * @returns {Array<{x: Number, y: Number}>}
+   */
+  expand_shape_points(shape_points) {
+    const expanded_points = [];
+    shape_points.forEach((point) => {
+      this.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
+        expanded_points.push({ x: xi, y: yj });
+      });
+    });
+    return expanded_points;
   }
 
   /**

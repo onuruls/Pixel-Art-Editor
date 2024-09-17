@@ -1,4 +1,5 @@
 import { MapEditorPart } from "./MapEditorPart.js";
+import { Util } from "../../../Util/Util.js";
 
 export class MapEditorTools extends MapEditorPart {
   constructor(map_editor) {
@@ -6,29 +7,112 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Returns the Html-String
+   * Renders the complete HTML structure for the tools section.
    * @returns {String}
    */
   render() {
     return `
-      <div class="toolbox">
-        <button id="pen" class="tool-button active" data-tool="pen" title="Pen tool"><img src="img/icons/pen.svg" alt="Pen"></button>
-        <button id="eraser" class="tool-button" data-tool="eraser" title="Eraser tool"><img src="img/icons/eraser.svg" alt="Eraser"></button>
-        <button id="stroke" class="tool-button" data-tool="stroke" title="Stroke tool"><img src="img/icons/stroke.svg" alt="Stroke"></button>
-        <button id="bucket" class="tool-button" data-tool="bucket" title="Fill tool"><img src="img/icons/bucket.svg" alt="Fill"></button>
-        <button id="rectangle" class="tool-button" data-tool="rectangle" title="Rectangle tool"><img src="img/icons/rectangle.svg" alt="Rectangle"></button>
-        <button id="circle" class="tool-button" data-tool="circle" title="Circle tool"><img src="img/icons/circle.svg" alt="Circle"></button>
-        <button id="rectangle_selection" class="tool-button" data-tool="rectangle_selection" title="Rectangle Selection"><img src="img/icons/rectangle_selection.svg" alt="Rectangle Selection"></button>
-        <button id="irregular_selection" class="tool-button" data-tool="irregular_selection" title="Irregular Selection"><img src="img/icons/irregular_selection.svg" alt="Irregular Selection"></button>
-        <button id="shape_selection" class="tool-button" data-tool="shape_selection" title="Shape Selection"><img src="img/icons/fill_shape.svg" alt="Shape Selection"></button>
-      </div>
-      <div class="assetbox">
-        ${this.renderAssetButtons()}
-      </div>
+      ${this.render_pixel_size_options()}
+      ${this.render_tools()}
+      ${this.render_assets()}
     `;
   }
 
-  renderAssetButtons() {
+  /**
+   * Renders and creates the pixel size options.
+   * @returns {String}
+   */
+  render_pixel_size_options() {
+    return `
+      <div class="pixel-size-options" title="Pixel size">
+        ${this.create_pixel_size_button(1, "1px size")}
+        ${this.create_pixel_size_button(2, "2px size")}
+        ${this.create_pixel_size_button(4, "4px size")}
+      </div>`;
+  }
+
+  create_pixel_size_button(size, info) {
+    return `
+      <button class="pixel-size-option" id="size_${size}" data-size="${size}" data-info='["${info}"]'>
+        <div class="bg"></div>
+      </button>`;
+  }
+
+  /**
+   * Renders and creates the toolbox with all available tools.
+   * @returns {String}
+   */
+  render_tools() {
+    const tools = [
+      {
+        id: "pen",
+        icon: "pen",
+        info: JSON.stringify(["(P) Pen tool"]),
+        active: true,
+      },
+      {
+        id: "eraser",
+        icon: "eraser",
+        info: JSON.stringify(["(E) Eraser tool"]),
+      },
+      {
+        id: "stroke",
+        icon: "stroke",
+        info: JSON.stringify(["(L) Stroke tool"]),
+      },
+      { id: "bucket", icon: "bucket", info: JSON.stringify(["(B) Fill tool"]) },
+      {
+        id: "rectangle",
+        icon: "rectangle",
+        info: JSON.stringify(["(R) Rectangle tool"]),
+      },
+      {
+        id: "circle",
+        icon: "circle",
+        info: JSON.stringify(["(C) Circle tool"]),
+      },
+      {
+        id: "rectangle_selection",
+        icon: "rectangle_selection",
+        info: JSON.stringify(["(T) Rectangle Selection"]),
+      },
+      {
+        id: "irregular_selection",
+        icon: "irregular_selection",
+        info: JSON.stringify(["(I) Irregular Selection"]),
+      },
+      {
+        id: "shape_selection",
+        icon: "fill_shape",
+        info: JSON.stringify(["(Q) Shape Selection"]),
+      },
+    ];
+
+    return `
+      <div class="toolbox">
+        ${tools.map((tool) => this.create_tool_button(tool)).join("")}
+      </div>`;
+  }
+
+  /**
+   * Creates an HTML button for a tool.
+   * @param {Object} tool - Tool object containing id, icon, info, and optional active status.
+   * @returns {String}
+   */
+  create_tool_button(tool) {
+    const infoArray = tool.info;
+    const isActive = tool.active ? "active" : "";
+    return `
+      <button id="${tool.id}" class="tool-button ${isActive}" data-tool="${tool.id}" data-info='${infoArray}'>
+        <img src="img/icons/${tool.icon}.svg" alt="${tool.id}" />
+      </button>`;
+  }
+
+  /**
+   * Renders and creates the asset buttons.
+   * @returns {String}
+   */
+  render_assets() {
     const assets = [
       "dummy_dirt",
       "dummy_foliage",
@@ -38,31 +122,52 @@ export class MapEditorTools extends MapEditorPart {
       "dummy_water",
       "dummy_tree",
     ];
-
-    return assets
-      .map(
-        (asset) =>
-          `<button class="asset-button" data-asset="${asset}" title="${this.capitalize(
-            asset.replace("_", " ")
-          )} asset"><img src="img/assets/${asset}.png" alt="${this.capitalize(
-            asset.replace("_", " ")
-          )}"></button>`
-      )
-      .join("");
+    return `
+      <div class="assetbox">
+        ${assets.map((asset) => this.create_asset_button(asset)).join("")}
+      </div>`;
   }
 
+  /**
+   * Creates an HTML button for an asset.
+   * @param {String} asset - Name of the asset.
+   * @returns {String}
+   */
+  create_asset_button(asset) {
+    const title = this.capitalize(asset.replace("_", " "));
+    return `
+      <button class="asset-button" data-asset="${asset}" data-info='["${title} asset"]'>
+        <img src="img/assets/${asset}.png" alt="${title}">
+      </button>`;
+  }
+
+  /**
+   * Capitalizes the first letter of a string.
+   * @param {String} str
+   * @returns {String}
+   */
   capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  /**
+   * Initializes the event listeners for buttons.
+   */
   init() {
-    this.initToolButtons();
-    this.initAssetButtons();
+    this.setup_tool_buttons();
+    this.setup_pixel_size_buttons();
+    this.setup_asset_buttons();
   }
 
-  initToolButtons() {
+  /**
+   * Sets up event listeners for tool buttons.
+   */
+  setup_tool_buttons() {
     const tool_buttons = document.querySelectorAll(".tool-button");
     tool_buttons.forEach((button) => {
+      const tool_info = JSON.parse(button.getAttribute("data-info"));
+      Util.create_tool_info(button, tool_info);
+
       button.addEventListener("click", () => {
         tool_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
@@ -70,9 +175,32 @@ export class MapEditorTools extends MapEditorPart {
     });
   }
 
-  initAssetButtons() {
+  /**
+   * Sets up event listeners for pixel size buttons.
+   */
+  setup_pixel_size_buttons() {
+    const pixel_size_options = document.querySelectorAll(".pixel-size-option");
+    pixel_size_options.forEach((button) => {
+      const pixel_info = JSON.parse(button.getAttribute("data-info"));
+      Util.create_tool_info(button, pixel_info);
+
+      button.addEventListener("click", () => {
+        pixel_size_options.forEach((btn) => btn.classList.remove("active"));
+        button.classList.add("active");
+        this.map_editor.set_pixel_size(Number(button.dataset.size));
+      });
+    });
+  }
+
+  /**
+   * Sets up event listeners for asset buttons.
+   */
+  setup_asset_buttons() {
     const asset_buttons = document.querySelectorAll(".asset-button");
     asset_buttons.forEach((button) => {
+      const asset_info = JSON.parse(button.getAttribute("data-info"));
+      Util.create_tool_info(button, asset_info);
+
       button.addEventListener("click", () => {
         asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
