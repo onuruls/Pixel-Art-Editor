@@ -114,9 +114,9 @@ export class MapEditor extends HTMLElement {
   appendComponents() {
     this.map_tools = new MapEditorTools(this);
     this.map_canvas = new MapEditorCanvas(this);
+    this.canvas_wrapper = this.map_canvas.querySelector(".canvas-wrapper");
     this.map_selection_area = new MapEditorSelectionArea(this);
     this.append(this.map_tools, this.map_canvas, this.map_selection_area);
-    this.canvas_wrapper = this.map_canvas.querySelector(".canvas-wrapper");
   }
 
   /**
@@ -1211,6 +1211,18 @@ export class MapEditor extends HTMLElement {
         }
       });
     });
+  }
+
+  /**
+   * Scrolls the canvas container to the x,y position
+   * Called when preview is clicked
+   * @param {Number} x
+   * @param {Number} y
+   */
+  scroll_to_location(x, y) {
+    this.canvas_wrapper.scrollLeft = x;
+    this.canvas_wrapper.scrollTop = y;
+    this.canvas_wrapper.dispatchEvent(new Event("scroll"));
   }
 }
 
