@@ -21,6 +21,13 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.hover_canvas = new HoverCanvas(this);
     this.input_canvas = new InputCanvas(this);
     this.canvas_wrapper = null;
+    this.canvas_array = [
+      this.drawing_canvas,
+      this.onion_skin_canvas,
+      this.hover_canvas,
+      this.temp_canvas,
+      this.input_canvas,
+    ];
   }
 
   /**
@@ -41,22 +48,19 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.canvas_wrapper.append(this.temp_canvas);
     this.canvas_wrapper.append(this.hover_canvas);
     this.canvas_wrapper.append(this.input_canvas);
-    this.drawing_canvas.canvas.addEventListener("resize", (event) => {
-      this.drawing_canvas.canvas.height =
-        event.target.getBoundingClientRect().height;
-      this.drawing_canvas.canvas.width =
-        event.target.getBoundingClientRect().width;
-      this.dispatchEvent(
-        new CustomEvent("canvas_resized", {
-          detail: {
-            height: event.target.getBoundingClientRect().height,
-            width: event.target.getBoundingClientRect().width,
-          },
-        })
-      );
-    });
     this.canvas_wrapper.addEventListener("contextmenu", (event) => {
       event.preventDefault();
+    });
+  }
+
+  /**
+   * Updates the size of all canvas objects
+   */
+  set_canvas_sizes(width, height) {
+    [...this.canvas_array].forEach((canvas) => {
+      canvas.revert_canvas();
+      canvas.canvas.width = width;
+      canvas.canvas.height = height;
     });
   }
 }
