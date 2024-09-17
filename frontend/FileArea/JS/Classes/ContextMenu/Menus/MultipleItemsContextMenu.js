@@ -1,8 +1,8 @@
 /**
  * Context menu for multiple selected folders
  */
-import { ContextMenu } from "./ContextMenu.js";
-import { DeleteMultipleItemsAction } from "./DeleteMultipleItemsAction.js";
+import { ContextMenu } from "../Shared/ContextMenu.js";
+import { DeleteMultipleItemsAction } from "../Actions/DeleteMultipleItemsAction.js";
 
 export class MultipleItemsContextMenu extends ContextMenu {
   /**

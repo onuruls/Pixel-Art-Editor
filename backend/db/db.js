@@ -7,24 +7,26 @@ const sequelize = new Sequelize({
 });
 
 /**
- * Define the Project, Folder, and File models.
+ * Define the Project, Folder, and File models
  */
 
-const Project = sequelize.define("Project", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
+const Project = sequelize.define(
+  "Project",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.NOW,
-  },
-});
+  {
+    paranoid: true,
+  }
+);
 
 const Folder = sequelize.define(
   "Folder",
@@ -49,6 +51,7 @@ const Folder = sequelize.define(
     },
   },
   {
+    // paranoid: true,
     indexes: [
       {
         unique: true,
@@ -71,7 +74,12 @@ const File = sequelize.define(
       allowNull: false,
     },
     type: {
+      type: DataTypes.ENUM("png", "tmx"),
+      allowNull: false,
+    },
+    filepath: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     folder_id: {
       type: DataTypes.INTEGER,
@@ -84,19 +92,19 @@ const File = sequelize.define(
     },
   },
   {
+    // paranoid: true,
     indexes: [
       {
         unique: true,
-        fields: ["name", "folder_id"],
+        fields: ["name", "type", "folder_id"],
       },
     ],
   }
 );
 
 /**
- * Define the relationships between the models.
+ * Define the relationships between the models
  */
-
 Project.belongsTo(Folder, { as: "rootFolder", foreignKey: "root_folder_id" });
 
 Folder.hasMany(Folder, {

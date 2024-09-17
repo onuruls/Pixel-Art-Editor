@@ -5,8 +5,6 @@ import { MapEditorTools } from "./MapEditorTools.js";
 import { MapEditorSelectionArea } from "./MapEditorSelectionArea.js";
 import { Pen } from "../Tools/Pen.js";
 import { Eraser } from "../Tools/Eraser.js";
-import { ZoomIn } from "../Tools/ZoomIn.js";
-import { ZoomOut } from "../Tools/ZoomOut.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { Stroke } from "../Tools/Stroke.js";
 import { Bucket } from "../Tools/Bucket.js";
@@ -44,6 +42,7 @@ export class MapEditor extends HTMLElement {
     this.selection_start_point = { x: 0, y: 0 };
     this.selection_move_start_point = { x: 0, y: 0 };
     this.selection_copied = false;
+    this.previous_changed = { x: null, y: null };
   }
 
   /**
@@ -144,9 +143,11 @@ export class MapEditor extends HTMLElement {
       }
     });
 
-    this.canvas_wrapper.addEventListener("scroll", () => {
-      this.canvas_wrapper.style.backgroundPosition = `${-this.canvas_wrapper
-        .scrollLeft}px ${-this.canvas_wrapper.scrollTop}px`;
+    this.canvas_wrapper.addEventListener("wheel", (event) => {
+      if (event.ctrlKey) {
+        event.preventDefault();
+        this.mouse_wheel_used_on_canvas(event);
+      }
     });
   }
 
@@ -261,17 +262,27 @@ export class MapEditor extends HTMLElement {
 
   /**
    * Adjusts the zoom level and location
-   * @param {Number} zoom_level
+   * @param {Boolean} zoom_up
    * @param {Number} mouseX
    * @param {Number} mouseY
    */
-  apply_zoom(zoom_level, mouseX, mouseY) {
+  apply_zoom(zoom_up, mouseX, mouseY) {
     const current_mouseX =
       (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const current_mouseY =
       (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
 
-    this.scale = Math.min(Math.max(this.scale + zoom_level, 1.0), 2.0);
+    let new_scale;
+    if (zoom_up) {
+      new_scale = this.scale - 0.1;
+    } else {
+      new_scale = this.scale + 0.1;
+    }
+    if (new_scale >= 1 && new_scale <= 3) {
+      this.scale = new_scale;
+    } else {
+      return;
+    }
 
     const new_mouseX = (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
     const new_mouseY = (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
@@ -318,6 +329,14 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Sets the pixel size for drawing.
+   * @param {Number} size
+   */
+  set_pixel_size(size) {
+    this.pixel_size = size;
+  }
+
+  /**
    * Starts gouping pen points for the action stack
    */
   start_action_buffer() {
@@ -348,25 +367,17 @@ export class MapEditor extends HTMLElement {
         .then((img) => {
           this.apply_to_pixel_block(x, y, (xi, yj) => {
             const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
-            if (prev_asset === this.selected_asset) return;
-            this.layer_manager.get_active_layer()[xi][yj] = this.selected_asset;
-            this.action_buffer.push({
-              x: xi,
-              y: yj,
-              layer: this.layer_manager.active_layer_index,
-              prev_asset: prev_asset,
-              asset: this.selected_asset,
-            });
-            this.dispatchEvent(
-              new CustomEvent("pen_matrix_changed", {
-                detail: {
-                  x: xi,
-                  y: yj,
-                  asset: img,
-                },
-              })
+            if (prev_asset === this.selected_asset) {
+              this.previous_changed = { x: x, y: y };
+              return;
+            }
+            this.update_line(
+              [this.previous_changed, { x, y }],
+              this.selected_asset,
+              "pen_matrix_changed"
             );
           });
+          this.previous_changed = { x: x, y: y };
         })
         .catch((error) => {
           console.error("Error loading image:", error);
@@ -403,23 +414,13 @@ export class MapEditor extends HTMLElement {
     this.apply_to_pixel_block(x, y, (xi, yj) => {
       const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
       if (prev_asset !== "") {
-        this.layer_manager.get_active_layer()[xi][yj] = "";
-        this.action_buffer.push({
-          x: xi,
-          y: yj,
-          layer: this.layer_manager.active_layer_index,
-          prev_asset: prev_asset,
-          asset: "",
-        });
-        this.dispatchEvent(
-          new CustomEvent("eraser_matrix_changed", {
-            detail: {
-              x: xi,
-              y: yj,
-            },
-          })
+        this.update_line(
+          [this.previous_changed, { x, y }],
+          "",
+          "eraser_matrix_changed"
         );
       }
+      this.previous_changed = { x: x, y: y };
     });
   }
 
@@ -459,10 +460,6 @@ export class MapEditor extends HTMLElement {
         return new Pen(this);
       case "eraser":
         return new Eraser(this);
-      case "zoom-in":
-        return new ZoomIn(this);
-      case "zoom-out":
-        return new ZoomOut(this);
       case "stroke":
         return new Stroke(this);
       case "bucket":
@@ -606,31 +603,34 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   *  Draws a straight Line on the Canvas
-   * @param {Array<{x: Number, y: Number, prev_asset: Array<Number>}>} shape_points
+   * Draws a shape to the matrix used for rectangles, circles, and lines
+   * @param {Array<{x: Number, y: Number}>} shape_points
    * @param {Boolean} final
    */
-  draw_shape_matrix(shape_points, final) {
+  draw_shape_matrix(shape_points, final = false) {
     if (this.selected_asset) {
       this.load_image(this.selected_asset).then((img) => {
+        const expanded_shape_points = this.expand_shape_points(shape_points);
         if (final) {
           this.start_action_buffer();
           const content = this.layer_manager.get_active_layer();
-          shape_points.forEach((point) => {
+          expanded_shape_points.forEach((point) => {
             const prev_asset = content[point.x][point.y];
-            this.action_buffer.push({
-              x: point.x,
-              y: point.y,
-              layer: this.layer_manager.active_layer_index,
-              prev_asset: prev_asset,
-              asset: this.selected_asset,
-            });
-            content[point.x][point.y] = this.selected_asset;
+            if (prev_asset !== this.selected_asset) {
+              this.action_buffer.push({
+                x: point.x,
+                y: point.y,
+                layer: this.layer_manager.active_layer_index,
+                prev_asset: prev_asset,
+                asset: this.selected_asset,
+              });
+              content[point.x][point.y] = this.selected_asset;
+            }
           });
           this.dispatchEvent(
             new CustomEvent("draw_shape", {
               detail: {
-                points: shape_points,
+                points: expanded_shape_points,
                 asset: img,
               },
             })
@@ -641,7 +641,7 @@ export class MapEditor extends HTMLElement {
           this.dispatchEvent(
             new CustomEvent("draw_temp_shape", {
               detail: {
-                points: shape_points,
+                points: expanded_shape_points,
                 asset: img,
               },
             })
@@ -649,6 +649,21 @@ export class MapEditor extends HTMLElement {
         }
       });
     }
+  }
+
+  /**
+   * Expands the given shape points according to the pixel size
+   * @param {Array<{x: Number, y: Number}>} shape_points
+   * @returns {Array<{x: Number, y: Number}>}
+   */
+  expand_shape_points(shape_points) {
+    const expanded_points = [];
+    shape_points.forEach((point) => {
+      this.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
+        expanded_points.push({ x: xi, y: yj });
+      });
+    });
+    return expanded_points;
   }
 
   /**
@@ -1099,6 +1114,103 @@ export class MapEditor extends HTMLElement {
         },
       })
     );
+  }
+
+  /**
+   *
+   * @param {Event} event
+   */
+  mouse_wheel_used_on_canvas(event) {
+    const { x, y } = this.get_mouse_position(event);
+    if (event.deltaY > 0) {
+      this.apply_zoom(
+        true,
+        x * this.tile_size * this.scale,
+        y * this.tile_size * this.scale
+      );
+    } else {
+      this.apply_zoom(
+        false,
+        x * this.tile_size * this.scale,
+        y * this.tile_size * this.scale
+      );
+    }
+  }
+
+  /**
+   * DUPLICATE Tool
+   * Calculates mouse position from event.
+   * @param {Event} event
+   * @returns {{x: Number, y: Number}}
+   */
+  get_mouse_position(event) {
+    const activeLayerCanvas =
+      this.map_canvas.layer_canvases[this.layer_manager.active_layer_index];
+    const rect = activeLayerCanvas.getBoundingClientRect();
+    const mouseX = (event.clientX - rect.left) / (this.tile_size * this.scale);
+    const mouseY = (event.clientY - rect.top) / (this.tile_size * this.scale);
+    const x = Math.floor(mouseX);
+    const y = Math.floor(mouseY);
+    return { x, y };
+  }
+
+  /**
+   * DUPLICATE SpriteEditor
+   * Updates a single point on the canvas.
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Array<Number>} prev_color
+   * @param {Array<Number>} color
+   * @param {String} event_name
+   */
+  update_point(x, y, prev_asset, asset, event_name) {
+    const content = this.layer_manager.get_active_layer();
+    content[x][y] = asset;
+    this.action_buffer.push({
+      x: x,
+      y: y,
+      layer: this.layer_manager.active_layer_index,
+      prev_asset: prev_asset,
+      asset: asset,
+    });
+    let detail = {};
+    detail.x = x;
+    detail.y = y;
+    if (event_name === "pen_matrix_changed") {
+      detail.asset = this.image_cache[asset];
+    }
+    this.dispatchEvent(
+      new CustomEvent(event_name, {
+        detail: detail,
+      })
+    );
+  }
+
+  /**
+   * DUPLICATE SpriteEditor
+   * Updates a line of points on the canvas.
+   * @param {Array<{x: Number, y: Number}>} points
+   * @param {Array<Number>} color
+   * @param {String} event_name
+   */
+  update_line(points, asset, event_name) {
+    const [last_point, current_point] = points.slice(-2);
+    const content = this.layer_manager.get_active_layer();
+    const line_points = this.calculate_line_points(
+      last_point.x,
+      last_point.y,
+      current_point.x,
+      current_point.y
+    );
+
+    line_points.forEach(({ x, y }) => {
+      this.apply_to_pixel_block(x, y, (xi, yj) => {
+        const prev_asset = content[xi][yj];
+        if (prev_asset !== asset) {
+          this.update_point(xi, yj, prev_asset, asset, event_name);
+        }
+      });
+    });
   }
 }
 

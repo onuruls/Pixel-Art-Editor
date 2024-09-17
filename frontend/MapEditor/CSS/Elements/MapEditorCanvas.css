@@ -1,9 +1,8 @@
 map-editor-canvas {
-  flex: 5;
+  flex: 10;
   display: flex;
   align-items: center;
   background-color: var(--primary-bg);
-  border-left: 1px solid var(--primary-border);
   border-right: 1px solid var(--primary-border);
 
   > .canvas-wrapper {

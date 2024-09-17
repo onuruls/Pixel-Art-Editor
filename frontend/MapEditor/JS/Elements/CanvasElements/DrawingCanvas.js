@@ -134,13 +134,11 @@ export class DrawingCanvas extends CanvasElement {
    */
   draw_pen_canvas(event) {
     if (!this._active) return;
-    const scale = this.map_editor.scale;
-    const pixelSize =
-      this.map_editor.tile_size * scale * this.map_editor.pixel_size;
+    const pixel_size = this.map_editor.tile_size * this.map_editor.scale;
     const asset = event.detail.asset;
-    const x = event.detail.x * pixelSize;
-    const y = event.detail.y * pixelSize;
-    this.context.drawImage(asset, x, y, pixelSize, pixelSize);
+    const x = event.detail.x * pixel_size;
+    const y = event.detail.y * pixel_size;
+    this.context.drawImage(asset, x, y, pixel_size, pixel_size);
   }
 
   /**
@@ -149,11 +147,10 @@ export class DrawingCanvas extends CanvasElement {
    */
   erase_canvas(event) {
     if (!this._active) return;
-    const scale = this.map_editor.scale;
-    const pixelSize = this.map_editor.tile_size * scale;
-    const x = event.detail.x * pixelSize;
-    const y = event.detail.y * pixelSize;
-    this.context.clearRect(x, y, pixelSize, pixelSize);
+    const pixel_size = this.map_editor.tile_size * this.map_editor.scale;
+    const x = event.detail.x * pixel_size;
+    const y = event.detail.y * pixel_size;
+    this.context.clearRect(x, y, pixel_size, pixel_size);
   }
 
   /**
@@ -239,7 +236,6 @@ export class DrawingCanvas extends CanvasElement {
     const points = event.detail.points;
     points.forEach((point) => {
       const asset = point.original_asset;
-      // Check if there is an asset to paste
       if (asset && asset !== "") {
         this.erase_single_pixel(point.x, point.y);
         this.paint_single_pixel(point.x, point.y, asset);
