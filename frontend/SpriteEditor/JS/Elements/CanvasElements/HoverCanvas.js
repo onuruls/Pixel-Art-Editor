@@ -23,8 +23,6 @@ export class HoverCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.sprite_editor.addEventListener("hover_matrix_changed", (event) => {
       this.draw_hover(event);
     });

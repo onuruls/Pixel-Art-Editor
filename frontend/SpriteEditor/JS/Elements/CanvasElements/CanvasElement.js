@@ -16,8 +16,6 @@ export class CanvasElement extends HTMLElement {
     this.innerHTML = this.render();
     this.canvas = this.querySelector("canvas");
     this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.init();
   }
 

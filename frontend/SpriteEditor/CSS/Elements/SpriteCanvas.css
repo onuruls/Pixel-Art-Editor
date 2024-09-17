@@ -19,8 +19,6 @@ sprite-canvas {
     background-size: 10px 10px;
     background-position: 0 0;
     border: 1cap solid var(--canvas-border);
-    width: 640px;
-    height: 640px;
     overflow: auto;
     scrollbar-color: var(--canvas-grid-line) var(--primary-bg);
     scrollbar-width: thin;

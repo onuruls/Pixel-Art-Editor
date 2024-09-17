@@ -131,7 +131,7 @@ export class SpriteEditor extends HTMLElement {
     this.canvas_wrapper = this.sprite_canvas.querySelector(".canvas-wrapper");
   }
 
-  create_import_input() {
+  create_file_input() {
     this.import_input = document.createElement("input");
     this.import_input.setAttribute("type", "file");
     this.import_input.setAttribute("accept", "image/png");
@@ -552,7 +552,7 @@ export class SpriteEditor extends HTMLElement {
         detail: {
           x: x,
           y: y,
-          size: this.pixel_size * 10,
+          size: this.pixel_size * this.tile_size,
         },
       })
     );
@@ -591,7 +591,7 @@ export class SpriteEditor extends HTMLElement {
         detail: {
           color: color,
           points: fill_pixels,
-          size: this.pixel_size * 10,
+          size: this.pixel_size * this.tile_size,
         },
       })
     );
