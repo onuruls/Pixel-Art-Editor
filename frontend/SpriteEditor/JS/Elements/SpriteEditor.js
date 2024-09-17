@@ -89,6 +89,19 @@ export class SpriteEditor extends HTMLElement {
       this.sprite_tools.querySelector("#secondary_color_input").value
     );
     this.initialized = true;
+
+    const size_obs = new ResizeObserver((entries) => {
+      entries.forEach((e) => {
+        this.sprite_canvas_width = e.contentRect.width;
+        this.sprite_canvas_height = e.contentRect.height;
+      });
+      this.resize_canvas_wrapper();
+      this.sprite_canvas.set_canvas_sizes(
+        this.canvas_wrapper_width,
+        this.canvas_wrapper_height
+      );
+    });
+    size_obs.observe(this.sprite_canvas);
   }
 
   /**
@@ -118,7 +131,7 @@ export class SpriteEditor extends HTMLElement {
     this.canvas_wrapper = this.sprite_canvas.querySelector(".canvas-wrapper");
   }
 
-  create_file_input() {
+  create_import_input() {
     this.import_input = document.createElement("input");
     this.import_input.setAttribute("type", "file");
     this.import_input.setAttribute("accept", "image/png");
