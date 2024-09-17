@@ -122,7 +122,6 @@ export class MapEditorMapPreview extends MapEditorPart {
     const width = this.zoom_canvas.width / scale;
     const height = this.zoom_canvas.height / scale;
     const [x, y] = this.get_view_position();
-    console.log("WIDTH:", width);
     this.zoom_context.strokeStyle = "red";
     this.zoom_context.strokeRect(x, y, width, height);
   }
