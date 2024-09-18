@@ -48,9 +48,10 @@ export class MirrorPen extends Tool {
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
-    const half_of_pixel = (this.sprite_editor.pixel_size * 10) / 2;
+    const tile_size = this.sprite_editor.tile_size;
+    const x = Math.floor(mouseX / tile_size);
+    const y = Math.floor(mouseY / tile_size);
+    const half_of_pixel = (this.sprite_editor.pixel_size * tile_size) / 2;
     const mousekey = event.buttons;
 
     const desired_mirror = this.is_shift_pressed ? "horizontal" : "vertical";
@@ -89,10 +90,11 @@ export class MirrorPen extends Tool {
    * @returns {{x1: Number, x2: Number}}
    */
   calculateVerticalMirrorCoords(x, middleX) {
-    const x1 = Math.floor(x / 10) * 10;
+    const tile_size = this.sprite_editor.tile_size;
+    const x1 = Math.floor(x / tile_size) * tile_size;
     const x_mid_diff = x1 - middleX;
     const x2 = x1 - 2 * x_mid_diff;
-    return { x1: Math.floor(x1 / 10), x2: Math.floor(x2 / 10) };
+    return { x1: Math.floor(x1 / tile_size), x2: Math.floor(x2 / tile_size) };
   }
 
   /**
@@ -102,9 +104,10 @@ export class MirrorPen extends Tool {
    * @returns {{y1: Number, y2: Number}}
    */
   calculateHorizontalMirrorCoords(y, middleY) {
-    const y1 = Math.floor(y / 10) * 10;
+    const tile_size = this.sprite_editor.tile_size;
+    const y1 = Math.floor(y / tile_size) * tile_size;
     const y_mid_diff = y1 - middleY;
     const y2 = y1 - 2 * y_mid_diff;
-    return { y1: Math.floor(y1 / 10), y2: Math.floor(y2 / 10) };
+    return { y1: Math.floor(y1 / tile_size), y2: Math.floor(y2 / tile_size) };
   }
 }

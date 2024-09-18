@@ -28,8 +28,8 @@ export class SpriteEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.width = 32;
-    this.height = 32;
+    this.width = 64;
+    this.height = 64;
     this.tile_size = 10;
     this.sprite_canvas_width = 0;
     this.sprite_canvas_height = 0;
