@@ -8,7 +8,7 @@ class FileService {
   /**
    * Service for managing file-related operations
    */
-  async add_file(folder_id, name, type) {
+  async add_file(folder_id, name, type, matrix_data = null) {
     if (!["png", "tmx"].includes(type)) {
       throw new Error("Invalid file type. Only 'png' and 'tmx' are allowed.");
     }
@@ -28,6 +28,7 @@ class FileService {
       type,
       filepath: file_path,
       folder_id,
+      matrix_data: matrix_data ? JSON.stringify(matrix_data) : null,
     });
 
     return new_file;
@@ -47,6 +48,7 @@ class FileService {
       type: file.type,
       folder_id: file.folder_id,
       url: file.filepath,
+      matrix_data: file.matrix_data ? JSON.parse(file.matrix_data) : null,
     };
   }
 

@@ -272,8 +272,17 @@ export class FileSystemHandler {
   /**
    * Creates a new file.
    */
-  async create_file(file_name, file_type) {
+  async create_file(file_name, file_type, matrix_data = null) {
     try {
+      const body = {
+        name: file_name,
+        type: file_type,
+      };
+
+      if (file_type === "png" && matrix_data) {
+        body.matrix_data = matrix_data;
+      }
+
       const new_file = await this.fetch_api(
         `http://localhost:3000/folders/${this.active_folder.id}/files`,
         {
@@ -281,10 +290,7 @@ export class FileSystemHandler {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            name: file_name,
-            type: file_type,
-          }),
+          body: JSON.stringify(body),
         }
       );
 

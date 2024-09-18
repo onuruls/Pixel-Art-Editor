@@ -87,7 +87,7 @@ export class FileAreaTools extends HTMLElement {
    */
   init() {
     this.save_button.addEventListener("click", () => {
-      switch (this.file_area.editor_tool.selected_editor) {
+      switch (this.file_area.selected_editor) {
         case "SpriteEditor":
           this.file_area.editor_tool.sprite_editor.save_sprite_file();
           break;

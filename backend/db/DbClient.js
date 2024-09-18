@@ -46,8 +46,8 @@ class DbClient {
     );
   }
 
-  async add_file(folder_id, name, type) {
-    return await file_service.add_file(folder_id, name, type);
+  async add_file(folder_id, name, type, matrix_data) {
+    return await file_service.add_file(folder_id, name, type, matrix_data);
   }
 
   async get_file(id) {
