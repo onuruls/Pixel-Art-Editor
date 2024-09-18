@@ -13,11 +13,11 @@ export class FolderItemView extends ItemView {
   constructor(name, file_area_view, id = -1) {
     super(name, file_area_view, id);
 
-    this.edit_name_input = this.create_edit_name_input();
-    this.id = id;
-    this.name = name;
-    this.file_area_view = file_area_view;
     this.setAttribute("draggable", true);
+    this.id = id;
+    this.file_area_view = file_area_view;
+    this.name = name;
+    this.edit_name_input = this.create_edit_name_input();
   }
 
   /**

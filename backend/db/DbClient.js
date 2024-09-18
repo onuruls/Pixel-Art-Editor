@@ -50,6 +50,10 @@ class DbClient {
     return await file_service.add_file(folder_id, name, type);
   }
 
+  async get_file(id) {
+    return await file_service.get_file(id);
+  }
+
   async delete_file(id) {
     return await file_service.delete_file(id);
   }

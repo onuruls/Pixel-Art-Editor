@@ -31,7 +31,6 @@ export class Folder extends Item {
           child.folder_id,
           child.type
         );
-        console.log("item", item);
         return item;
       }
     });

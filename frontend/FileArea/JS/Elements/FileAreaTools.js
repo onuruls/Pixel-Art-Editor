@@ -86,6 +86,16 @@ export class FileAreaTools extends HTMLElement {
    * Initializes the tool listeners
    */
   init() {
+    this.save_button.addEventListener("click", () => {
+      switch (this.file_area.editor_tool.selected_editor) {
+        case "SpriteEditor":
+          this.file_area.editor_tool.sprite_editor.save_sprite_file();
+          break;
+        case "MapEditor":
+          // TODO: Implement
+          break;
+      }
+    });
     this.export_button.addEventListener("click", () => {
       this.file_area.editor_tool.sprite_editor.export_as_png();
     });

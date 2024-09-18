@@ -55,7 +55,7 @@ export class FileSystemHandler {
   get_folder_by_id(folder_id) {
     return (
       this.entries.find(
-        (entry) => entry instanceof Folder && entry.id === folder_id
+        (entry) => entry instanceof Folder && entry.id == folder_id
       ) || null
     );
   }
@@ -64,10 +64,8 @@ export class FileSystemHandler {
    * Finds a file by its ID.
    */
   get_file_by_id(file_id) {
-    return (
-      this.entries.find(
-        (entry) => entry instanceof File && entry.id === file_id
-      ) || null
+    return this.entries.find(
+      (entry) => entry instanceof File && entry.id == file_id
     );
   }
 

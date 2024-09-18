@@ -81,6 +81,10 @@ const File = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    matrix_data: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     folder_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -92,7 +96,6 @@ const File = sequelize.define(
     },
   },
   {
-    // paranoid: true,
     indexes: [
       {
         unique: true,

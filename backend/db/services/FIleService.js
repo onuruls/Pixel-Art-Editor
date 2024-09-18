@@ -34,6 +34,23 @@ class FileService {
   }
 
   /**
+   * Service to retrieve a file by its ID.
+   */
+  async get_file(id) {
+    const file = await File.findByPk(id);
+    if (!file) {
+      throw new Error("File not found");
+    }
+    return {
+      id: file.id,
+      name: file.name,
+      type: file.type,
+      folder_id: file.folder_id,
+      url: file.filepath,
+    };
+  }
+
+  /**
    * Service to delete a file and its record
    */
   async delete_file(id) {

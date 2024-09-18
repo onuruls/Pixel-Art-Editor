@@ -6,7 +6,7 @@ class FileSystemService {
    * Service for handling file system operations
    */
   constructor(base_dir) {
-    this.base_dir = base_dir || path.resolve(__dirname, "../uploads");
+    this.base_dir = base_dir || path.resolve(__dirname, "../../../uploads");
   }
 
   /**
