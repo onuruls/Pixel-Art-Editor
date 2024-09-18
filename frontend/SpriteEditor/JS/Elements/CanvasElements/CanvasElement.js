@@ -20,7 +20,7 @@ export class CanvasElement extends HTMLElement {
   }
 
   /**
-   * Malt ein Pixel in der angegebenen Farbe.
+   * Paints a pixel in the given color
    * @param {Number} x
    * @param {Number} y
    * @param {Array<Number>} color
