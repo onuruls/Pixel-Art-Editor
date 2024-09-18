@@ -3,7 +3,7 @@ import { CanvasElement } from "./CanvasElement.js";
 export class BackgroundCanvas extends CanvasElement {
   /**
    * Renders the background
-   * @param {MapEditorCanvas} canvas
+   * @param {SpriteCanvas} canvas
    */
   constructor(canvas) {
     super(canvas);
@@ -28,67 +28,29 @@ export class BackgroundCanvas extends CanvasElement {
   /**
    * Draws the backgorund grid
    */
-  // draw_background_grid() {
-  //   const tile_size = this.sprite_editor.tile_size;
-  //   const scale = this.sprite_editor.scale;
-  //   this.revert_canvas();
-  //   this.context.strokeStyle = this.line_color;
-  //   this.context.lineWidth = 1;
-  //   this.context.strokeRect(
-  //     0,
-  //     0,
-  //     tile_size * this.sprite_editor.width,
-  //     tile_size * this.sprite_editor.height
-  //   );
-  //   for (let i = 0; i < this.sprite_editor.width; i++) {
-  //     this.context.beginPath();
-  //     this.context.moveTo(+i * tile_size, 0);
-  //     this.context.lineTo(i * tile_size, this.sprite_editor.height * tile_size);
-  //     this.context.stroke();
-  //   }
-
-  //   for (let i = 0; i < this.sprite_editor.height; i++) {
-  //     this.context.beginPath();
-  //     this.context.moveTo(0, +i * tile_size);
-  //     this.context.lineTo(this.sprite_editor.width * tile_size, i * tile_size);
-  //     this.context.stroke();
-  //   }
-  // }
-
   draw_background_grid() {
     const tile_size = this.sprite_editor.tile_size;
+    const scale = this.sprite_editor.scale;
     this.revert_canvas();
-
-    // Disable image smoothing
-    this.context.imageSmoothingEnabled = false;
-
-    // Set line properties
     this.context.strokeStyle = this.line_color;
     this.context.lineWidth = 1;
-
-    // Draw the outer rectangle
     this.context.strokeRect(
-      0.5,
-      0.5,
-      tile_size * this.sprite_editor.width - 1,
-      tile_size * this.sprite_editor.height - 1
+      0,
+      0,
+      tile_size * this.sprite_editor.width,
+      tile_size * this.sprite_editor.height
     );
-
-    // Draw vertical grid lines
-    for (let i = 0; i <= this.sprite_editor.width; i++) {
-      const x = i * tile_size + 0.5;
+    for (let i = 0; i < this.sprite_editor.width; i++) {
       this.context.beginPath();
-      this.context.moveTo(x, 0);
-      this.context.lineTo(x, tile_size * this.sprite_editor.height);
+      this.context.moveTo(+i * tile_size, 0);
+      this.context.lineTo(i * tile_size, this.sprite_editor.height * tile_size);
       this.context.stroke();
     }
 
-    // Draw horizontal grid lines
-    for (let i = 0; i <= this.sprite_editor.height; i++) {
-      const y = i * tile_size + 0.5;
+    for (let i = 0; i < this.sprite_editor.height; i++) {
       this.context.beginPath();
-      this.context.moveTo(0, y);
-      this.context.lineTo(tile_size * this.sprite_editor.width, y);
+      this.context.moveTo(0, +i * tile_size);
+      this.context.lineTo(this.sprite_editor.width * tile_size, i * tile_size);
       this.context.stroke();
     }
   }

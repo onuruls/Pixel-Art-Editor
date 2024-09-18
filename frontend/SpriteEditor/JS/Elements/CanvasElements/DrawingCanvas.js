@@ -185,7 +185,7 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Repaints the whole canvas, after sprite is imported
+   * Repaints the whole canvas, after sprite is imported or canvas is resized
    * @param {Event} event
    */
   repaint_canvas(event) {

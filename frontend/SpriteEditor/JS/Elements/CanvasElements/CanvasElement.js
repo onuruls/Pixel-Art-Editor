@@ -27,7 +27,6 @@ export class CanvasElement extends HTMLElement {
    */
   paint_single_pixel(x, y, color) {
     const tile_size = this.sprite_editor.tile_size;
-    console.log("x: ", x, "y: ", y, "tilesize: ", tile_size);
     const color_str = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${
       color[3] / 255
     })`;
