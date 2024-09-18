@@ -20,16 +20,18 @@ export class CanvasElement extends HTMLElement {
   }
 
   /**
-   * Paints a pixel in the given color
+   * Malt ein Pixel in der angegebenen Farbe.
    * @param {Number} x
    * @param {Number} y
    * @param {Array<Number>} color
    */
   paint_single_pixel(x, y, color) {
-    const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
+    const tile_size = this.sprite_editor.tile_size;
+    console.log("x: ", x, "y: ", y, "tilesize: ", tile_size);
+    const color_str = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${
       color[3] / 255
     })`;
-    const tile_size = this.sprite_editor.tile_size;
+
     this.context.fillStyle = color_str;
     this.context.fillRect(x * tile_size, y * tile_size, tile_size, tile_size);
   }

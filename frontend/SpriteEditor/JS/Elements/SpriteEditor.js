@@ -28,8 +28,8 @@ export class SpriteEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.width = 64;
-    this.height = 64;
+    this.width = 32;
+    this.height = 32;
     this.tile_size = 10;
     this.sprite_canvas_width = 0;
     this.sprite_canvas_height = 0;
@@ -139,7 +139,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Called when MapEditorCanvas is resized, resizes the wrapper
+   * Called when SpriteCanvas is resized, resizes the wrapper
    */
   resize_canvas_wrapper() {
     const max_height = this.sprite_canvas_height - 40;
@@ -147,6 +147,8 @@ export class SpriteEditor extends HTMLElement {
     const height_tile_size = max_height / this.height;
     const width_tile_size = max_width / this.width;
     this.tile_size = Math.min(height_tile_size, width_tile_size);
+
+    this.tile_size = Math.floor(this.tile_size);
 
     this.canvas_wrapper_width = this.tile_size * this.width;
     this.canvas_wrapper_height = this.tile_size * this.height;
