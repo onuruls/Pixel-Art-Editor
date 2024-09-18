@@ -1,3 +1,4 @@
+import { FileArea } from "../../../Elements/FileArea.js";
 import { ContextMenuAction } from "./ContextMenuAction.js";
 
 /**
@@ -9,8 +10,7 @@ export class AddFileAction extends ContextMenuAction {
    * @param {string} file_type
    */
   constructor(file_area, file_type) {
-    super();
-    this.file_area = file_area;
+    super(file_area);
     this.file_type = file_type;
   }
 

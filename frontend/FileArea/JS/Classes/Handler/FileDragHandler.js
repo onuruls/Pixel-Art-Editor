@@ -1,10 +1,9 @@
+import { FileAreaView } from "../../Elements/FileAreaView.js";
 import { FolderItemView } from "../../Elements/FolderItemView.js";
-import { FileItemView } from "../../Elements/FileItemView.js";
 
 export class FileDragHandler {
   /**
    * Handles drag and drop operations in the file area.
-   *
    * @param {FileAreaView} file_area_view
    */
   constructor(file_area_view) {
@@ -13,7 +12,6 @@ export class FileDragHandler {
 
   /**
    * Handles the start of a drag operation.
-   *
    * @param {DragEvent} event
    */
   handle_drag_start(event) {

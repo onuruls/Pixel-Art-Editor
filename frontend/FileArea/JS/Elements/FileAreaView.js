@@ -6,10 +6,12 @@ import { FolderItemView } from "../Elements/FolderItemView.js";
 import { FileItemView } from "../Elements/FileItemView.js";
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../EditorTool/JS/Classes/File.js";
+import { FileArea } from "./FileArea.js";
 
 export class FileAreaView extends HTMLElement {
   /**
    * Initializes the view of folders and files in the FileArea.
+   * @param {FileArea} file_area
    */
   constructor(file_area) {
     super();

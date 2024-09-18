@@ -1,5 +1,6 @@
 import { Folder } from "../../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../../EditorTool/JS/Classes/File.js";
+import { FileAreaView } from "../../Elements/FileAreaView.js";
 
 export class FileSystemHandler {
   /**

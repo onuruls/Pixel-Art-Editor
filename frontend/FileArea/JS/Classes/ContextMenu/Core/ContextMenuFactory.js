@@ -1,3 +1,4 @@
+import { FileArea } from "../../../Elements/FileArea.js";
 import { FileAreaContextMenu } from "../Menus/FileAreaContextMenu.js";
 import { ItemContextMenu } from "../Menus/ItemContextMenu.js";
 import { MultipleItemsContextMenu } from "../Menus/MultipleItemsContextMenu.js";
