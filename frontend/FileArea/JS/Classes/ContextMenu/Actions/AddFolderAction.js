@@ -15,6 +15,6 @@ export class AddFolderAction extends ContextMenuAction {
    * @returns {void}
    */
   execute() {
-    this.file_area.create_new_folder();
+    this.file_area.create_new_item("folder");
   }
 }

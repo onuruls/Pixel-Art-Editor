@@ -19,6 +19,6 @@ export class AddFileAction extends ContextMenuAction {
    * @returns {void}
    */
   execute() {
-    this.file_area.create_new_file(this.file_type);
+    this.file_area.create_new_item(this.file_type);
   }
 }

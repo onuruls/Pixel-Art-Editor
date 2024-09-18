@@ -17,6 +17,7 @@ export class FileArea extends HTMLElement {
     this.editor_tool = editor_tool;
     this.file_system_handler = null;
     this.operation_in_progress = false;
+    this.selected_editor = "SpriteEditor";
 
     this.css = this.create_css_link();
     this.appendChild(this.css);
@@ -100,21 +101,6 @@ export class FileArea extends HTMLElement {
    */
   async create_new_item(fileType = "folder") {
     await this.create_handler.create_new_item(fileType);
-  }
-
-  /**
-   * Creates a new file.
-   * @param {string} fileType - The type of file to create (e.g., 'png', 'tmx').
-   */
-  async create_new_file(fileType) {
-    await this.create_new_item(fileType);
-  }
-
-  /**
-   * Creates a new folder by calling create_new_item with 'folder' as the type.
-   */
-  async create_new_folder() {
-    await this.create_new_item("folder");
   }
 
   /**

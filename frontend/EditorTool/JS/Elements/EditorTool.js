@@ -87,10 +87,12 @@ export class EditorTool extends HTMLElement {
       this.sprite_editor.remove();
       this.editor_container.appendChild(this.map_editor);
       this.top_menu.set_editor_name("Sprite Editor");
+      this.file_area.selected_editor = "MapEditor";
     } else {
       this.map_editor.remove();
       this.editor_container.appendChild(this.sprite_editor);
       this.top_menu.set_editor_name("Map Editor");
+      this.file_area.selected_editor = "SpriteEditor";
     }
   }
 }

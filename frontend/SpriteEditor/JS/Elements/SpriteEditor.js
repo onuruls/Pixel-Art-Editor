@@ -1568,8 +1568,10 @@ export class SpriteEditor extends HTMLElement {
    * @param {File} file
    */
   import_from_png(file) {
+    console.log(file);
     const reader = new FileReader();
     reader.onload = (e) => {
+      console.log(e.target.result);
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -1623,6 +1625,10 @@ export class SpriteEditor extends HTMLElement {
     link.href = canvas.toDataURL("image/png");
     link.download = "image.png";
     link.click();
+  }
+
+  save_sprite_file() {
+    // TODO
   }
 
   /**

@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
+const { PNG } = require("pngjs");
 const fs = require("fs");
 const path = require("path");
 
@@ -230,14 +231,14 @@ app.post("/folders/:folder_id/files", async (req, res) => {
   }
 
   try {
-    // Zuerst wird der Dateieintrag in der Datenbank erstellt
     const file = await db_client.add_file(folder_id, name, type);
-
-    // Danach wird die Datei im Dateisystem erstellt
-    const dummyContent =
-      type === "png" ? "Dummy PNG content" : "Dummy TMX content";
-    fs.writeFileSync(file.filepath, dummyContent);
-
+    if (type === "png") {
+      const png = new PNG({ width: 64, height: 64 });
+      png.pack().pipe(fs.createWriteStream(file.filepath));
+    } else {
+      const dummyContent = "Dummy TMX content";
+      fs.writeFileSync(file.filepath, dummyContent);
+    }
     res.status(201).send(file);
   } catch (error) {
     console.error("Error creating file:", error);
