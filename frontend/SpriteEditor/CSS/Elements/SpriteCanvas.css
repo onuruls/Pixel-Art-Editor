@@ -8,19 +8,7 @@ sprite-canvas {
     position: relative;
     padding: 0px;
     margin: auto;
-    background-image: linear-gradient(
-        90deg,
-        var(--canvas-grid-line) 1px,
-        transparent 1px
-      ),
-      linear-gradient(90deg, var(--canvas-grid-line) 1px, transparent 1px),
-      linear-gradient(0deg, var(--canvas-grid-line) 1px, transparent 1px),
-      linear-gradient(0deg, var(--canvas-grid-line) 1px, transparent 1px);
-    background-size: 10px 10px;
-    background-position: 0 0;
     border: 1cap solid var(--canvas-border);
-    width: 640px;
-    height: 640px;
     overflow: auto;
     scrollbar-color: var(--canvas-grid-line) var(--primary-bg);
     scrollbar-width: thin;
@@ -30,9 +18,6 @@ sprite-canvas {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    cursor: crosshair;
   }
 
   drawing-canvas {

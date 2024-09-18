@@ -30,6 +30,11 @@ export class SpriteEditor extends HTMLElement {
     this.selected_tool = null;
     this.width = 64;
     this.height = 64;
+    this.tile_size = 10;
+    this.sprite_canvas_width = 0;
+    this.sprite_canvas_height = 0;
+    this.canvas_wrapper_width = 0;
+    this.canvas_wrapper_height = 0;
     this.canvas_matrix = this.create_canvas_matrix();
     this.canvas_matrices = [this.canvas_matrix];
     this.fill_visited = {};
@@ -71,23 +76,10 @@ export class SpriteEditor extends HTMLElement {
    * Initializes the SpriteEditor with its Parts
    */
   init() {
-    this.css = document.createElement("link");
-    this.css.setAttribute(
-      "href",
-      "../SpriteEditor/CSS/Elements/SpriteEditor.css"
-    );
-    this.css.setAttribute("rel", "stylesheet");
-    this.css.setAttribute("type", "text/css");
-    this.appendChild(this.css);
-    this.import_input = document.createElement("input");
-    this.import_input.setAttribute("type", "file");
-    this.import_input.setAttribute("accept", "image/png");
-    this.sprite_tools = new SpriteTools(this);
-    this.sprite_canvas = new SpriteCanvas(this);
-    this.sprite_preview = new SpritePreview(this);
-    this.appendChild(this.sprite_tools);
-    this.appendChild(this.sprite_canvas);
-    this.appendChild(this.sprite_preview);
+    this.appendCSS();
+    this.appendComponents();
+    this.create_file_input();
+
     this.set_listeners();
     this.selected_tool = new Pen(this);
     this.selected_color = this.hex_to_rgb_array(
@@ -97,6 +89,72 @@ export class SpriteEditor extends HTMLElement {
       this.sprite_tools.querySelector("#secondary_color_input").value
     );
     this.initialized = true;
+
+    const size_obs = new ResizeObserver((entries) => {
+      entries.forEach((e) => {
+        this.sprite_canvas_width = e.contentRect.width;
+        this.sprite_canvas_height = e.contentRect.height;
+      });
+      this.resize_canvas_wrapper();
+      this.sprite_canvas.set_canvas_sizes(
+        this.canvas_wrapper_width,
+        this.canvas_wrapper_height
+      );
+      this.sprite_canvas.background_canvas.draw_background_grid();
+      this.sprite_canvas.drawing_canvas.repaint_canvas();
+    });
+    size_obs.observe(this.sprite_canvas);
+  }
+
+  /**
+   * Appends CSS to the SpriteEditor
+   */
+  appendCSS() {
+    this.css = document.createElement("link");
+    this.css.setAttribute(
+      "href",
+      "../SpriteEditor/CSS/Elements/SpriteEditor.css"
+    );
+    this.css.setAttribute("rel", "stylesheet");
+    this.css.setAttribute("type", "text/css");
+    this.appendChild(this.css);
+  }
+
+  /**
+   * Appends the necessary components to the SpriteEditor
+   */
+  appendComponents() {
+    this.sprite_tools = new SpriteTools(this);
+    this.sprite_canvas = new SpriteCanvas(this);
+    this.sprite_preview = new SpritePreview(this);
+    this.appendChild(this.sprite_tools);
+    this.appendChild(this.sprite_canvas);
+    this.appendChild(this.sprite_preview);
+    this.canvas_wrapper = this.sprite_canvas.querySelector(".canvas-wrapper");
+  }
+
+  create_file_input() {
+    this.import_input = document.createElement("input");
+    this.import_input.setAttribute("type", "file");
+    this.import_input.setAttribute("accept", "image/png");
+  }
+
+  /**
+   * Called when SpriteCanvas is resized, resizes the wrapper
+   */
+  resize_canvas_wrapper() {
+    const max_height = this.sprite_canvas_height - 40;
+    const max_width = this.sprite_canvas_width - 40;
+    const height_tile_size = max_height / this.height;
+    const width_tile_size = max_width / this.width;
+    this.tile_size = Math.min(height_tile_size, width_tile_size);
+
+    this.tile_size = Math.floor(this.tile_size);
+
+    this.canvas_wrapper_width = this.tile_size * this.width;
+    this.canvas_wrapper_height = this.tile_size * this.height;
+    this.canvas_wrapper.style.width = this.canvas_wrapper_width;
+    this.canvas_wrapper.style.height = this.canvas_wrapper_height;
   }
 
   /**
@@ -498,7 +556,7 @@ export class SpriteEditor extends HTMLElement {
         detail: {
           x: x,
           y: y,
-          size: this.pixel_size * 10,
+          size: this.pixel_size * this.tile_size,
         },
       })
     );
@@ -537,7 +595,7 @@ export class SpriteEditor extends HTMLElement {
         detail: {
           color: color,
           points: fill_pixels,
-          size: this.pixel_size * 10,
+          size: this.pixel_size * this.tile_size,
         },
       })
     );

@@ -10,6 +10,7 @@ export class DrawingCanvas extends CanvasElement {
   constructor(sprite_canvas) {
     super(sprite_canvas);
     this.context = null;
+    console.log(this.sprite_editor);
   }
 
   render() {
@@ -83,14 +84,15 @@ export class DrawingCanvas extends CanvasElement {
     const color_str = `rgba(${color[0]},${color[1]},${color[2]},${
       color[3] / 255
     })`;
+    const tile_size = this.sprite_editor.tile_size;
     points.forEach((point) => {
-      const x = point.x * 10;
-      const y = point.y * 10;
+      const x = point.x * tile_size;
+      const y = point.y * tile_size;
       this.context.fillStyle = color_str;
       if (color_str === "rgba(0,0,0,0)") {
-        this.context.clearRect(x, y, 10, 10);
+        this.context.clearRect(x, y, tile_size, tile_size);
       } else {
-        this.context.fillRect(x, y, 10, 10);
+        this.context.fillRect(x, y, tile_size, tile_size);
       }
     });
   }
@@ -138,14 +140,15 @@ export class DrawingCanvas extends CanvasElement {
   move_canvas(event) {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const points = event.detail.points;
+    const tile_size = this.sprite_editor.tile_size;
     points.forEach((point) => {
       const new_x = point.x - event.detail.x_diff;
       const new_y = point.y - event.detail.y_diff;
       if (
         new_x >= 0 &&
-        new_x < this.canvas.width / 10 &&
+        new_x < this.canvas.width / tile_size &&
         new_y >= 0 &&
-        new_y < this.canvas.height / 10
+        new_y < this.canvas.height / tile_size
       ) {
         this.paint_single_pixel(new_x, new_y, point.color);
       }
@@ -182,7 +185,7 @@ export class DrawingCanvas extends CanvasElement {
   }
 
   /**
-   * Repaints the whole canvas, after sprite is imported
+   * Repaints the whole canvas, after sprite is imported or canvas is resized
    * @param {Event} event
    */
   repaint_canvas(event) {

@@ -112,8 +112,9 @@ export class Tool {
     var rect = this.canvas.getBoundingClientRect();
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
-    const x = Math.floor(mouseX / 10);
-    const y = Math.floor(mouseY / 10);
+    const tile_size = this.sprite_editor.tile_size;
+    const x = Math.floor(mouseX / tile_size);
+    const y = Math.floor(mouseY / tile_size);
     const position_changed = this.has_hover_position_changed(x, y);
     if (position_changed) {
       this.hover_position = {
@@ -153,8 +154,9 @@ export class Tool {
     var rect = this.canvas.getBoundingClientRect();
     var mouse_x = event.clientX - rect.left;
     var mouse_y = event.clientY - rect.top;
-    const x = Math.floor(mouse_x / 10);
-    const y = Math.floor(mouse_y / 10);
+    const tile_size = this.sprite_editor.tile_size;
+    const x = Math.floor(mouse_x / tile_size);
+    const y = Math.floor(mouse_y / tile_size);
     return { x: x, y: y };
   }
   /**

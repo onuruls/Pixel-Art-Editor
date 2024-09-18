@@ -56,6 +56,7 @@ export class MapEditorCanvas extends MapEditorPart {
       canvas.canvas.height = height;
     });
     this.background_canvas.draw_background_grid();
+    this.redraw_every_layer();
   }
 
   /**

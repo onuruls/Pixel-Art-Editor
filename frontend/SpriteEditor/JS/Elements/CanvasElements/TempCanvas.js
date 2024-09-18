@@ -23,8 +23,6 @@ export class TempCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.sprite_editor.addEventListener("draw_temp_shape", (event) => {
       this.draw_shape(event);
     });
