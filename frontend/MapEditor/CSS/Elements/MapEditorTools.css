@@ -1,35 +1,75 @@
 map-editor-tools {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  background-color: var(--secondary-bg);
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  row-gap: 1em;
+  padding: 1em;
+  background-color: var(--primary-bg);
+  align-items: center;
+  flex: 1.5;
+
+  .pixel-size-options {
+    display: flex;
+    justify-content: center;
+    column-gap: 0.1em;
+    width: 100%;
+
+    .pixel-size-option {
+      width: 2rem;
+      height: 2rem;
+      text-align: center;
+      cursor: pointer;
+      background-color: var(--tool-button-inactive-background-color);
+      color: var(--tool-button-inactive-color);
+      border: solid var(--color-input-default);
+
+      &:hover {
+        filter: invert(5%) brightness(100%) contrast(100%);
+      }
+
+      &.active {
+        border-color: var(--active-accent);
+      }
+    }
+
+    #size_1 {
+      border-width: 10px;
+    }
+    #size_2 {
+      border-width: 6px;
+    }
+    #size_3 {
+      border-width: 3px;
+    }
+  }
 
   .toolbox {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    width: min-content;
-  }
+    grid-template-columns: repeat(2, 3.1rem);
+    justify-content: center;
+    gap: 0.1rem;
 
-  .tool-button {
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    .tool-button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-    &:hover {
-      filter: invert(5%) brightness(100%) contrast(100%);
-    }
+      &:hover {
+        filter: invert(5%) brightness(100%) contrast(100%);
+      }
 
-    &.active {
-      filter: invert(100%) brightness(100%) contrast(100%);
-    }
+      &.active {
+        filter: invert(100%) brightness(100%) contrast(100%);
+      }
 
-    img {
-      width: 50px;
-      height: 50px;
+      img {
+        width: 3rem;
+        height: 3rem;
+      }
     }
   }
 

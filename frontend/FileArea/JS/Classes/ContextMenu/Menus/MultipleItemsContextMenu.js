@@ -10,9 +10,7 @@ export class MultipleItemsContextMenu extends ContextMenu {
    * @param {HTMLElement} menu_element
    */
   constructor(file_area, menu_element) {
-    super(menu_element);
-    this.file_area = file_area;
-
+    super(menu_element, file_area);
     this.actions = {
       delete_multiple: new DeleteMultipleItemsAction(this.file_area),
     };

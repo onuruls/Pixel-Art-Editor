@@ -29,7 +29,9 @@ export class Folder extends Item {
           child.id,
           child.name,
           child.folder_id,
-          child.type
+          child.type,
+          child.url,
+          child.matrix_data
         );
         return item;
       }

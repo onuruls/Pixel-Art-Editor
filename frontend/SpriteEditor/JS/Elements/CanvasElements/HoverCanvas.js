@@ -12,6 +12,7 @@ export class HoverCanvas extends CanvasElement {
     super(sprite_canvas);
     this.context = null;
     this.hover_color = "rgba(180,240,213,0.5)";
+    console.log(this.sprite_editor);
   }
 
   render() {
@@ -23,8 +24,6 @@ export class HoverCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.canvas.height = 640;
-    this.canvas.width = 640;
     this.sprite_editor.addEventListener("hover_matrix_changed", (event) => {
       this.draw_hover(event);
     });
@@ -40,8 +39,9 @@ export class HoverCanvas extends CanvasElement {
   draw_hover(event) {
     this.revert_canvas();
     const size = event.detail.size;
-    const x = event.detail.x * 10;
-    const y = event.detail.y * 10;
+    const tile_size = this.sprite_editor.tile_size;
+    const x = event.detail.x * tile_size;
+    const y = event.detail.y * tile_size;
     this.context.fillStyle = this.hover_color;
     this.context.fillRect(x, y, size, size);
   }

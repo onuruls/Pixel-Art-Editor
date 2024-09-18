@@ -7,6 +7,7 @@ import { FolderItemView } from "./FolderItemView.js";
 import { FileItemView } from "./FileItemView.js";
 import { Folder } from "../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../EditorTool/JS/Classes/File.js";
+import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 
 export class FileArea extends HTMLElement {
   /**

@@ -1,7 +1,8 @@
+import { FileAreaView } from "../../Elements/FileAreaView.js";
+
 export class FileSelectionHandler {
   /**
    * Handles selection of files and folders in the FileAreaView.
-   *
    * @param {FileAreaView} file_area_view
    */
   constructor(file_area_view) {

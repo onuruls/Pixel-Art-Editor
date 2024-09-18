@@ -1,3 +1,4 @@
+import { FileAreaView } from "./FileAreaView.js";
 import { ItemView } from "./ItemView.js";
 
 /**
@@ -6,9 +7,9 @@ import { ItemView } from "./ItemView.js";
  */
 export class FolderItemView extends ItemView {
   /**
-   * @param {string} name
+   * @param {String} name
    * @param {FileAreaView} file_area_view
-   * @param {number} id
+   * @param {Number} id
    */
   constructor(name, file_area_view, id = -1) {
     super(name, file_area_view, id);

@@ -1,3 +1,4 @@
+import { FileAreaView } from "./FileAreaView.js";
 import { ItemView } from "./ItemView.js";
 
 /**
@@ -6,10 +7,10 @@ import { ItemView } from "./ItemView.js";
  */
 export class FileItemView extends ItemView {
   /**
-   * @param {string} name
+   * @param {String} name
    * @param {FileAreaView} file_area_view
-   * @param {number} id
-   * @param {string} type
+   * @param {Number} id
+   * @param {String} type
    */
   constructor(name, file_area_view, id, type) {
     super(name, file_area_view, id);
@@ -58,21 +59,18 @@ export class FileItemView extends ItemView {
     const file_id = this.id;
     const file_system_handler = this.file_area_view.file_system_handler;
 
-    file_system_handler
-      .get_file(file_id)
-      .then((fileData) => {
-        console.log("Loaded sprite file:", fileData);
-        if (fileData.type === "png" && fileData.matrix_data) {
-          console.log("Matrix data:", fileData.matrix_data);
-          const spriteEditor = this.file_area.editor_tool.sprite_editor;
-          spriteEditor.handle_loaded_matrix(fileData.matrix_data);
-        } else {
-          console.error("Unsupported file type or missing matrix data.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error loading sprite file:", error);
-      });
+    const fileData = file_system_handler.get_file_by_id(file_id);
+
+    if (fileData) {
+      if (fileData.type === "png" && fileData.matrix_data) {
+        const spriteEditor = this.file_area.editor_tool.sprite_editor;
+        spriteEditor.handle_loaded_matrix(fileData.matrix_data);
+      } else {
+        console.error("Unsupported file type or missing matrix data.");
+      }
+    } else {
+      console.error("Error loading sprite file.");
+    }
   }
 
   /**

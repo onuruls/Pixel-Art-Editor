@@ -24,7 +24,7 @@ export class MapEditorSelectionArea extends MapEditorPart {
     this.map_sprite_preview = new MapEditorSpritePreview(this.map_editor);
     this.map_map_preview = new MapEditorMapPreview(this.map_editor);
     this.map_layers = new MapEditorLayers(this.map_editor);
-    this.append(this.map_sprite_preview, this.map_map_preview, this.map_layers);
+    this.append(this.map_sprite_preview, this.map_layers, this.map_map_preview);
 
     this.map_editor.addEventListener("layers-updated", () => {
       this.map_layers.render_layers_list(

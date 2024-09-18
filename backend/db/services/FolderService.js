@@ -39,8 +39,9 @@ class FolderService {
           id: file.id,
           name: file.name,
           type: file.type,
-          url: `http://localhost:3000/files/${file.id}/content`,
+          url: file.filepath,
           folder_id: file.folder_id,
+          matrix_data: JSON.parse(file.matrix_data),
         });
       });
     }

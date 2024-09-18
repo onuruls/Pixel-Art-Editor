@@ -1,5 +1,8 @@
 import { Folder } from "../../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../../EditorTool/JS/Classes/File.js";
+import { FileAreaView } from "../../Elements/FileAreaView.js";
+import { BackendClient } from "../../../../BackendClient/BackendClient.js";
+import { Project } from "../../../../EditorTool/JS/Classes/Project.js";
 
 export class FileSystemHandler {
   /**
@@ -42,7 +45,8 @@ export class FileSystemHandler {
         entry.name,
         entry.folder_id,
         entry.type,
-        entry.url
+        entry.filepath,
+        JSON.parse(entry.matrix_data)
       );
     } else {
       console.error("Unknown entry type", entry);
@@ -70,29 +74,6 @@ export class FileSystemHandler {
   }
 
   /**
-   * Fetches data from the API.
-   */
-  async fetch_api(url, options = {}) {
-    try {
-      const response = await fetch(url, options);
-      const contentType = response.headers.get("Content-Type");
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-
-      if (contentType && contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        return response.text();
-      }
-    } catch (error) {
-      console.error(`API call failed: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
    * Reads and updates the directory content.
    */
   async read_directory_content() {
@@ -102,10 +83,9 @@ export class FileSystemHandler {
     }
 
     try {
-      const folder_data = await this.fetch_api(
-        `http://localhost:3000/folders/${this.active_folder.id}`
+      const folder_data = await BackendClient.read_directory_content(
+        this.active_folder.id
       );
-
       this.active_folder.build_folder_structure(folder_data.children);
       this.entries = this.normalize_entries(this.active_folder.children);
       this.file_area_view.rebuild_view();
@@ -169,18 +149,9 @@ export class FileSystemHandler {
    */
   async create_folder(folder_name) {
     try {
-      const new_folder = await this.fetch_api(
-        "http://localhost:3000/projects/folders",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            folder_id: this.active_folder.id,
-            folder_name: folder_name,
-          }),
-        }
+      const new_folder = await BackendClient.create_folder(
+        this.active_folder.id,
+        folder_name
       );
 
       this.active_folder.children.push(
@@ -197,14 +168,7 @@ export class FileSystemHandler {
    */
   async rename_folder_by_id(id, new_name) {
     try {
-      await this.fetch_api(`http://localhost:3000/folders/${id}/rename`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ new_name }),
-      });
-
+      await BackendClient.rename_folder_by_id(id, new_name);
       const folder = this.get_folder_by_id(id);
       if (folder) folder.name = new_name;
     } catch (error) {
@@ -217,10 +181,7 @@ export class FileSystemHandler {
    */
   async delete_folder_by_id(folder_id) {
     try {
-      await this.fetch_api(`http://localhost:3000/folders/${folder_id}`, {
-        method: "DELETE",
-      });
-
+      await BackendClient.delete_folder_by_id(folder_id);
       this.active_folder.children = this.active_folder.children.filter(
         (child) => child.id !== folder_id
       );
@@ -234,16 +195,7 @@ export class FileSystemHandler {
    */
   async move_folder_by_id(folder_id, target_folder_id) {
     try {
-      await this.fetch_api(`http://localhost:3000/folders/move`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          folder_id: folder_id,
-          target_folder_id: target_folder_id,
-        }),
-      });
+      await BackendClient.move_folder_by_id(folder_id, target_folder_id);
     } catch (error) {
       console.error("Error moving folder:", error);
     }
@@ -254,16 +206,7 @@ export class FileSystemHandler {
    */
   async move_file_by_id(file_id, target_folder_id) {
     try {
-      await this.fetch_api(`http://localhost:3000/files/move`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          file_id: file_id,
-          target_folder_id: target_folder_id,
-        }),
-      });
+      await BackendClient.move_file_by_id(file_id, target_folder_id);
     } catch (error) {
       console.error("Error moving file:", error);
     }
@@ -273,67 +216,31 @@ export class FileSystemHandler {
    * Creates a new file.
    */
   async create_file(file_name, file_type, matrix_data = null) {
+    if (file_type === "png" && !matrix_data) {
+      matrix_data = Array.from({ length: 64 }, () =>
+        Array(64).fill([0, 0, 0, 0])
+      );
+    }
     try {
-      const body = {
-        name: file_name,
-        type: file_type,
-      };
-
-      if (file_type === "png") {
-        if (!matrix_data) {
-          matrix_data = [];
-          for (let y = 0; y < 64; y++) {
-            const row = [];
-            for (let x = 0; x < 64; x++) {
-              row.push([0, 0, 0, 0]);
-            }
-            matrix_data.push(row);
-          }
-        }
-        body.matrix_data = matrix_data;
-      }
-
-      console.log("Creating file with body:", body);
-
-      const new_file = await this.fetch_api(
-        `http://localhost:3000/folders/${this.active_folder.id}/files`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }
+      const new_file = await BackendClient.create_file(
+        this.active_folder.id,
+        file_name,
+        file_type,
+        matrix_data
       );
 
-      this.active_folder.children.push(
-        new File(
-          new_file.id,
-          new_file.name,
-          new_file.folder_id,
-          new_file.type,
-          new_file.url
-        )
+      const fileObject = new File(
+        new_file.id,
+        new_file.name,
+        new_file.folder_id,
+        new_file.type,
+        new_file.filepath,
+        JSON.parse(new_file.matrix_data)
       );
+      this.active_folder.children.push(fileObject);
       this.read_directory_content();
     } catch (error) {
       console.error("Error creating file:", error);
-    }
-  }
-
-  /**
-   * Fetches a file by its ID.
-   * @param {number} file_id
-   */
-  async get_file(file_id) {
-    try {
-      const file = await this.fetch_api(
-        `http://localhost:3000/files/${file_id}`
-      );
-      return file;
-    } catch (error) {
-      console.error(`Error fetching file with ID ${file_id}:`, error);
-      throw error;
     }
   }
 
@@ -342,14 +249,7 @@ export class FileSystemHandler {
    */
   async rename_file_by_id(id, new_name) {
     try {
-      await this.fetch_api(`http://localhost:3000/files/${id}/rename`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ new_name }),
-      });
-
+      await BackendClient.rename_file_by_id(id, new_name);
       const file = this.get_file_by_id(id);
       if (file) file.name = new_name;
     } catch (error) {
@@ -362,10 +262,7 @@ export class FileSystemHandler {
    */
   async delete_file_by_id(file_id) {
     try {
-      await this.fetch_api(`http://localhost:3000/files/${file_id}`, {
-        method: "DELETE",
-      });
-
+      await BackendClient.delete_file_by_id(file_id);
       this.active_folder.children = this.active_folder.children.filter(
         (child) => child.id !== file_id
       );

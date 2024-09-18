@@ -1,7 +1,14 @@
 import { Folder } from "../../../../EditorTool/JS/Classes/Folder.js";
 import { File } from "../../../../EditorTool/JS/Classes/File.js";
+import { FileSystemHandler } from "../Service/FileSystemHandler.js";
+import { FileAreaView } from "../../Elements/FileAreaView.js";
 
 export class RenameItemHandler {
+  /**
+   *
+   * @param {FileSystemHandler} file_system_handler
+   * @param {FileAreaView} file_area_view
+   */
   constructor(file_system_handler, file_area_view) {
     this.file_system_handler = file_system_handler;
     this.file_area_view = file_area_view;

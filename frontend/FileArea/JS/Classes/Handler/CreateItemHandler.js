@@ -1,6 +1,11 @@
+import { FileAreaView } from "../../Elements/FileAreaView.js";
+import { FileSystemHandler } from "../Service/FileSystemHandler.js";
+
 export class CreateItemHandler {
   /**
    * Handles the creation of new items (files or folders) in the file system.
+   * @param {FileSystemHandler} file_system_handler
+   * @param {FileAreaView} file_view
    */
   constructor(file_system_handler, file_view) {
     this.file_system_handler = file_system_handler;

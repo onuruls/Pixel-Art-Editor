@@ -7,6 +7,11 @@ const { Op } = require("sequelize");
 class FileService {
   /**
    * Service for managing file-related operations
+   * @param {number} folder_id
+   * @param {string} name
+   * @param {string} type
+   * @param {Array<Array<string>>} matrix_data
+   * @returns {Promise<File>}
    */
   async add_file(folder_id, name, type, matrix_data = null) {
     if (!["png", "tmx"].includes(type)) {
@@ -28,14 +33,16 @@ class FileService {
       type,
       filepath: file_path,
       folder_id,
-      matrix_data: matrix_data ? JSON.stringify(matrix_data) : null,
+      matrix_data: JSON.stringify(matrix_data),
     });
 
     return new_file;
   }
 
   /**
-   * Service to retrieve a file by its ID.
+   * Service to retrieve a file by its ID
+   * @param {number} id
+   * @returns {Promise<File>}
    */
   async get_file(id) {
     const file = await File.findByPk(id);
@@ -48,12 +55,13 @@ class FileService {
       type: file.type,
       folder_id: file.folder_id,
       url: file.filepath,
-      matrix_data: file.matrix_data ? JSON.parse(file.matrix_data) : null,
+      matrix_data: JSON.parse(file.matrix_data),
     };
   }
 
   /**
    * Service to delete a file and its record
+   * @param {number} id
    */
   async delete_file(id) {
     const file = await File.findByPk(id);
@@ -65,6 +73,8 @@ class FileService {
 
   /**
    * Service to rename a file and update its filepath
+   * @param {number} id
+   * @param {string} new_name
    */
   async rename_file(id, new_name) {
     const file = await File.findByPk(id);
@@ -105,6 +115,9 @@ class FileService {
 
   /**
    * Service to move a file to a new folder
+   * @param {number} file_id
+   * @param {number} target_folder_id
+   * @returns {Promise<File>}
    */
   async move_file_to_folder(file_id, target_folder_id) {
     const file = await File.findByPk(file_id);

@@ -82,8 +82,8 @@ const File = sequelize.define(
       allowNull: false,
     },
     matrix_data: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     folder_id: {
       type: DataTypes.INTEGER,

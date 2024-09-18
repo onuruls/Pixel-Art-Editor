@@ -276,24 +276,6 @@ app.get("/files/:id", async (req, res) => {
 });
 
 /**
- * Serves the file content by file ID
- */
-app.get("/files/:id/content", async (req, res) => {
-  const file_id = req.params.id;
-
-  try {
-    const file = await db_client.get_file(file_id);
-    if (!file) {
-      return res.status(404).send("File not found");
-    }
-    res.sendFile(file.filepath);
-  } catch (error) {
-    console.error("Error serving file:", error);
-    res.status(500).send(error);
-  }
-});
-
-/**
  * Renames a file by its ID
  */
 app.put("/files/:id/rename", async (req, res) => {

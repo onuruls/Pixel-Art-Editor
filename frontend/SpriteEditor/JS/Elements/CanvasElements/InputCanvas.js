@@ -19,12 +19,6 @@ export class InputCanvas extends CanvasElement {
    * Initializes the Canvas
    */
   init() {
-    this.canvas.height = 640;
-    this.canvas.width = 640;
-    this.sprite_canvas.addEventListener("canvas_resized", (event) => {
-      this.canvas.width = event.detail.width;
-      this.canvas.height = event.detail.height;
-    });
     this.canvas.addEventListener("mousedown", (event) => {
       this.sprite_editor.selected_tool.mouse_down(event);
     });

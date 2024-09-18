@@ -23,9 +23,9 @@ export class MapEditor extends HTMLElement {
     super();
     this.editor_tool = editor_tool;
     this.selected_tool = null;
-    this.layer_manager = new LayerManager();
-    this.width = 24;
-    this.height = 24;
+    this.layer_manager = new LayerManager(this);
+    this.width = 100;
+    this.height = 100;
     this.map_canvas_width = 0;
     this.map_canvas_height = 0;
     this.canvas_wrapper_width = 0;
@@ -114,9 +114,9 @@ export class MapEditor extends HTMLElement {
   appendComponents() {
     this.map_tools = new MapEditorTools(this);
     this.map_canvas = new MapEditorCanvas(this);
+    this.canvas_wrapper = this.map_canvas.querySelector(".canvas-wrapper");
     this.map_selection_area = new MapEditorSelectionArea(this);
     this.append(this.map_tools, this.map_canvas, this.map_selection_area);
-    this.canvas_wrapper = this.map_canvas.querySelector(".canvas-wrapper");
   }
 
   /**
@@ -190,6 +190,7 @@ export class MapEditor extends HTMLElement {
     this.layer_manager.remove_layer(index);
     this.map_canvas.remove_layer_canvas(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -203,6 +204,7 @@ export class MapEditor extends HTMLElement {
       this.layer_manager.is_layer_visible(index)
     );
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -212,6 +214,7 @@ export class MapEditor extends HTMLElement {
   switch_layer(index) {
     this.layer_manager.switch_layer(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -222,6 +225,7 @@ export class MapEditor extends HTMLElement {
       this.apply_undo(point);
     });
     this.destroy_selection();
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -231,6 +235,7 @@ export class MapEditor extends HTMLElement {
     this.layer_manager.redo_last_action((point) => {
       this.apply_redo(point);
     });
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -324,6 +329,14 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Sets the pixel size for drawing.
+   * @param {Number} size
+   */
+  set_pixel_size(size) {
+    this.pixel_size = size;
+  }
+
+  /**
    * Starts gouping pen points for the action stack
    */
   start_action_buffer() {
@@ -341,6 +354,7 @@ export class MapEditor extends HTMLElement {
       current_stack.push(this.action_buffer);
     }
     this.action_buffer = [];
+    this.dispatchEvent(new CustomEvent("reload_map_preview"));
   }
 
   /**
@@ -357,27 +371,11 @@ export class MapEditor extends HTMLElement {
               this.previous_changed = { x: x, y: y };
               return;
             }
-            // this.action_buffer.push({
-            //   x: xi,
-            //   y: yj,
-            //   layer: this.layer_manager.active_layer_index,
-            //   prev_asset: prev_asset,
-            //   asset: this.selected_asset,
-            // });
             this.update_line(
               [this.previous_changed, { x, y }],
               this.selected_asset,
               "pen_matrix_changed"
             );
-            // this.dispatchEvent(
-            //   new CustomEvent("pen_matrix_changed", {
-            //     detail: {
-            //       x: xi,
-            //       y: yj,
-            //       asset: img,
-            //     },
-            //   })
-            // );
           });
           this.previous_changed = { x: x, y: y };
         })
@@ -605,31 +603,34 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   *  Draws a straight Line on the Canvas
-   * @param {Array<{x: Number, y: Number, prev_asset: Array<Number>}>} shape_points
+   * Draws a shape to the matrix used for rectangles, circles, and lines
+   * @param {Array<{x: Number, y: Number}>} shape_points
    * @param {Boolean} final
    */
-  draw_shape_matrix(shape_points, final) {
+  draw_shape_matrix(shape_points, final = false) {
     if (this.selected_asset) {
       this.load_image(this.selected_asset).then((img) => {
+        const expanded_shape_points = this.expand_shape_points(shape_points);
         if (final) {
           this.start_action_buffer();
           const content = this.layer_manager.get_active_layer();
-          shape_points.forEach((point) => {
+          expanded_shape_points.forEach((point) => {
             const prev_asset = content[point.x][point.y];
-            this.action_buffer.push({
-              x: point.x,
-              y: point.y,
-              layer: this.layer_manager.active_layer_index,
-              prev_asset: prev_asset,
-              asset: this.selected_asset,
-            });
-            content[point.x][point.y] = this.selected_asset;
+            if (prev_asset !== this.selected_asset) {
+              this.action_buffer.push({
+                x: point.x,
+                y: point.y,
+                layer: this.layer_manager.active_layer_index,
+                prev_asset: prev_asset,
+                asset: this.selected_asset,
+              });
+              content[point.x][point.y] = this.selected_asset;
+            }
           });
           this.dispatchEvent(
             new CustomEvent("draw_shape", {
               detail: {
-                points: shape_points,
+                points: expanded_shape_points,
                 asset: img,
               },
             })
@@ -640,7 +641,7 @@ export class MapEditor extends HTMLElement {
           this.dispatchEvent(
             new CustomEvent("draw_temp_shape", {
               detail: {
-                points: shape_points,
+                points: expanded_shape_points,
                 asset: img,
               },
             })
@@ -648,6 +649,21 @@ export class MapEditor extends HTMLElement {
         }
       });
     }
+  }
+
+  /**
+   * Expands the given shape points according to the pixel size
+   * @param {Array<{x: Number, y: Number}>} shape_points
+   * @returns {Array<{x: Number, y: Number}>}
+   */
+  expand_shape_points(shape_points) {
+    const expanded_points = [];
+    shape_points.forEach((point) => {
+      this.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
+        expanded_points.push({ x: xi, y: yj });
+      });
+    });
+    return expanded_points;
   }
 
   /**
@@ -1196,6 +1212,23 @@ export class MapEditor extends HTMLElement {
       });
     });
   }
+
+  /**
+   * Scrolls the canvas container to the x,y position
+   * Called when preview is clicked
+   * @param {Number} x
+   * @param {Number} y
+   */
+  scroll_to_location(x, y) {
+    this.canvas_wrapper.scrollLeft = x;
+    this.canvas_wrapper.scrollTop = y;
+    this.canvas_wrapper.dispatchEvent(new Event("scroll"));
+  }
+
+  /**
+   * Saves the File in the Backend
+   */
+  save_file() {}
 }
 
 customElements.define("map-editor", MapEditor);

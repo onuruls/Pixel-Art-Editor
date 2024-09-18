@@ -5,6 +5,7 @@ import { TempCanvas } from "./CanvasElements/TempCanvas.js";
 import { HoverCanvas } from "./CanvasElements/HoverCanvas.js";
 import { InputCanvas } from "./CanvasElements/InputCanvas.js";
 import { OnionSkinCanvas } from "./CanvasElements/OnionSkinCanvas.js";
+import { BackgroundCanvas } from "./CanvasElements/BackgroundCanvas.js";
 
 export class SpriteCanvas extends SpriteEditorPart {
   /**
@@ -15,12 +16,22 @@ export class SpriteCanvas extends SpriteEditorPart {
     super(sprite_editor);
     this.shape_holder = [];
     this.selected_points_holder = [];
+    this.background_canvas = new BackgroundCanvas(this);
     this.onion_skin_canvas = new OnionSkinCanvas(this);
     this.drawing_canvas = new DrawingCanvas(this);
     this.temp_canvas = new TempCanvas(this);
     this.hover_canvas = new HoverCanvas(this);
     this.input_canvas = new InputCanvas(this);
     this.canvas_wrapper = null;
+
+    this.canvas_array = [
+      this.background_canvas,
+      this.onion_skin_canvas,
+      this.drawing_canvas,
+      this.temp_canvas,
+      this.hover_canvas,
+      this.input_canvas,
+    ];
   }
 
   /**
@@ -36,27 +47,25 @@ export class SpriteCanvas extends SpriteEditorPart {
    */
   init() {
     this.canvas_wrapper = this.querySelector(".canvas-wrapper");
-    this.canvas_wrapper.append(this.onion_skin_canvas);
+    this.canvas_wrapper.append(this.background_canvas);
     this.canvas_wrapper.append(this.drawing_canvas);
+    this.canvas_wrapper.append(this.onion_skin_canvas);
     this.canvas_wrapper.append(this.temp_canvas);
     this.canvas_wrapper.append(this.hover_canvas);
     this.canvas_wrapper.append(this.input_canvas);
-    this.drawing_canvas.canvas.addEventListener("resize", (event) => {
-      this.drawing_canvas.canvas.height =
-        event.target.getBoundingClientRect().height;
-      this.drawing_canvas.canvas.width =
-        event.target.getBoundingClientRect().width;
-      this.dispatchEvent(
-        new CustomEvent("canvas_resized", {
-          detail: {
-            height: event.target.getBoundingClientRect().height,
-            width: event.target.getBoundingClientRect().width,
-          },
-        })
-      );
-    });
     this.canvas_wrapper.addEventListener("contextmenu", (event) => {
       event.preventDefault();
+    });
+  }
+
+  /**
+   * Updates the size of all canvas objects
+   */
+  set_canvas_sizes(width, height) {
+    [...this.canvas_array].forEach((canvas) => {
+      canvas.revert_canvas();
+      canvas.canvas.width = width;
+      canvas.canvas.height = height;
     });
   }
 }
