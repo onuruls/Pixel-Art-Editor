@@ -1,3 +1,4 @@
+import { BackendClient } from "../../../BackendClient/BackendClient.js";
 import { Project } from "../Classes/Project.js";
 import { EditorTool } from "./EditorTool.js";
 import { AddProjectInputs } from "./TitleScreen/AddProjectInputs.js";
@@ -50,26 +51,13 @@ export class TitleScreen extends HTMLElement {
    * @param {String} project_name
    */
   async submit_button_clicked(project_name) {
-    const response = await fetch("http://localhost:3000/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: project_name }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const projectData = await response.json();
-
+    const project_data = await BackendClient.create_new_project(project_name);
     const new_project = new Project(
-      projectData.id,
-      projectData.name,
-      projectData.createdAt,
-      projectData.root_folder_id,
-      projectData.root_folder
+      project_data.id,
+      project_data.name,
+      project_data.createdAt,
+      project_data.root_folder_id,
+      project_data.root_folder
     );
     this.editor_tool.set_project(new_project);
   }
@@ -79,12 +67,7 @@ export class TitleScreen extends HTMLElement {
    * @param {Event} event
    */
   async load_project_clicked(event) {
-    const response = await fetch("http://localhost:3000/projects");
-    if (!response.ok) {
-      throw new Error("Error fetching projects.");
-    }
-
-    let projects = await response.json();
+    let projects = await BackendClient.get_project_list();
     projects = projects.map((project) => {
       return new Project(
         project.id,
