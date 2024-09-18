@@ -4,6 +4,7 @@ import { FileArea } from "../../../FileArea/JS/Elements/FileArea.js";
 import { MapEditor } from "../../../MapEditor/JS/Elements/MapEditor.js";
 import { TitleScreen } from "./TitleScreen.js";
 import { Project } from "../Classes/Project.js";
+import { BackendClient } from "../../../BackendClient/BackendClient.js";
 
 export class EditorTool extends HTMLElement {
   constructor() {
@@ -66,10 +67,7 @@ export class EditorTool extends HTMLElement {
    * @param {Project} project
    */
   async set_project(project) {
-    const response = await fetch(
-      `http://localhost:3000/projects/${project.id}`
-    );
-    const resp_project = await response.json();
+    const resp_project = await BackendClient.get_project_by_id(project.id);
     project.build_project_structure(resp_project.root_folder);
     this.project = project;
     this.title_screen.remove();

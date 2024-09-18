@@ -1,6 +1,8 @@
+import { BackendClient } from "../../../../BackendClient/BackendClient.js";
 import { Util } from "../../../../Util/Util.js";
 import { TitleScreen } from "../TitleScreen.js";
 import { ProjectView } from "./ProjectView.js";
+import { Project } from "../../Classes/Project.js";
 
 export class ProjectsOverview extends HTMLElement {
   /**
@@ -55,6 +57,10 @@ export class ProjectsOverview extends HTMLElement {
     });
   }
 
+  /**
+   * @param {Project} project
+   * @returns {HTMLDivElement}
+   */
   create_project_buttons(project) {
     const project_buttons = Util.create_element(
       "div",
@@ -99,21 +105,7 @@ export class ProjectsOverview extends HTMLElement {
     const new_name = prompt(`Enter new name for project ${project.name}:`);
     if (new_name) {
       try {
-        const response = await fetch(
-          `http://localhost:3000/projects/${project.id}/rename`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ new_name }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to rename project.");
-        }
-
+        await BackendClient.rename_project(project.id, new_name);
         console.log(`Project ${project.id} renamed to ${new_name}`);
         project.name = new_name;
         this.render_loaded_projects(this.projects);
@@ -130,17 +122,7 @@ export class ProjectsOverview extends HTMLElement {
   async delete_project(project) {
     if (confirm(`Are you sure you want to delete project ${project.name}?`)) {
       try {
-        const response = await fetch(
-          `http://localhost:3000/projects/${project.id}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to delete project.");
-        }
-
+        await BackendClient.delete_project(project.id);
         console.log(`Project ${project.id} deleted.`);
         this.projects = this.projects.filter((p) => p.id !== project.id);
         this.render_loaded_projects(this.projects);

@@ -1,7 +1,14 @@
+import { BackendClient } from "../../../../BackendClient/BackendClient.js";
+import { EditorTool } from "../EditorTool.js";
+
 /**
  * Header bar for the editor tool
  */
 export class TopMenu extends HTMLElement {
+  /**
+   *
+   * @param {EditorTool} editor_tool
+   */
   constructor(editor_tool) {
     super();
     this.classList.add("top-menu");
@@ -120,19 +127,10 @@ export class TopMenu extends HTMLElement {
 
     if (new_name && new_name !== this.project_name) {
       try {
-        const response = await fetch(
-          `http://localhost:3000/projects/${this.editor_tool.project.id}/rename`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ new_name }),
-          }
+        await BackendClient.rename_project(
+          this.editor_tool.project.id,
+          new_name
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to rename project.");
-        }
-
         this.editor_tool.project.name = new_name;
         this.project_name = new_name;
       } catch (error) {

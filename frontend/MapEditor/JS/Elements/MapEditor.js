@@ -1224,6 +1224,11 @@ export class MapEditor extends HTMLElement {
     this.canvas_wrapper.scrollTop = y;
     this.canvas_wrapper.dispatchEvent(new Event("scroll"));
   }
+
+  /**
+   * Saves the File in the Backend
+   */
+  save_file() {}
 }
 
 customElements.define("map-editor", MapEditor);
