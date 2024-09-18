@@ -1,9 +1,13 @@
+import { FileArea } from "../../../Elements/FileArea.js";
+
 export class ContextMenu {
   /**
    * @param {HTMLElement} menu_element
+   * @param {FileArea} file_area
    */
-  constructor(menu_element) {
+  constructor(menu_element, file_area) {
     this.menu_element = menu_element;
+    this.file_area = file_area;
   }
 
   /**

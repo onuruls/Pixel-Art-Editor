@@ -1,3 +1,4 @@
+import { FileArea } from "../../../Elements/FileArea.js";
 import { ContextMenuAction } from "./ContextMenuAction.js";
 
 /**
@@ -8,8 +9,7 @@ export class DeleteItemAction extends ContextMenuAction {
    * @param {FileArea} file_area
    */
   constructor(file_area) {
-    super();
-    this.file_area = file_area;
+    super(file_area);
   }
 
   /**

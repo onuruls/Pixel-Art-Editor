@@ -1,7 +1,8 @@
+import { FileAreaView } from "../../Elements/FileAreaView.js";
+
 export class FileContextMenuHandler {
   /**
    * Handles the context menu in the file area.
-   *
    * @param {FileAreaView} file_area_view
    */
   constructor(file_area_view) {

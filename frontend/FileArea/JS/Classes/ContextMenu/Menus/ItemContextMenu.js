@@ -11,9 +11,7 @@ export class ItemContextMenu extends ContextMenu {
    * @param {HTMLElement} menu_element
    */
   constructor(file_area, menu_element) {
-    super(menu_element);
-    this.file_area = file_area;
-
+    super(menu_element, file_area);
     this.actions = {
       rename_item: new RenameItemAction(this.file_area),
       delete_item: new DeleteItemAction(this.file_area),
