@@ -279,9 +279,21 @@ export class FileSystemHandler {
         type: file_type,
       };
 
-      if (file_type === "png" && matrix_data) {
+      if (file_type === "png") {
+        if (!matrix_data) {
+          matrix_data = [];
+          for (let y = 0; y < 64; y++) {
+            const row = [];
+            for (let x = 0; x < 64; x++) {
+              row.push([0, 0, 0, 0]);
+            }
+            matrix_data.push(row);
+          }
+        }
         body.matrix_data = matrix_data;
       }
+
+      console.log("Creating file with body:", body);
 
       const new_file = await this.fetch_api(
         `http://localhost:3000/folders/${this.active_folder.id}/files`,
@@ -306,6 +318,22 @@ export class FileSystemHandler {
       this.read_directory_content();
     } catch (error) {
       console.error("Error creating file:", error);
+    }
+  }
+
+  /**
+   * Fetches a file by its ID.
+   * @param {number} file_id
+   */
+  async get_file(file_id) {
+    try {
+      const file = await this.fetch_api(
+        `http://localhost:3000/files/${file_id}`
+      );
+      return file;
+    } catch (error) {
+      console.error(`Error fetching file with ID ${file_id}:`, error);
+      throw error;
     }
   }
 

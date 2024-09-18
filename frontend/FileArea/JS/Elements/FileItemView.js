@@ -40,7 +40,10 @@ export class FileItemView extends ItemView {
     super.init();
     switch (this.type) {
       case "png":
-        this.icon.addEventListener("dblclick", this.open_png_file.bind(this));
+        this.icon.addEventListener(
+          "dblclick",
+          this.open_sprite_file.bind(this)
+        );
         break;
       case "tmx":
         //TODO: Implement TMX file opening
@@ -51,23 +54,25 @@ export class FileItemView extends ItemView {
   /**
    * Opens the sprite file
    */
-  open_png_file() {
-    const file_meta_data = this.file_area.file_system_handler.get_file_by_id(
-      this.id
-    );
-    const file_path = `../../../../uploads/${file_meta_data.name}.png`;
-    const file = new File([file_path], `${file_meta_data.name}.png`, {
-      type: "image/png",
-    });
-    switch (this.file_area.selected_editor) {
-      case "SpriteEditor":
-        this.file_area.editor_tool.sprite_editor.import_from_png(file);
-        break;
-      case "MapEditor":
-        //TODO: Implement map editor
-        console.log("Map Editor");
-        break;
-    }
+  open_sprite_file() {
+    const file_id = this.id;
+    const file_system_handler = this.file_area_view.file_system_handler;
+
+    file_system_handler
+      .get_file(file_id)
+      .then((fileData) => {
+        console.log("Loaded sprite file:", fileData);
+        if (fileData.type === "png" && fileData.matrix_data) {
+          console.log("Matrix data:", fileData.matrix_data);
+          const spriteEditor = this.file_area.editor_tool.sprite_editor;
+          spriteEditor.handle_loaded_matrix(fileData.matrix_data);
+        } else {
+          console.error("Unsupported file type or missing matrix data.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading sprite file:", error);
+      });
   }
 
   /**
