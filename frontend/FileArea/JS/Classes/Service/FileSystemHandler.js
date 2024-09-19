@@ -45,7 +45,8 @@ export class FileSystemHandler {
         entry.name,
         entry.folder_id,
         entry.type,
-        entry.url
+        entry.filepath,
+        JSON.parse(entry.matrix_data)
       );
     } else {
       console.error("Unknown entry type", entry);
@@ -214,22 +215,29 @@ export class FileSystemHandler {
   /**
    * Creates a new file.
    */
-  async create_file(file_name, file_type) {
+  async create_file(file_name, file_type, matrix_data = null) {
+    if (file_type === "png" && !matrix_data) {
+      matrix_data = Array.from({ length: 64 }, () =>
+        Array(64).fill([0, 0, 0, 0])
+      );
+    }
     try {
       const new_file = await BackendClient.create_file(
         this.active_folder.id,
         file_name,
-        file_type
+        file_type,
+        matrix_data
       );
-      this.active_folder.children.push(
-        new File(
-          new_file.id,
-          new_file.name,
-          new_file.folder_id,
-          new_file.type,
-          new_file.url
-        )
+
+      const fileObject = new File(
+        new_file.id,
+        new_file.name,
+        new_file.folder_id,
+        new_file.type,
+        new_file.filepath,
+        JSON.parse(new_file.matrix_data)
       );
+      this.active_folder.children.push(fileObject);
       this.read_directory_content();
     } catch (error) {
       console.error("Error creating file:", error);

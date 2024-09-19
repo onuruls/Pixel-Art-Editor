@@ -216,7 +216,7 @@ app.put("/files/move", async (req, res) => {
  * Adds a new File to a folder with a dummy file
  */
 app.post("/folders/:folder_id/files", async (req, res) => {
-  const { name, type } = req.body;
+  const { name, type, matrix_data } = req.body;
   const folder_id = req.params.folder_id;
 
   if (!name) {
@@ -231,9 +231,20 @@ app.post("/folders/:folder_id/files", async (req, res) => {
   }
 
   try {
-    const file = await db_client.add_file(folder_id, name, type);
+    const file = await db_client.add_file(folder_id, name, type, matrix_data);
+
     if (type === "png") {
       const png = new PNG({ width: 64, height: 64 });
+      for (let y = 0; y < 64; y++) {
+        for (let x = 0; x < 64; x++) {
+          const idx = (64 * y + x) << 2;
+          const pixel = matrix_data[y][x];
+          png.data[idx] = pixel[0];
+          png.data[idx + 1] = pixel[1];
+          png.data[idx + 2] = pixel[2];
+          png.data[idx + 3] = pixel[3];
+        }
+      }
       png.pack().pipe(fs.createWriteStream(file.filepath));
     } else {
       const dummyContent = "Dummy TMX content";
@@ -260,24 +271,6 @@ app.get("/files/:id", async (req, res) => {
     res.status(200).send(file);
   } catch (error) {
     console.error("Error fetching file:", error);
-    res.status(500).send(error);
-  }
-});
-
-/**
- * Serves the file content by file ID
- */
-app.get("/files/:id/content", async (req, res) => {
-  const file_id = req.params.id;
-
-  try {
-    const file = await db_client.get_file(file_id);
-    if (!file) {
-      return res.status(404).send("File not found");
-    }
-    res.sendFile(file.filepath);
-  } catch (error) {
-    console.error("Error serving file:", error);
     res.status(500).send(error);
   }
 });
