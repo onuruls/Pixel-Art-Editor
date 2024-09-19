@@ -16,6 +16,9 @@ export class TopMenu extends HTMLElement {
     this.project_name = "Untitled Project";
     this.project_container = null;
     this.project_name_element = null;
+    this.file_name = "Untitled File";
+    this.file_container = null;
+    this.file_name_element = null;
     this.editor_name = "Map Editor";
     this.editor_button = this.create_editor_button();
     this.appendChild(this.editor_button);
@@ -31,7 +34,9 @@ export class TopMenu extends HTMLElement {
       this.editor_tool.change_editor.bind(this.editor_tool)
     );
     const project_container = this.create_project_container();
+    const file_container = this.create_file_container();
     this.appendChild(project_container);
+    this.appendChild(file_container);
   }
 
   /**
@@ -58,8 +63,8 @@ export class TopMenu extends HTMLElement {
     const project_label = document.createElement("span");
     project_label.textContent = "Project: ";
 
-    this.project_name_element = document.createElement("span");
     this.project_name = this.editor_tool.project?.name || this.project_name;
+    this.project_name_element = document.createElement("span");
     this.project_name_element.textContent = this.project_name;
 
     this.project_container.appendChild(project_label);
@@ -70,6 +75,34 @@ export class TopMenu extends HTMLElement {
     );
 
     return this.project_container;
+  }
+
+  /**
+   * @returns {HTMLDivElement}
+   * */
+  create_file_container() {
+    this.file_container = document.createElement("div");
+    this.file_container.classList.add("file-container");
+
+    const file_label = document.createElement("span");
+    file_label.textContent = "File: ";
+    // TODO: remove unusued file_name
+    this.file_name = this.editor_tool.active_file?.name || this.file_name;
+    this.file_name_element = document.createElement("span");
+    this.file_name_element.textContent = this.file_name;
+
+    this.file_container.appendChild(file_label);
+    this.file_container.appendChild(this.file_name_element);
+
+    return this.file_container;
+  }
+
+  /**
+   * Updates the file name displayed in the file container
+   * @param {string} file_name
+   */
+  update_file_name(file_name) {
+    this.file_name_element.textContent = file_name || "Untitled File";
   }
 
   /**

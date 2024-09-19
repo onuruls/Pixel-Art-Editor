@@ -2,9 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
-const { PNG } = require("pngjs");
-const fs = require("fs");
-const path = require("path");
 
 const app = express();
 
@@ -213,7 +210,7 @@ app.put("/files/move", async (req, res) => {
 });
 
 /**
- * Adds a new File to a folder with a dummy file
+ * Adds a new File to a folder
  */
 app.post("/folders/:folder_id/files", async (req, res) => {
   const { name, type, matrix_data } = req.body;
@@ -232,24 +229,6 @@ app.post("/folders/:folder_id/files", async (req, res) => {
 
   try {
     const file = await db_client.add_file(folder_id, name, type, matrix_data);
-
-    if (type === "png") {
-      const png = new PNG({ width: 64, height: 64 });
-      for (let y = 0; y < 64; y++) {
-        for (let x = 0; x < 64; x++) {
-          const idx = (64 * y + x) << 2;
-          const pixel = matrix_data[y][x];
-          png.data[idx] = pixel[0];
-          png.data[idx + 1] = pixel[1];
-          png.data[idx + 2] = pixel[2];
-          png.data[idx + 3] = pixel[3];
-        }
-      }
-      png.pack().pipe(fs.createWriteStream(file.filepath));
-    } else {
-      const dummyContent = "Dummy TMX content";
-      fs.writeFileSync(file.filepath, dummyContent);
-    }
     res.status(201).send(file);
   } catch (error) {
     console.error("Error creating file:", error);
@@ -272,6 +251,30 @@ app.get("/files/:id", async (req, res) => {
   } catch (error) {
     console.error("Error fetching file:", error);
     res.status(500).send(error);
+  }
+});
+
+/**
+ * Updates the content of an existing file (PNG).
+ */
+app.put("/files/:id", async (req, res) => {
+  const file_id = req.params.id;
+  const matrix_data = JSON.parse(req.body.content);
+
+  if (!matrix_data) {
+    return res.status(400).send("Matrix data is required to update the file");
+  }
+
+  try {
+    const file = await db_client.get_file(file_id);
+    if (!file) {
+      return res.status(404).send("File not found");
+    }
+    await db_client.write_file(file_id, matrix_data);
+    res.status(200).send("File updated");
+  } catch (error) {
+    console.error("Error updating file:", error);
+    res.status(500).send("Error updating file");
   }
 });
 

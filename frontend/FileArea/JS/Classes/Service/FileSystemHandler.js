@@ -214,6 +214,10 @@ export class FileSystemHandler {
 
   /**
    * Creates a new file.
+   * @param {string} file_name
+   * @param {string} file_type
+   * @param {Array<Array<String>>} matrix_data
+   * @returns {Promise<File>}
    */
   async create_file(file_name, file_type, matrix_data = null) {
     if (file_type === "png" && !matrix_data) {
@@ -239,13 +243,31 @@ export class FileSystemHandler {
       );
       this.active_folder.children.push(fileObject);
       this.read_directory_content();
+      return fileObject;
     } catch (error) {
       console.error("Error creating file:", error);
     }
   }
 
   /**
+   * Writes data to an existing file.
+   * @param {File} file
+   * @param {String} content
+   * @returns {Promise<void>}
+   */
+  async write_file(file, content) {
+    try {
+      await BackendClient.write_file(file.id, content);
+    } catch (error) {
+      console.error(`Error writing to file ${file.name}:`, error);
+    }
+  }
+
+  /**
    * Renames a file by its ID.
+   * @param {number} id
+   * @param {string} new_name
+   * @returns {Promise<void>}
    */
   async rename_file_by_id(id, new_name) {
     try {

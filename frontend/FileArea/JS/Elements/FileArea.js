@@ -96,6 +96,30 @@ export class FileArea extends HTMLElement {
   }
 
   /**
+   * Opens the sprite file
+   * @param {number} file_id
+   */
+  async open_sprite_file(file_id) {
+    if (!this.file_system_handler) {
+      console.error("File system handler is not initialized yet.");
+      return;
+    }
+
+    const fileData = this.file_system_handler.get_file_by_id(file_id);
+    if (fileData) {
+      if (fileData.type === "png" && fileData.matrix_data) {
+        this.editor_tool.set_active_file(fileData);
+        const spriteEditor = this.editor_tool.sprite_editor;
+        spriteEditor.handle_loaded_matrix(fileData.matrix_data);
+      } else {
+        console.error("Unsupported file type or missing matrix data.");
+      }
+    } else {
+      console.error("Error loading sprite file.");
+    }
+  }
+
+  /**
    * Creates a new folder or file element using the CreateItemHandler.
    * If no file type is specified, it defaults to creating a folder.
    * @param {string} fileType

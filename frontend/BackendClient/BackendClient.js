@@ -228,9 +228,31 @@ export class BackendClient {
       }),
     });
     if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
+      throw new Error(response.statusText);
     }
     return await response.json();
+  }
+
+  /**
+   * Sends PUT-Request to update the content of a file.
+   * @param {String} file_id
+   * @param {String} content
+   * @returns {any}
+   */
+  static async write_file(file_id, content) {
+    const response = await fetch(`http://localhost:3000/files/${file_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: content,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    return await response.text();
   }
 
   /**

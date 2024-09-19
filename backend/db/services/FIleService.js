@@ -1,4 +1,6 @@
 const { File } = require("../db");
+const fs = require("fs");
+const { PNG } = require("pngjs");
 const file_system_service = require("./FileSystemService");
 const helper = require("../utils/helpers");
 const path = require("path");
@@ -27,6 +29,14 @@ class FileService {
     }
 
     const file_path = await file_system_service.create_file(name, type);
+
+    if (type === "png" && matrix_data) {
+      const png = this.generate_png(matrix_data);
+      png.pack().pipe(fs.createWriteStream(file_path));
+    } else if (type === "tmx") {
+      const dummyContent = "Dummy TMX content";
+      fs.writeFileSync(file_path, dummyContent);
+    }
 
     const new_file = await File.create({
       name,
@@ -57,6 +67,29 @@ class FileService {
       url: file.filepath,
       matrix_data: JSON.parse(file.matrix_data),
     };
+  }
+
+  /**
+   * Updates the file's matrix data and rewrites the PNG file on disk.
+   * @param {number} file_id
+   * @param {Array<Array<string>>} matrix_data
+   * @returns {Promise<void>}
+   */
+  async write_file(file_id, matrix_data) {
+    const file = await File.findByPk(file_id);
+    if (!file) {
+      throw new Error("File not found");
+    }
+
+    if (file.type === "png") {
+      const png = this.generate_png(matrix_data);
+      png.pack().pipe(fs.createWriteStream(file.filepath));
+    } else {
+      throw new Error("Unsupported file type");
+    }
+
+    file.matrix_data = JSON.stringify(matrix_data);
+    await file.save();
   }
 
   /**
@@ -141,6 +174,26 @@ class FileService {
     await file.save();
 
     return file;
+  }
+
+  /**
+   * Service to generate a PNG image from matrix data
+   * @param {Array<Array<string>>} matrix_data
+   * @returns {PNG}
+   */
+  generate_png(matrix_data) {
+    const png = new PNG({ width: 64, height: 64 });
+    for (let y = 0; y < 64; y++) {
+      for (let x = 0; x < 64; x++) {
+        const idx = (64 * y + x) << 2;
+        const pixel = matrix_data[y][x];
+        png.data[idx] = pixel[0];
+        png.data[idx + 1] = pixel[1];
+        png.data[idx + 2] = pixel[2];
+        png.data[idx + 3] = pixel[3];
+      }
+    }
+    return png;
   }
 }
 

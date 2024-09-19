@@ -18,6 +18,7 @@ export class FileAreaTools extends HTMLElement {
     this.appendChild(this.import_button);
     this.appendChild(this.export_button);
     this.init();
+    this.add_keyboard_shortcuts();
   }
 
   /**
@@ -87,14 +88,7 @@ export class FileAreaTools extends HTMLElement {
    */
   init() {
     this.save_button.addEventListener("click", () => {
-      switch (this.file_area.selected_editor) {
-        case "SpriteEditor":
-          this.file_area.editor_tool.sprite_editor.save_sprite_file();
-          break;
-        case "MapEditor":
-          // TODO: Implement
-          break;
-      }
+      this.save_file();
     });
     this.export_button.addEventListener("click", () => {
       this.file_area.editor_tool.sprite_editor.export_as_png();
@@ -102,6 +96,32 @@ export class FileAreaTools extends HTMLElement {
     this.import_button.addEventListener("click", () => {
       this.file_area.editor_tool.sprite_editor.import_clicked();
     });
+  }
+
+  /**
+   * Adds keyboard shortcut listeners
+   */
+  add_keyboard_shortcuts() {
+    document.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.key === "s") {
+        event.preventDefault();
+        this.save_file();
+      }
+    });
+  }
+
+  /**
+   * Handles the saving of the file
+   */
+  save_file() {
+    switch (this.file_area.selected_editor) {
+      case "SpriteEditor":
+        this.file_area.editor_tool.sprite_editor.save_sprite_file();
+        break;
+      case "MapEditor":
+        // TODO: Implement saving for MapEditor
+        break;
+    }
   }
 }
 
