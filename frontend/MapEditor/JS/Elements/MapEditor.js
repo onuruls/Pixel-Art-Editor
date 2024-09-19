@@ -13,6 +13,7 @@ import { Circle } from "../Tools/Circle.js";
 import { RectangleSelection } from "../Tools/RectangleSelection.js";
 import { IrregularSelection } from "../Tools/IrregularSelection.js";
 import { ShapeSelection } from "../Tools/ShapeSelection.js";
+import { EditorUtil } from "../../../Util/EditorUtil.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -311,24 +312,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Applies the given action to a block of pixels defined by this.pixel_size
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Function} action
-   */
-  apply_to_pixel_block(x, y, action) {
-    for (let i = 0; i < this.pixel_size; i++) {
-      for (let j = 0; j < this.pixel_size; j++) {
-        const xi = x + i;
-        const yj = y + j;
-        if (this.coordinates_in_bounds(xi, yj)) {
-          action(xi, yj);
-        }
-      }
-    }
-  }
-
-  /**
    * Sets the pixel size for drawing.
    * @param {Number} size
    */
@@ -365,18 +348,24 @@ export class MapEditor extends HTMLElement {
     if (this.selected_asset) {
       this.load_image(this.selected_asset)
         .then((img) => {
-          this.apply_to_pixel_block(x, y, (xi, yj) => {
-            const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
-            if (prev_asset === this.selected_asset) {
-              this.previous_changed = { x: x, y: y };
-              return;
+          EditorUtil.apply_to_pixel_block(
+            x,
+            y,
+            this.pixel_size,
+            this.layer_manager.get_active_layer(),
+            (xi, yj) => {
+              const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
+              if (prev_asset === this.selected_asset) {
+                this.previous_changed = { x: x, y: y };
+                return;
+              }
+              this.update_line(
+                [this.previous_changed, { x, y }],
+                this.selected_asset,
+                "pen_matrix_changed"
+              );
             }
-            this.update_line(
-              [this.previous_changed, { x, y }],
-              this.selected_asset,
-              "pen_matrix_changed"
-            );
-          });
+          );
           this.previous_changed = { x: x, y: y };
         })
         .catch((error) => {
@@ -411,17 +400,23 @@ export class MapEditor extends HTMLElement {
    * @param {Number} y
    */
   eraser_change_matrix(x, y) {
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
-      if (prev_asset !== "") {
-        this.update_line(
-          [this.previous_changed, { x, y }],
-          "",
-          "eraser_matrix_changed"
-        );
+    EditorUtil.apply_to_pixel_block(
+      x,
+      y,
+      this.pixel_size,
+      this.layer_manager.get_active_layer(),
+      (xi, yj) => {
+        const prev_asset = this.layer_manager.get_active_layer()[xi][yj];
+        if (prev_asset !== "") {
+          this.update_line(
+            [this.previous_changed, { x, y }],
+            "",
+            "eraser_matrix_changed"
+          );
+        }
+        this.previous_changed = { x: x, y: y };
       }
-      this.previous_changed = { x: x, y: y };
-    });
+    );
   }
 
   /**
@@ -478,22 +473,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Returns true if the x and y coordinate are in the canvas bounds
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Boolean}
-   */
-  coordinates_in_bounds(x, y) {
-    return (
-      x >= 0 &&
-      y >= 0 &&
-      x < this.layer_manager.get_active_layer().length &&
-      y < this.layer_manager.get_active_layer()[0].length
-    );
-  }
-
-  /**
-   * DUPLICATE -- merge with SpriteEditor
    * @param {Number} x
    * @param {Number} y
    */
@@ -502,8 +481,16 @@ export class MapEditor extends HTMLElement {
       this.load_image(this.selected_asset).then((img) => {
         this.start_action_buffer();
         const content = this.layer_manager.get_active_layer();
-        const fill_pixels = this.recursive_fill_matrix(x, y, content[x][y]);
         this.fill_visited = {};
+        const fill_pixels = EditorUtil.recursive_fill_matrix(
+          x,
+          y,
+          content,
+          content[x][y],
+          this.fill_visited,
+          (a, b) => a === b
+        );
+
         fill_pixels.forEach((pixel) => {
           this.action_buffer.push({
             x: pixel.x,
@@ -528,36 +515,6 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * DUPLICATE -- merge with SpriteEditor
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Array}
-   */
-  recursive_fill_matrix(x, y, sprite) {
-    const content = this.layer_manager.get_active_layer();
-    if (
-      this.fill_visited[`${x}_${y}`] === undefined &&
-      x >= 0 &&
-      x < this.width &&
-      y >= 0 &&
-      y < this.height &&
-      content[x][y] === sprite
-    ) {
-      const self = { x: x, y: y };
-      this.fill_visited[`${x}_${y}`] = false;
-      return [
-        self,
-        ...this.recursive_fill_matrix(x + 1, y, sprite),
-        ...this.recursive_fill_matrix(x - 1, y, sprite),
-        ...this.recursive_fill_matrix(x, y + 1, sprite),
-        ...this.recursive_fill_matrix(x, y - 1, sprite),
-      ];
-    } else {
-      return [];
-    }
-  }
-
-  /**
    *  Draws a straight Line on the Canvas
    * @param {Number} x1
    * @param {Number} y1
@@ -566,7 +523,7 @@ export class MapEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_line_matrix(x1, y1, x2, y2, final = false) {
-    const line_points = this.calculate_line_points(x1, y1, x2, y2);
+    const line_points = EditorUtil.calculate_line_points(x1, y1, x2, y2);
     this.draw_shape_matrix(line_points, final);
   }
 
@@ -579,17 +536,17 @@ export class MapEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_rectangle_matrix(end_x, end_y, start_x, start_y, final = false) {
-    const rectangle_points = this.calculate_rectangle_points(
+    const rectangle_points = EditorUtil.calculate_rectangle_points(
       start_x,
       start_y,
       end_x,
-      end_y
+      end_y,
+      this.layer_manager.get_active_layer()
     );
     this.draw_shape_matrix(rectangle_points, final);
   }
 
   /**
-   * DUPLICATE -- merge with SpriteEditor
    * Draws a circle on the Canvas
    * @param {Number} x1
    * @param {Number} y1
@@ -598,7 +555,14 @@ export class MapEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_circle_matrix(x1, y1, x2, y2, final = false) {
-    const circle_points = this.calculate_circle_points(x1, y1, x2, y2);
+    const active_layer = this.layer_manager.get_active_layer();
+    const circle_points = EditorUtil.calculate_circle_points(
+      x1,
+      y1,
+      x2,
+      y2,
+      active_layer
+    );
     this.draw_shape_matrix(circle_points, final);
   }
 
@@ -659,142 +623,11 @@ export class MapEditor extends HTMLElement {
   expand_shape_points(shape_points) {
     const expanded_points = [];
     shape_points.forEach((point) => {
-      this.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
+      EditorUtil.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
         expanded_points.push({ x: xi, y: yj });
       });
     });
     return expanded_points;
-  }
-
-  /**
-   * DUPLICATE -- merge with SpriteEditor
-   * Calculates the linepoints include in the line with Bresenham
-   * @param {Number} x1
-   * @param {Number} y1
-   * @param {Number} x2
-   * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>}>}
-   */
-  calculate_line_points(x1, y1, x2, y2) {
-    const line_points = [];
-    const dx = Math.abs(x2 - x1);
-    const dy = Math.abs(y2 - y1);
-    const step_x = x1 < x2 ? 1 : -1;
-    const step_y = y1 < y2 ? 1 : -1;
-    let err = dx - dy;
-    let x = x1;
-    let y = y1;
-    while (true) {
-      line_points.push({
-        x: x,
-        y: y,
-        prev_asset: this.layer_manager.get_active_layer()[x][y],
-      });
-
-      if (x === x2 && y === y2) break;
-
-      const e2 = 2 * err;
-      if (e2 > -dy) {
-        err -= dy;
-        x += step_x;
-      }
-      if (e2 < dx) {
-        err += dx;
-        y += step_y;
-      }
-    }
-    return line_points;
-  }
-
-  /**
-   * DUPLICATE -- merge with SpriteEditor
-   * Calculates the matrix points included in the rectangle
-   * @param {Number} x1
-   * @param {Number} y1
-   * @param {Number} x2
-   * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>}>}
-   */
-  calculate_rectangle_points(x1, y1, x2, y2) {
-    const points = [];
-    const y_direction = y1 - y2 > 0 ? -1 : 1;
-    const x_direction = x1 - x2 > 0 ? -1 : 1;
-    const layer_matrix = this.layer_manager.get_active_layer();
-    for (let i = x1; x_direction > 0 ? i <= x2 : i >= x2; i += x_direction) {
-      points.push({ x: i, y: y1, prev_asset: layer_matrix[i][y1] });
-      points.push({ x: i, y: y2, prev_asset: layer_matrix[i][x2] });
-    }
-    for (
-      let j = y1 + y_direction;
-      y_direction > 0 ? j < y2 : j > y2;
-      j += y_direction
-    ) {
-      points.push({ x: x1, y: j, prev_asset: layer_matrix[x1][j] });
-      points.push({ x: x2, y: j, prev_asset: layer_matrix[x2][j] });
-    }
-    return points;
-  }
-
-  /**
-   * DUPLICATE -- merge with SpriteEditor
-   * Calculates the matrix points included in the circle
-   * @param {Number} x1
-   * @param {Number} y1
-   * @param {Number} x2
-   * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, prev_asset: Array<Number>}>}
-   */
-  calculate_circle_points(x1, y1, x2, y2) {
-    const points = [];
-    const added_points = [];
-    const radiusX = Math.abs(x2 - x1) / 2;
-    const radiusY = Math.abs(y2 - y1) / 2;
-    const centerX = Math.min(x1, x2) + radiusX;
-    const centerY = Math.min(y1, y2) + radiusY;
-    const step = 1 / Math.max(radiusX, radiusY);
-    const content = this.layer_manager.get_active_layer();
-    for (let a = 0; a < 2 * Math.PI; a += step) {
-      const x = Math.round(centerX + radiusX * Math.cos(a));
-      const y = Math.round(centerY + radiusY * Math.sin(a));
-      const pointKey = `${x},${y}`;
-      if (!added_points[pointKey]) {
-        points.push({ x: x, y: y, prev_asset: content[x][y] });
-        added_points[pointKey] = true;
-      }
-    }
-    return points;
-  }
-
-  /**
-   * DUPLICATE -- merge later with SpriteEditor
-   * Adjusts the aspect ratio of a shape to maintain a 1:1 ratio if the Shift key is held.
-   * @param {number} start_x
-   * @param {number} start_y
-   * @param {number} end_x
-   * @param {number} end_y
-   * @param {boolean} shiftKey
-   * @returns {{ end_x: number, end_y: number }}
-   */
-
-  calculate_aspect_ratio(start_x, start_y, end_x, end_y, shiftKey) {
-    if (shiftKey) {
-      const width = Math.abs(end_x - start_x);
-      const height = Math.abs(end_y - start_y);
-      const size = Math.min(width, height);
-
-      if (end_x < start_x) {
-        end_x = start_x - size;
-      } else {
-        end_x = start_x + size;
-      }
-
-      if (end_y < start_y) {
-        end_y = start_y - size;
-      } else {
-        end_y = start_y + size;
-      }
-    }
-    return { end_x, end_y };
   }
 
   /**
@@ -826,7 +659,7 @@ export class MapEditor extends HTMLElement {
     this.start_action_buffer();
     const content = this.layer_manager.get_active_layer();
     this.selected_points.forEach((point) => {
-      if (this.coordinates_in_bounds(point.x, point.y)) {
+      if (EditorUtil.coordinates_in_bounds(point.x, point.y, content)) {
         this.action_buffer.push({
           x: point.x,
           y: point.y,
@@ -946,7 +779,7 @@ export class MapEditor extends HTMLElement {
     const { x: x1_start, y: y1_start } = this.selection_start_point;
     const { x: x2_end, y: y2_end } = path[path.length - 1];
 
-    const linePoints = this.calculate_line_points(
+    const linePoints = EditorUtil.calculate_line_points(
       x1_start,
       y1_start,
       x2_end,
@@ -954,7 +787,7 @@ export class MapEditor extends HTMLElement {
     );
 
     linePoints.forEach((point) => {
-      if (!this.is_point_already_selected(point)) {
+      if (!EditorUtil.is_point_already_selected(point, this.selected_points)) {
         this.selected_points.push({
           x: point.x,
           y: point.y,
@@ -965,10 +798,12 @@ export class MapEditor extends HTMLElement {
     for (let i = 0; i < path.length - 1; i++) {
       const { x: x1, y: y1 } = path[i];
       const { x: x2, y: y2 } = path[i + 1];
-      const linePoints = this.calculate_line_points(x1, y1, x2, y2);
+      const linePoints = EditorUtil.calculate_line_points(x1, y1, x2, y2);
 
       linePoints.forEach((point) => {
-        if (!this.is_point_already_selected(point)) {
+        if (
+          !EditorUtil.is_point_already_selected(point, this.selected_points)
+        ) {
           this.selected_points.push({
             x: point.x,
             y: point.y,
@@ -993,7 +828,7 @@ export class MapEditor extends HTMLElement {
    */
   fill_selection(pointsInsidePath) {
     pointsInsidePath.forEach((point) => {
-      if (!this.is_point_already_selected(point)) {
+      if (!EditorUtil.is_point_already_selected(point, this.selected_points)) {
         this.selected_points.push({
           x: point.x,
           y: point.y,
@@ -1057,17 +892,6 @@ export class MapEditor extends HTMLElement {
 
   /**
    * DUPLICATE SpriteEditor
-   * Checks if a point is already selected (already in selected_points)
-   * @param {{x: Number, y: Number}} point
-   * @returns {Boolean}
-   */
-  is_point_already_selected(point) {
-    if (this.selected_points.length === 0) return false;
-    return this.selected_points.some((p) => this.compare_points(p, point));
-  }
-
-  /**
-   * DUPLICATE SpriteEditor
    * Compares two points
    * @param {x: Number, y: Number} point1
    * @param {x: Number, y: Number} point2
@@ -1096,7 +920,11 @@ export class MapEditor extends HTMLElement {
    * @param {{x: Number, y: Number}} position
    */
   move_selected_area(position) {
-    const difference = this.calculate_move_difference(position);
+    const start_point = this.selection_move_start_point;
+    const difference = EditorUtil.calculate_move_difference(
+      start_point,
+      position
+    );
     this.selected_points = this.selected_points.map((point) => {
       const x = point.x - difference.x;
       const y = point.y - difference.y;
@@ -1196,7 +1024,7 @@ export class MapEditor extends HTMLElement {
   update_line(points, asset, event_name) {
     const [last_point, current_point] = points.slice(-2);
     const content = this.layer_manager.get_active_layer();
-    const line_points = this.calculate_line_points(
+    const line_points = EditorUtil.calculate_line_points(
       last_point.x,
       last_point.y,
       current_point.x,
@@ -1204,12 +1032,18 @@ export class MapEditor extends HTMLElement {
     );
 
     line_points.forEach(({ x, y }) => {
-      this.apply_to_pixel_block(x, y, (xi, yj) => {
-        const prev_asset = content[xi][yj];
-        if (prev_asset !== asset) {
-          this.update_point(xi, yj, prev_asset, asset, event_name);
+      EditorUtil.apply_to_pixel_block(
+        x,
+        y,
+        this.pixel_size,
+        this.layer_manager.get_active_layer(),
+        (xi, yj) => {
+          const prev_asset = content[xi][yj];
+          if (prev_asset !== asset) {
+            this.update_point(xi, yj, prev_asset, asset, event_name);
+          }
         }
-      });
+      );
     });
   }
 
