@@ -13,15 +13,12 @@ export class TopMenu extends HTMLElement {
     super();
     this.classList.add("top-menu");
     this.editor_tool = editor_tool;
+    this.editor_name = "Map Editor";
     this.project_name = "Untitled Project";
     this.project_container = null;
     this.project_name_element = null;
-    this.file_name = "Untitled File";
     this.file_container = null;
     this.file_name_element = null;
-    this.editor_name = "Map Editor";
-    this.editor_button = this.create_editor_button();
-    this.appendChild(this.editor_button);
   }
 
   connectedCallback() {
@@ -29,14 +26,16 @@ export class TopMenu extends HTMLElement {
   }
 
   init() {
+    this.editor_button = this.create_editor_button();
+    this.appendChild(this.editor_button);
     this.editor_button.addEventListener(
       "click",
       this.editor_tool.change_editor.bind(this.editor_tool)
     );
-    const project_container = this.create_project_container();
     const file_container = this.create_file_container();
-    this.appendChild(project_container);
     this.appendChild(file_container);
+    const project_container = this.create_project_container();
+    this.appendChild(project_container);
   }
 
   /**
@@ -51,6 +50,25 @@ export class TopMenu extends HTMLElement {
     editor_button.appendChild(icon);
     editor_button.appendChild(document.createTextNode(this.editor_name));
     return editor_button;
+  }
+
+  /**
+   * @returns {HTMLDivElement}
+   * */
+  create_file_container() {
+    this.file_container = document.createElement("div");
+    this.file_container.classList.add("file-container");
+
+    const file_label = document.createElement("span");
+    file_label.textContent = "File: ";
+    this.file_name_element = document.createElement("span");
+    this.file_name_element.textContent =
+      this.editor_tool.active_file?.name || "Untitled File";
+
+    this.file_container.appendChild(file_label);
+    this.file_container.appendChild(this.file_name_element);
+
+    return this.file_container;
   }
 
   /**
@@ -75,26 +93,6 @@ export class TopMenu extends HTMLElement {
     );
 
     return this.project_container;
-  }
-
-  /**
-   * @returns {HTMLDivElement}
-   * */
-  create_file_container() {
-    this.file_container = document.createElement("div");
-    this.file_container.classList.add("file-container");
-
-    const file_label = document.createElement("span");
-    file_label.textContent = "File: ";
-    // TODO: remove unusued file_name
-    this.file_name = this.editor_tool.active_file?.name || this.file_name;
-    this.file_name_element = document.createElement("span");
-    this.file_name_element.textContent = this.file_name;
-
-    this.file_container.appendChild(file_label);
-    this.file_container.appendChild(this.file_name_element);
-
-    return this.file_container;
   }
 
   /**
