@@ -268,36 +268,22 @@ export class MapEditor extends HTMLElement {
    * @param {Number} mouseY
    */
   apply_zoom(zoom_up, mouseX, mouseY) {
-    const current_mouseX =
-      (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
-    const current_mouseY =
-      (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
-
-    let new_scale;
-    if (zoom_up) {
-      new_scale = this.scale - 0.1;
-    } else {
-      new_scale = this.scale + 0.1;
-    }
-    if (new_scale >= 1 && new_scale <= 3) {
-      this.scale = new_scale;
-    } else {
-      return;
-    }
-
-    const new_mouseX = (mouseX + this.canvas_wrapper.scrollLeft) / this.scale;
-    const new_mouseY = (mouseY + this.canvas_wrapper.scrollTop) / this.scale;
+    const result = EditorUtil.apply_zoom(
+      zoom_up,
+      this.scale,
+      mouseX,
+      mouseY,
+      1,
+      3
+    );
+    this.scale = result.new_scale;
 
     this.map_canvas.set_canvas_sizes(
       this.canvas_wrapper_width * this.scale,
       this.canvas_wrapper_height * this.scale
     );
 
-    const deltaX = (current_mouseX - new_mouseX) * this.scale;
-    const deltaY = (current_mouseY - new_mouseY) * this.scale;
-
-    this.canvas_wrapper.scrollLeft += deltaX;
-    this.canvas_wrapper.scrollTop += deltaY;
+    EditorUtil.scroll_canvas(this.canvas_wrapper, result.deltaX, result.deltaY);
 
     this.dispatchEvent(
       new CustomEvent("zoom_changed", {
@@ -320,7 +306,7 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Starts gouping pen points for the action stack
+   * Starts grouping pen points for the action stack
    */
   start_action_buffer() {
     this.action_buffer = [];
@@ -540,8 +526,7 @@ export class MapEditor extends HTMLElement {
       start_x,
       start_y,
       end_x,
-      end_y,
-      this.layer_manager.get_active_layer()
+      end_y
     );
     this.draw_shape_matrix(rectangle_points, final);
   }
@@ -556,13 +541,7 @@ export class MapEditor extends HTMLElement {
    */
   draw_circle_matrix(x1, y1, x2, y2, final = false) {
     const active_layer = this.layer_manager.get_active_layer();
-    const circle_points = EditorUtil.calculate_circle_points(
-      x1,
-      y1,
-      x2,
-      y2,
-      active_layer
-    );
+    const circle_points = EditorUtil.calculate_circle_points(x1, y1, x2, y2);
     this.draw_shape_matrix(circle_points, final);
   }
 
@@ -574,7 +553,11 @@ export class MapEditor extends HTMLElement {
   draw_shape_matrix(shape_points, final = false) {
     if (this.selected_asset) {
       this.load_image(this.selected_asset).then((img) => {
-        const expanded_shape_points = this.expand_shape_points(shape_points);
+        const expanded_shape_points = EditorUtil.expand_shape_points(
+          shape_points,
+          this.pixel_size,
+          this.layer_manager.get_active_layer()
+        );
         if (final) {
           this.start_action_buffer();
           const content = this.layer_manager.get_active_layer();
@@ -621,13 +604,11 @@ export class MapEditor extends HTMLElement {
    * @returns {Array<{x: Number, y: Number}>}
    */
   expand_shape_points(shape_points) {
-    const expanded_points = [];
-    shape_points.forEach((point) => {
-      EditorUtil.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
-        expanded_points.push({ x: xi, y: yj });
-      });
-    });
-    return expanded_points;
+    return EditorUtil.expand_shape_points(
+      shape_points,
+      this.pixel_size,
+      this.layer_manager.get_active_layer()
+    );
   }
 
   /**
@@ -712,236 +693,75 @@ export class MapEditor extends HTMLElement {
    * Removes selection, when tool is destroyed
    */
   destroy_selection() {
-    this.selection_copied = false;
-    this.selected_points = [];
-    this.dispatchEvent(new CustomEvent("remove_selection"));
+    EditorUtil.destroy_selection(this);
   }
 
   /**
-   * Sets the startposition for rectangle- and lasso-selection
+   * Sets the start position for rectangle- and lasso-selection
    * @param {{x: Number, y: Number}} position
    */
   set_selection_start_point(position) {
-    this.selection_start_point = position;
+    EditorUtil.set_selection_start_point(this, position);
     this.selected_points = [];
   }
 
   /**
-   * Sets the startposition for the movement of the selected area
+   * Sets the start position for the movement of the selected area
    * @param {{x: Number, y: Number}} position
    */
   set_selection_move_start_point(position) {
-    this.selection_move_start_point = position;
+    EditorUtil.set_selection_move_start_point(this, position);
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Draws the selection area (Rectangle) and sends event to the canvas
    * @param {{x: Number, y: Number}} position
    */
   draw_rectangle_selection(position) {
-    this.selected_points = [];
-    const y_direction = this.selection_start_point.y - position.y > 0 ? -1 : 1;
-    const x_direction = this.selection_start_point.x - position.x > 0 ? -1 : 1;
-    for (
-      let i = this.selection_start_point.x;
-      x_direction > 0 ? i <= position.x : i >= position.x;
-      i += x_direction
-    ) {
-      for (
-        let j = this.selection_start_point.y;
-        y_direction > 0 ? j <= position.y : j >= position.y;
-        j += y_direction
-      ) {
-        this.selected_points.push({
-          x: i,
-          y: j,
-        });
-      }
-    }
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.draw_rectangle_selection(this, position);
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Draws the selection area (Lasso) and dispatches an event to the canvas.
    * @param {Array<{x: number, y: number}>} path
    */
   draw_lasso_selection(path) {
-    this.selected_points = [];
-
-    const { x: x1_start, y: y1_start } = this.selection_start_point;
-    const { x: x2_end, y: y2_end } = path[path.length - 1];
-
-    const linePoints = EditorUtil.calculate_line_points(
-      x1_start,
-      y1_start,
-      x2_end,
-      y2_end
-    );
-
-    linePoints.forEach((point) => {
-      if (!EditorUtil.is_point_already_selected(point, this.selected_points)) {
-        this.selected_points.push({
-          x: point.x,
-          y: point.y,
-        });
-      }
-    });
-
-    for (let i = 0; i < path.length - 1; i++) {
-      const { x: x1, y: y1 } = path[i];
-      const { x: x2, y: y2 } = path[i + 1];
-      const linePoints = EditorUtil.calculate_line_points(x1, y1, x2, y2);
-
-      linePoints.forEach((point) => {
-        if (
-          !EditorUtil.is_point_already_selected(point, this.selected_points)
-        ) {
-          this.selected_points.push({
-            x: point.x,
-            y: point.y,
-          });
-        }
-      });
-    }
-
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.draw_lasso_selection(this, path);
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Fills the selection area with selection color
    * @param {Array<{x: number, y: number}>} pointsInsidePath
    */
   fill_selection(pointsInsidePath) {
-    pointsInsidePath.forEach((point) => {
-      if (!EditorUtil.is_point_already_selected(point, this.selected_points)) {
-        this.selected_points.push({
-          x: point.x,
-          y: point.y,
-        });
-      }
-    });
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.fill_selection(this, pointsInsidePath);
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Selects all neighboring pixels with the same color
    * @param {Number} x
    * @param {Number} y
    */
   shape_selection(x, y) {
-    const content = this.layer_manager.get_active_layer();
-    const target_asset = content[x][y];
-    const queue = [{ x, y }];
-    const visited = {};
-
-    this.selected_points = [];
-
-    while (queue.length > 0) {
-      const { x, y } = queue.shift();
-      const key = `${x}_${y}`;
-
-      if (
-        !visited[key] &&
-        x >= 0 &&
-        x < this.width &&
-        y >= 0 &&
-        y < this.height &&
-        target_asset === content[x][y]
-      ) {
-        visited[key] = true;
-        this.selected_points.push({
-          x,
-          y,
-        });
-        queue.push({ x: x + 1, y });
-        queue.push({ x: x - 1, y });
-        queue.push({ x, y: y + 1 });
-        queue.push({ x, y: y - 1 });
-      }
-    }
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.shape_selection(this, x, y);
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Compares two points
    * @param {x: Number, y: Number} point1
    * @param {x: Number, y: Number} point2
    * @returns {Boolean}
    */
   compare_points(point1, point2) {
-    return point1.x === point2.x && point1.y === point2.y;
+    return EditorUtil.compare_points(point1, point2);
   }
 
   /**
-   * DUPLICATE SpriteEditor
-   * Calculates the difference between the move startpoint and current position
-   * @param {{x: Number, y: Number}} position
-   * @returns {{x: Number, y: Number}}
-   */
-  calculate_move_difference(position) {
-    return {
-      x: this.selection_move_start_point.x - position.x,
-      y: this.selection_move_start_point.y - position.y,
-    };
-  }
-
-  /**
-   * DUPLICATE SpriteEditor
    * Moves the selected area
    * @param {{x: Number, y: Number}} position
    */
   move_selected_area(position) {
-    const start_point = this.selection_move_start_point;
-    const difference = EditorUtil.calculate_move_difference(
-      start_point,
-      position
-    );
-    this.selected_points = this.selected_points.map((point) => {
-      const x = point.x - difference.x;
-      const y = point.y - difference.y;
-      return {
-        ...point,
-        x: x,
-        y: y,
-      };
-    });
-    this.selection_move_start_point = position;
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.move_selected_area(this, position);
   }
 
   /**
@@ -966,29 +786,25 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * DUPLICATE Tool
    * Calculates mouse position from event.
    * @param {Event} event
    * @returns {{x: Number, y: Number}}
    */
   get_mouse_position(event) {
-    const activeLayerCanvas =
-      this.map_canvas.layer_canvases[this.layer_manager.active_layer_index];
-    const rect = activeLayerCanvas.getBoundingClientRect();
-    const mouseX = (event.clientX - rect.left) / (this.tile_size * this.scale);
-    const mouseY = (event.clientY - rect.top) / (this.tile_size * this.scale);
-    const x = Math.floor(mouseX);
-    const y = Math.floor(mouseY);
-    return { x, y };
+    return EditorUtil.get_mouse_position(
+      event,
+      this.tile_size,
+      this.scale,
+      this.map_canvas.layer_canvases[this.layer_manager.active_layer_index]
+    );
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Updates a single point on the canvas.
    * @param {Number} x
    * @param {Number} y
-   * @param {Array<Number>} prev_color
-   * @param {Array<Number>} color
+   * @param {Array<Number>} prev_asset
+   * @param {Array<Number>} asset
    * @param {String} event_name
    */
   update_point(x, y, prev_asset, asset, event_name) {
@@ -1015,10 +831,9 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * DUPLICATE SpriteEditor
    * Updates a line of points on the canvas.
    * @param {Array<{x: Number, y: Number}>} points
-   * @param {Array<Number>} color
+   * @param {Array<Number>} asset
    * @param {String} event_name
    */
   update_line(points, asset, event_name) {

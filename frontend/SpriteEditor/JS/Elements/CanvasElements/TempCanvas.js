@@ -61,7 +61,8 @@ export class TempCanvas extends CanvasElement {
     this.revert_canvas();
     const points = event.detail.points;
     points.forEach((point) => {
-      this.paint_single_pixel(point.x, point.y, point.selection_color);
+      const color = point.selection_color || this.selection_color;
+      this.paint_single_pixel(point.x, point.y, color);
     });
   }
 
