@@ -18,6 +18,7 @@ export class EditorTool extends HTMLElement {
     this.map_editor = new MapEditor(this);
     this.file_area = new FileArea(this);
     this.project = null;
+    this.active_file = null;
     this.appendChild(this.css);
     this.appendChild(this.title_screen);
     this.init();
@@ -91,6 +92,17 @@ export class EditorTool extends HTMLElement {
       this.editor_container.appendChild(this.sprite_editor);
       this.top_menu.set_editor_name("Map Editor");
       this.file_area.selected_editor = "SpriteEditor";
+    }
+    this.set_active_file(null);
+  }
+
+  set_active_file(file) {
+    if (file) {
+      this.active_file = file;
+      this.top_menu.update_file_name(file.name);
+    } else {
+      this.active_file = null;
+      this.top_menu.update_file_name("Untitled File");
     }
   }
 }

@@ -41,35 +41,17 @@ export class FileItemView extends ItemView {
     super.init();
     switch (this.type) {
       case "png":
-        this.icon.addEventListener(
-          "dblclick",
-          this.open_sprite_file.bind(this)
-        );
+        this.icon.addEventListener("dblclick", async () => {
+          if (this.file_area.file_system_handler) {
+            await this.file_area.open_sprite_file(this.id);
+          } else {
+            console.error("File system handler is not ready.");
+          }
+        });
         break;
       case "tmx":
         //TODO: Implement TMX file opening
         break;
-    }
-  }
-
-  /**
-   * Opens the sprite file
-   */
-  open_sprite_file() {
-    const file_id = this.id;
-    const file_system_handler = this.file_area_view.file_system_handler;
-
-    const fileData = file_system_handler.get_file_by_id(file_id);
-
-    if (fileData) {
-      if (fileData.type === "png" && fileData.matrix_data) {
-        const spriteEditor = this.file_area.editor_tool.sprite_editor;
-        spriteEditor.handle_loaded_matrix(fileData.matrix_data);
-      } else {
-        console.error("Unsupported file type or missing matrix data.");
-      }
-    } else {
-      console.error("Error loading sprite file.");
     }
   }
 

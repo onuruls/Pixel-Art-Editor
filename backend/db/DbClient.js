@@ -58,6 +58,10 @@ class DbClient {
     return await file_service.delete_file(id);
   }
 
+  async write_file(file_id, matrix_data) {
+    return await file_service.write_file(file_id, matrix_data);
+  }
+
   async rename_file(id, new_name) {
     return await file_service.rename_file(id, new_name);
   }
