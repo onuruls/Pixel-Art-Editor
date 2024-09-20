@@ -1,5 +1,6 @@
 import { SpriteEditorPart } from "./SpriteEditorPart.js";
 import { Util } from "../../../Util/Util.js";
+import { ColorUtil } from "../../../Util/ColorUtil.js";
 
 export class SpriteTools extends SpriteEditorPart {
   constructor(sprite_editor) {
@@ -210,15 +211,14 @@ export class SpriteTools extends SpriteEditorPart {
         } else if (event.shiftKey) {
           this.hide_color_input(palette);
           const color = this.sprite_editor.selected_color;
-          const hex_color = this.sprite_editor.rgb_array_to_hex(color);
+          const hex_color = ColorUtil.rgb_array_to_hex(color);
           this.sprite_editor.palettes[index] = hex_color;
           palette.value = hex_color;
         } else {
           this.hide_color_input(palette);
           const color = palette.value;
           document.getElementById("color_input").value = color;
-          this.sprite_editor.selected_color =
-            this.sprite_editor.hex_to_rgb_array(color);
+          this.sprite_editor.selected_color = ColorUtil.hex_to_rgb_array(color);
         }
       });
 
@@ -226,8 +226,7 @@ export class SpriteTools extends SpriteEditorPart {
         event.preventDefault();
         const color = palette.value;
         document.getElementById("secondary_color_input").value = color;
-        this.sprite_editor.secondary_color =
-          this.sprite_editor.hex_to_rgb_array(color);
+        this.sprite_editor.secondary_color = ColorUtil.hex_to_rgb_array(color);
       });
     });
   }
@@ -253,10 +252,10 @@ export class SpriteTools extends SpriteEditorPart {
       primary_color_input.value = secondary_color_input.value;
       secondary_color_input.value = primary_color;
 
-      this.sprite_editor.selected_color = this.sprite_editor.hex_to_rgb_array(
+      this.sprite_editor.selected_color = ColorUtil.hex_to_rgb_array(
         primary_color_input.value
       );
-      this.sprite_editor.secondary_color = this.sprite_editor.hex_to_rgb_array(
+      this.sprite_editor.secondary_color = ColorUtil.hex_to_rgb_array(
         secondary_color_input.value
       );
     });

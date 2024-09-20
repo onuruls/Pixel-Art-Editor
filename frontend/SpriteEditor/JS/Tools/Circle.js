@@ -1,3 +1,4 @@
+import { EditorUtil } from "../../../Util/EditorUtil.js";
 import { Tool } from "./Tool.js";
 
 export class Circle extends Tool {
@@ -53,7 +54,7 @@ export class Circle extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    const { end_x, end_y } = this.sprite_editor.calculate_aspect_ratio(
+    const { end_x, end_y } = EditorUtil.calculate_aspect_ratio(
       this.start_x,
       this.start_y,
       this.end_x,

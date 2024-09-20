@@ -1,4 +1,5 @@
 import { CanvasElement } from "./CanvasElement.js";
+import { ColorUtil } from "../../../../Util/ColorUtil.js";
 
 export class BackgroundCanvas extends CanvasElement {
   /**
@@ -7,7 +8,7 @@ export class BackgroundCanvas extends CanvasElement {
    */
   constructor(canvas) {
     super(canvas);
-    this.line_color = "#444";
+    this.line_color = ColorUtil.canvas_line_color;
   }
 
   /**
@@ -26,11 +27,10 @@ export class BackgroundCanvas extends CanvasElement {
   }
 
   /**
-   * Draws the backgorund grid
+   * Draws the background grid
    */
   draw_background_grid() {
     const tile_size = this.sprite_editor.tile_size;
-    const scale = this.sprite_editor.scale;
     this.revert_canvas();
     this.context.strokeStyle = this.line_color;
     this.context.lineWidth = 1;
@@ -42,17 +42,24 @@ export class BackgroundCanvas extends CanvasElement {
     );
     for (let i = 0; i < this.sprite_editor.width; i++) {
       this.context.beginPath();
-      this.context.moveTo(+i * tile_size, 0);
+      this.context.moveTo(i * tile_size, 0);
       this.context.lineTo(i * tile_size, this.sprite_editor.height * tile_size);
       this.context.stroke();
     }
 
     for (let i = 0; i < this.sprite_editor.height; i++) {
       this.context.beginPath();
-      this.context.moveTo(0, +i * tile_size);
+      this.context.moveTo(0, i * tile_size);
       this.context.lineTo(this.sprite_editor.width * tile_size, i * tile_size);
       this.context.stroke();
     }
+  }
+
+  /**
+   * Clears the background canvas.
+   */
+  revert_canvas() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
 

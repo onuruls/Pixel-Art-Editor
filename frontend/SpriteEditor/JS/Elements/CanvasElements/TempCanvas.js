@@ -1,5 +1,6 @@
 import { SpriteCanvas } from "../SpriteCanvas.js";
 import { CanvasElement } from "./CanvasElement.js";
+import { ColorUtil } from "../../../../Util/ColorUtil.js";
 
 export class TempCanvas extends CanvasElement {
   /**
@@ -61,7 +62,8 @@ export class TempCanvas extends CanvasElement {
     this.revert_canvas();
     const points = event.detail.points;
     points.forEach((point) => {
-      this.paint_single_pixel(point.x, point.y, point.selection_color);
+      const color = point.selection_color || this.selection_color;
+      this.paint_single_pixel(point.x, point.y, color);
     });
   }
 
@@ -69,17 +71,19 @@ export class TempCanvas extends CanvasElement {
    * Called when the selected area is copied
    * Copies the selected pixels to the selected_area to
    * show what has been copied
-   * @param {*} event
+   * @param {Event} event
    */
   selected_area_copied(event) {
     this.revert_canvas();
     const points = event.detail.points;
     points.forEach((point) => {
-      this.paint_single_pixel(
-        point.x,
-        point.y,
-        this.mix_colors(this.selection_color, point.original_color)
+      const blended_color_string = ColorUtil.blend_colors(
+        ColorUtil.rgba_array_to_string(this.selection_color),
+        ColorUtil.rgba_array_to_string(point.original_color)
       );
+      const blended_color_array =
+        ColorUtil.rgba_string_to_array(blended_color_string);
+      this.paint_single_pixel(point.x, point.y, blended_color_array);
     });
   }
 
@@ -88,6 +92,34 @@ export class TempCanvas extends CanvasElement {
    */
   remove_selection() {
     this.revert_canvas();
+  }
+
+  /**
+   * Paints a single pixel on the canvas.
+   * @param {Number} x - The x-coordinate.
+   * @param {Number} y - The y-coordinate.
+   * @param {Array<Number> | String} color - The color as an array or rgba string.
+   */
+  paint_single_pixel(x, y, color) {
+    const ctx = this.context;
+    let fillStyle;
+    if (Array.isArray(color)) {
+      fillStyle = ColorUtil.rgba_array_to_string(color);
+    } else if (typeof color === "string") {
+      fillStyle = color;
+    } else {
+      throw new Error("Invalid color format");
+    }
+    ctx.fillStyle = fillStyle;
+    const tile_size = this.sprite_canvas.sprite_editor.tile_size;
+    ctx.fillRect(x * tile_size, y * tile_size, tile_size, tile_size);
+  }
+
+  /**
+   * Clears the temporary canvas.
+   */
+  revert_canvas() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
 

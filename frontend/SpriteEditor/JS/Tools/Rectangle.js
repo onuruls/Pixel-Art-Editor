@@ -1,4 +1,5 @@
 import { Tool } from "./Tool.js";
+import { EditorUtil } from "../../../Util/EditorUtil.js";
 
 export class Rectangle extends Tool {
   /**
@@ -53,7 +54,7 @@ export class Rectangle extends Tool {
    * @param {Event} event
    */
   draw(event, final = false) {
-    const { end_x, end_y } = this.sprite_editor.calculate_aspect_ratio(
+    const { end_x, end_y } = EditorUtil.calculate_aspect_ratio(
       this.start_x,
       this.start_y,
       this.end_x,

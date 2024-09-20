@@ -1,3 +1,4 @@
+import { EditorUtil } from "../../../Util/EditorUtil.js";
 import { SpriteEditor } from "../Elements/SpriteEditor.js";
 import { SelectionTool } from "./SelectionTool.js";
 
@@ -67,7 +68,7 @@ export class RectangleSelection extends SelectionTool {
    */
   draw(event, final = false) {
     const position = this.get_mouse_position(event);
-    const { end_x, end_y } = this.sprite_editor.calculate_aspect_ratio(
+    const { end_x, end_y } = EditorUtil.calculate_aspect_ratio(
       this.start_x,
       this.start_y,
       position.x,

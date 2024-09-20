@@ -18,6 +18,8 @@ import { IrregularSelection } from "../Tools/IrregularSelection.js";
 import { ShapeSelection } from "../Tools/ShapeSelection.js";
 import { Dithering } from "../Tools/Dithering.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
+import { EditorUtil } from "../../../Util/EditorUtil.js";
+import { ColorUtil } from "../../../Util/ColorUtil.js";
 
 export class SpriteEditor extends HTMLElement {
   /**
@@ -61,6 +63,14 @@ export class SpriteEditor extends HTMLElement {
       "#A4A5A6",
       "#A4A5A6",
     ];
+
+    this.selected_color = ColorUtil.hex_to_rgb_array(
+      this.sprite_tools?.querySelector("#color_input")?.value || "#000000"
+    );
+    this.secondary_color = ColorUtil.hex_to_rgb_array(
+      this.sprite_tools?.querySelector("#secondary_color_input")?.value ||
+        "#FFFFFF"
+    );
   }
 
   /**
@@ -82,10 +92,10 @@ export class SpriteEditor extends HTMLElement {
 
     this.set_listeners();
     this.selected_tool = new Pen(this);
-    this.selected_color = this.hex_to_rgb_array(
+    this.selected_color = ColorUtil.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
-    this.secondary_color = this.hex_to_rgb_array(
+    this.secondary_color = ColorUtil.hex_to_rgb_array(
       this.sprite_tools.querySelector("#secondary_color_input").value
     );
     this.initialized = true;
@@ -133,6 +143,9 @@ export class SpriteEditor extends HTMLElement {
     this.canvas_wrapper = this.sprite_canvas.querySelector(".canvas-wrapper");
   }
 
+  /**
+   * Creates the file input for importing sprites
+   */
   create_file_input() {
     this.import_input = document.createElement("input");
     this.import_input.setAttribute("type", "file");
@@ -158,7 +171,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Sets the necessary eventlisteners
+   * Sets the necessary event listeners
    */
   set_listeners() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
@@ -173,7 +186,7 @@ export class SpriteEditor extends HTMLElement {
     this.sprite_tools
       .querySelector("#color_input")
       .addEventListener("input", (event) => {
-        this.selected_color = this.hex_to_rgb_array(event.target.value);
+        this.selected_color = ColorUtil.hex_to_rgb_array(event.target.value);
       });
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey) {
@@ -195,9 +208,10 @@ export class SpriteEditor extends HTMLElement {
       this.import_sprite(event);
     });
   }
+
   /**
    * Handles tool shortcuts
-   * @param {} event
+   * @param {Event} event
    */
   handle_tool_shortcuts(event) {
     const active_element = document.activeElement;
@@ -250,56 +264,13 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   *
+   * Sets the pixel size
    * @param {Number} size
    */
   set_pixel_size(size) {
     this.pixel_size = size;
   }
 
-  /**
-   * Applies the given action to a block of pixels defined by this.pixel_size
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Function} action
-   */
-  apply_to_pixel_block(x, y, action) {
-    for (let i = 0; i < this.pixel_size; i++) {
-      for (let j = 0; j < this.pixel_size; j++) {
-        const xi = x + i;
-        const yj = y + j;
-        if (this.coordinates_in_bounds(xi, yj)) {
-          action(xi, yj);
-        }
-      }
-    }
-  }
-
-  /**
-   *
-   * @param {String} hex_string
-   * @returns {Array<Numbers>}
-   */
-  hex_to_rgb_array(hex_string) {
-    hex_string = hex_string.replace(/^#/, "");
-    const big_int = parseInt(hex_string, 16);
-    const r = (big_int >> 16) & 255;
-    const g = (big_int >> 8) & 255;
-    const b = big_int & 255;
-    const a = 255;
-    return [r, g, b, a];
-  }
-  /**
-   * Turns rgb-array to hex string
-   * @param {Array<Number>} color
-   * @returns {String}
-   */
-  rgb_array_to_hex(color) {
-    const r = color[0].toString(16).padStart(2, "0");
-    const g = color[1].toString(16).padStart(2, "0");
-    const b = color[2].toString(16).padStart(2, "0");
-    return `#${r}${g}${b}`;
-  }
   /**
    * Creates the pixel matrix
    * @returns {Array<Array<Array<Number>>>}
@@ -315,12 +286,14 @@ export class SpriteEditor extends HTMLElement {
     }
     return matrix;
   }
+
   /**
-   * Starts gouping pen or eraser points for the action stack
+   * Starts grouping pen or eraser points for the action stack
    */
   start_action_buffer() {
     this.action_buffer = [];
   }
+
   /**
    * Ends grouping and pushes to stack
    */
@@ -328,8 +301,9 @@ export class SpriteEditor extends HTMLElement {
     this.action_stack.push(this.action_buffer);
     this.clear_changed_points();
   }
+
   /**
-   * Reverts the last action done (STRG + Z)
+   * Reverts the last action done (CTRL + Z)
    */
   revert_last_action() {
     if (!this.action_stack.actions_is_empty()) {
@@ -349,7 +323,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Redoing the last reverted action
+   * Redoes the last reverted action
    */
   redo_last_action() {
     if (!this.action_stack.redo_is_empty()) {
@@ -369,7 +343,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * clears the changed points
+   * Clears the changed points
    */
   clear_changed_points() {
     this.previous_changed = { x: null, y: null };
@@ -409,7 +383,7 @@ export class SpriteEditor extends HTMLElement {
    */
   update_line(points, color, event_name) {
     const [last_point, current_point] = points.slice(-2);
-    const line_points = this.calculate_line_points(
+    const line_points = EditorUtil.calculate_line_points(
       last_point.x,
       last_point.y,
       current_point.x,
@@ -417,12 +391,18 @@ export class SpriteEditor extends HTMLElement {
     );
 
     line_points.forEach(({ x, y }) => {
-      this.apply_to_pixel_block(x, y, (xi, yj) => {
-        const prev_color = this.canvas_matrix[xi][yj];
-        if (!this.compare_colors(prev_color, color)) {
-          this.update_point(xi, yj, prev_color, color, event_name);
+      EditorUtil.apply_to_pixel_block(
+        x,
+        y,
+        this.pixel_size,
+        this.canvas_matrix,
+        (xi, yj) => {
+          const prev_color = this.canvas_matrix[xi][yj];
+          if (!ColorUtil.compare_colors(prev_color, color)) {
+            this.update_point(xi, yj, prev_color, color, event_name);
+          }
         }
-      });
+      );
     });
   }
 
@@ -434,12 +414,18 @@ export class SpriteEditor extends HTMLElement {
    */
   pen_change_matrix(x, y, mousekey) {
     let color = this.set_color_by_mousekey(mousekey);
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_color = this.canvas_matrix[xi][yj];
-      if (!this.compare_colors(prev_color, color)) {
-        this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
+    EditorUtil.apply_to_pixel_block(
+      x,
+      y,
+      this.pixel_size,
+      this.canvas_matrix,
+      (xi, yj) => {
+        const prev_color = this.canvas_matrix[xi][yj];
+        if (!ColorUtil.compare_colors(prev_color, color)) {
+          this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
+        }
       }
-    });
+    );
 
     if (this.valid_previous_point(this.previous_changed)) {
       this.update_line(
@@ -460,18 +446,24 @@ export class SpriteEditor extends HTMLElement {
   eraser_change_matrix(x, y) {
     const erase_color = [0, 0, 0, 0];
 
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_color = this.canvas_matrix[xi][yj];
-      if (!this.compare_colors(prev_color, erase_color)) {
-        this.update_point(
-          xi,
-          yj,
-          prev_color,
-          erase_color,
-          "eraser_matrix_changed"
-        );
+    EditorUtil.apply_to_pixel_block(
+      x,
+      y,
+      this.pixel_size,
+      this.canvas_matrix,
+      (xi, yj) => {
+        const prev_color = this.canvas_matrix[xi][yj];
+        if (!ColorUtil.compare_colors(prev_color, erase_color)) {
+          this.update_point(
+            xi,
+            yj,
+            prev_color,
+            erase_color,
+            "eraser_matrix_changed"
+          );
+        }
       }
-    });
+    );
 
     if (this.valid_previous_point(this.previous_changed)) {
       this.update_line(
@@ -504,16 +496,28 @@ export class SpriteEditor extends HTMLElement {
     ];
 
     points.forEach(({ x, y, prev }) => {
-      if (this.coordinates_in_bounds(x, y)) {
-        this.apply_to_pixel_block(x, y, (xi, yj) => {
-          const prev_color = this.canvas_matrix[xi]?.[yj];
-          if (
-            prev_color !== undefined &&
-            !this.compare_colors(prev_color, color)
-          ) {
-            this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
+      if (EditorUtil.coordinates_in_bounds(x, y, this.canvas_matrix)) {
+        EditorUtil.apply_to_pixel_block(
+          x,
+          y,
+          this.pixel_size,
+          this.canvas_matrix,
+          (xi, yj) => {
+            const prev_color = this.canvas_matrix[xi]?.[yj];
+            if (
+              prev_color !== undefined &&
+              !ColorUtil.compare_colors(prev_color, color)
+            ) {
+              this.update_point(
+                xi,
+                yj,
+                prev_color,
+                color,
+                "pen_matrix_changed"
+              );
+            }
           }
-        });
+        );
 
         if (this.valid_previous_point(prev)) {
           this.update_line(
@@ -533,17 +537,19 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Checks if the coordinates aren't out of bound
+   * Checks if the previous point is valid (not out of bounds)
+   * @param {{x: Number, y: Number}} prev
+   * @returns {Boolean}
    */
   valid_previous_point(prev) {
     return (
       ![prev.x, prev.y].some((coord) => coord === null) &&
-      this.coordinates_in_bounds(prev.x, prev.y)
+      EditorUtil.coordinates_in_bounds(prev.x, prev.y, this.canvas_matrix)
     );
   }
 
   /**
-   *
+   * Hovers over the canvas matrix
    * @param {Number} x
    * @param {Number} y
    */
@@ -561,26 +567,33 @@ export class SpriteEditor extends HTMLElement {
       })
     );
   }
+
   /**
-   * Removes the hover-effect, when mouse leaves the canvas
+   * Removes the hover effect when mouse leaves the canvas
    */
   remove_hover() {
     this.dispatchEvent(new CustomEvent("remove_hover"));
   }
+
   /**
-   *
+   * Fills the matrix with the selected color using a recursive approach
    * @param {Number} x
    * @param {Number} y
+   * @param {Number} mousekey
    */
   fill_change_matrix(x, y, mousekey) {
     this.start_action_buffer();
     let color = this.set_color_by_mousekey(mousekey);
-    const fill_pixels = this.recursive_fill_matrix(
+    this.fill_visited = {};
+    const fill_pixels = EditorUtil.recursive_fill_matrix(
       x,
       y,
-      this.canvas_matrix[x][y]
+      this.canvas_matrix,
+      this.canvas_matrix[x][y],
+      this.fill_visited,
+      ColorUtil.compare_colors
     );
-    this.fill_visited = {};
+
     fill_pixels.forEach((pixel) => {
       this.action_buffer.push({
         x: pixel.x,
@@ -599,38 +612,12 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
+
     this.end_action_buffer();
   }
+
   /**
-   *
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Array}
-   */
-  recursive_fill_matrix(x, y, color) {
-    if (
-      this.fill_visited[`${x}_${y}`] === undefined &&
-      x >= 0 &&
-      x < this.width &&
-      y >= 0 &&
-      y < this.height &&
-      this.compare_colors(this.canvas_matrix[x][y], color)
-    ) {
-      const self = { x: x, y: y };
-      this.fill_visited[`${x}_${y}`] = false;
-      return [
-        self,
-        ...this.recursive_fill_matrix(x + 1, y, color),
-        ...this.recursive_fill_matrix(x - 1, y, color),
-        ...this.recursive_fill_matrix(x, y + 1, color),
-        ...this.recursive_fill_matrix(x, y - 1, color),
-      ];
-    } else {
-      return [];
-    }
-  }
-  /**
-   *
+   * Fills all pixels of the same color in the matrix
    * @param {Number} x
    * @param {Number} y
    * @param {Number} mousekey
@@ -642,7 +629,7 @@ export class SpriteEditor extends HTMLElement {
     const fill_pixels = [];
     for (var i = 0; i < this.height; i++) {
       for (var j = 0; j < this.width; j++) {
-        if (this.compare_colors(this.canvas_matrix[i][j], prev_color)) {
+        if (ColorUtil.compare_colors(this.canvas_matrix[i][j], prev_color)) {
           this.action_buffer.push({
             x: i,
             y: j,
@@ -664,8 +651,9 @@ export class SpriteEditor extends HTMLElement {
     );
     this.end_action_buffer();
   }
+
   /**
-   *  Draws a straight Line on the Canvas
+   * Draws a straight line on the canvas
    * @param {Number} x1
    * @param {Number} y1
    * @param {Number} x2
@@ -673,59 +661,26 @@ export class SpriteEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_line_matrix(x1, y1, x2, y2, final = false) {
-    const line_points = this.calculate_line_points(x1, y1, x2, y2);
+    const line_points = EditorUtil.calculate_line_points(x1, y1, x2, y2);
     this.draw_shape_matrix(line_points, final);
   }
-  /**
-   * Calculates the linepoints include in the line with Bresenham
-   * @param {Number} x1
-   * @param {Number} y1
-   * @param {Number} x2
-   * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, prev_color: Array<Number>}>}
-   */
-  calculate_line_points(x1, y1, x2, y2) {
-    const line_points = [];
-    const dx = Math.abs(x2 - x1);
-    const dy = Math.abs(y2 - y1);
-    const step_x = x1 < x2 ? 1 : -1;
-    const step_y = y1 < y2 ? 1 : -1;
-    let err = dx - dy;
-    let x = x1;
-    let y = y1;
-    while (true) {
-      line_points.push({
-        x: x,
-        y: y,
-        prev_color: this.canvas_matrix[x][y],
-      });
 
-      if (x === x2 && y === y2) break;
-
-      const e2 = 2 * err;
-      if (e2 > -dy) {
-        err -= dy;
-        x += step_x;
-      }
-      if (e2 < dx) {
-        err += dx;
-        y += step_y;
-      }
-    }
-    return line_points;
-  }
   /**
-   * Draws a shape to the matrix used for rectangles, circles and lines
-   * @param {Array<{x: Number, y: Number, prev_color: Array<Number>}>} shape_points
+   * Draws a shape on the canvas matrix
+   * @param {Array<{x: Number, y: Number}>} shape_points
    * @param {Boolean} final
    */
   draw_shape_matrix(shape_points, final = false) {
     if (final) {
       this.start_action_buffer();
-      const expanded_shape_points = this.expand_shape_points(shape_points);
+      const expanded_shape_points = EditorUtil.expand_shape_points(
+        shape_points,
+        this.pixel_size,
+        this.canvas_matrix
+      );
       expanded_shape_points.forEach((point) => {
         const prev_color = this.canvas_matrix[point.x][point.y];
-        if (!this.compare_colors(prev_color, this.selected_color)) {
+        if (!ColorUtil.compare_colors(prev_color, this.selected_color)) {
           this.action_buffer.push({
             x: point.x,
             y: point.y,
@@ -749,7 +704,11 @@ export class SpriteEditor extends HTMLElement {
       this.dispatchEvent(
         new CustomEvent("draw_temp_shape", {
           detail: {
-            points: this.expand_shape_points(shape_points),
+            points: EditorUtil.expand_shape_points(
+              shape_points,
+              this.pixel_size,
+              this.canvas_matrix
+            ),
             color: this.selected_color,
           },
         })
@@ -758,22 +717,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Expands the given shape points according to the pixel size
-   * @param {Array<{x: Number, y: Number}>} shape_points
-   * @returns {Array<{x: Number, y: Number}>}
-   */
-  expand_shape_points(shape_points) {
-    const expanded_points = [];
-    shape_points.forEach((point) => {
-      this.apply_to_pixel_block(point.x, point.y, (xi, yj) => {
-        expanded_points.push({ x: xi, y: yj });
-      });
-    });
-    return expanded_points;
-  }
-
-  /**
-   *  Draws a rectangle on the Canvas
+   * Draws a rectangle on the canvas
    * @param {Number} x1
    * @param {Number} y1
    * @param {Number} x2
@@ -781,37 +725,17 @@ export class SpriteEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_rectangle_matrix(x1, y1, x2, y2, final = false) {
-    const rectangle_points = this.calculate_rectangle_points(x1, y1, x2, y2);
+    const rectangle_points = EditorUtil.calculate_rectangle_points(
+      x1,
+      y1,
+      x2,
+      y2
+    );
     this.draw_shape_matrix(rectangle_points, final);
   }
+
   /**
-   * Calculates the matrix points included in the rectangle
-   * @param {Number} x1
-   * @param {Number} y1
-   * @param {Number} x2
-   * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, prev_color: Array<Number>}>}
-   */
-  calculate_rectangle_points(x1, y1, x2, y2) {
-    const points = [];
-    const y_direction = y1 - y2 > 0 ? -1 : 1;
-    const x_direction = x1 - x2 > 0 ? -1 : 1;
-    for (let i = x1; x_direction > 0 ? i <= x2 : i >= x2; i += x_direction) {
-      points.push({ x: i, y: y1, prev_color: this.canvas_matrix[i][y1] });
-      points.push({ x: i, y: y2, prev_color: this.canvas_matrix[i][x2] });
-    }
-    for (
-      let j = y1 + y_direction;
-      y_direction > 0 ? j < y2 : j > y2;
-      j += y_direction
-    ) {
-      points.push({ x: x1, y: j, prev_color: this.canvas_matrix[x1][j] });
-      points.push({ x: x2, y: j, prev_color: this.canvas_matrix[x2][j] });
-    }
-    return points;
-  }
-  /**
-   * Draws a circle on the Canvas
+   * Draws a circle on the canvas
    * @param {Number} x1
    * @param {Number} y1
    * @param {Number} x2
@@ -819,113 +743,55 @@ export class SpriteEditor extends HTMLElement {
    * @param {Boolean} final
    */
   draw_circle_matrix(x1, y1, x2, y2, final = false) {
-    const circle_points = this.calculate_circle_points(x1, y1, x2, y2);
+    const circle_points = EditorUtil.calculate_circle_points(x1, y1, x2, y2);
     this.draw_shape_matrix(circle_points, final);
   }
-  /**
-   * Calculates the matrix points included in the circle
-   * @param {Number} x1
-   * @param {Number} y1
-   * @param {Number} x2
-   * @param {Number} y2
-   * @returns {Array<{x: Number, y: Number, prev_color: Array<Number>}>}
-   */
-  calculate_circle_points(x1, y1, x2, y2) {
-    const points = [];
-    const added_points = [];
-    const radiusX = Math.abs(x2 - x1) / 2;
-    const radiusY = Math.abs(y2 - y1) / 2;
-    const centerX = Math.min(x1, x2) + radiusX;
-    const centerY = Math.min(y1, y2) + radiusY;
-    const step = 1 / Math.max(radiusX, radiusY);
-    for (let a = 0; a < 2 * Math.PI; a += step) {
-      const x = Math.round(centerX + radiusX * Math.cos(a));
-      const y = Math.round(centerY + radiusY * Math.sin(a));
-      const pointKey = `${x},${y}`;
-      if (!added_points[pointKey]) {
-        points.push({ x: x, y: y, prev_color: this.canvas_matrix[x][y] });
-        added_points[pointKey] = true;
-      }
-    }
-    return points;
-  }
-  /**
-   * Adjusts the aspect ratio of a shape to maintain a 1:1 ratio if the Shift key is held.
-   * @param {number} start_x
-   * @param {number} start_y
-   * @param {number} end_x
-   * @param {number} end_y
-   * @param {boolean} shiftKey
-   * @returns {{ end_x: number, end_y: number }}
-   */
-  calculate_aspect_ratio(start_x, start_y, end_x, end_y, shiftKey) {
-    if (shiftKey) {
-      const width = Math.abs(end_x - start_x);
-      const height = Math.abs(end_y - start_y);
-      const size = Math.min(width, height);
 
-      if (end_x < start_x) {
-        end_x = start_x - size;
-      } else {
-        end_x = start_x + size;
-      }
-
-      if (end_y < start_y) {
-        end_y = start_y - size;
-      } else {
-        end_y = start_y + size;
-      }
-    }
-    return { end_x, end_y };
-  }
-  /**
-   * Clamps a number between a minimum and a maximum value
-   * @param {Number} value
-   * @param {Number} min
-   * @param {Number} max
-   * @returns {Number}
-   */
-  clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-  }
   /**
    * Changes the brightness of the pixel
    * @param {Number} x
    * @param {Number} y
    * @param {Number} brightness
+   * @param {Boolean} darken
    */
   change_brightness_matrix(x, y, brightness, darken) {
     brightness = darken ? -brightness : brightness;
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const prev_color = this.canvas_matrix[xi][yj];
-      if (prev_color[3] == 0) return;
-      const new_color = [
-        this.clamp(prev_color[0] + brightness, 0, 255),
-        this.clamp(prev_color[1] + brightness, 0, 255),
-        this.clamp(prev_color[2] + brightness, 0, 255),
-        prev_color[3],
-      ];
-      this.canvas_matrix[xi][yj] = new_color;
-      if (
-        !this.action_buffer.some((action) => action.x === xi && action.y === yj)
-      ) {
-        this.action_buffer.push({
-          x: xi,
-          y: yj,
-          prev_color: prev_color,
-          color: new_color,
-        });
-      }
-      this.dispatchEvent(
-        new CustomEvent("pen_matrix_changed", {
-          detail: {
+    EditorUtil.apply_to_pixel_block(
+      x,
+      y,
+      this.pixel_size,
+      this.canvas_matrix,
+      (xi, yj) => {
+        const prev_color = this.canvas_matrix[xi][yj];
+        if (prev_color[3] == 0) return;
+        const new_color = ColorUtil.adjust_brightness_array(
+          prev_color,
+          brightness
+        );
+        this.canvas_matrix[xi][yj] = new_color;
+        if (
+          !this.action_buffer.some(
+            (action) => action.x === xi && action.y === yj
+          )
+        ) {
+          this.action_buffer.push({
             x: xi,
             y: yj,
+            prev_color: prev_color,
             color: new_color,
-          },
-        })
-      );
-    });
+          });
+        }
+        this.dispatchEvent(
+          new CustomEvent("pen_matrix_changed", {
+            detail: {
+              x: xi,
+              y: yj,
+              color: new_color,
+            },
+          })
+        );
+      }
+    );
   }
 
   /**
@@ -936,44 +802,49 @@ export class SpriteEditor extends HTMLElement {
    */
   dither_change_matrix(x, y, mousekey) {
     let color = this.set_color_by_mousekey(mousekey);
-    this.apply_to_pixel_block(x, y, (xi, yj) => {
-      const is_draw = this.draw_or_erase({ x: xi, y: yj }) === "draw";
-      const prev_color = this.canvas_matrix[xi][yj];
-      color = is_draw ? color : [0, 0, 0, 0];
+    EditorUtil.apply_to_pixel_block(
+      x,
+      y,
+      this.pixel_size,
+      this.canvas_matrix,
+      (xi, yj) => {
+        const is_draw = EditorUtil.draw_or_erase({ x: xi, y: yj }) === "draw";
+        const prev_color = this.canvas_matrix[xi][yj];
+        color = is_draw ? color : [0, 0, 0, 0];
 
-      if (!this.compare_colors(prev_color, color)) {
-        this.canvas_matrix[xi][yj] = color;
-        this.action_buffer.push({
-          x: xi,
-          y: yj,
-          prev_color: prev_color,
-          color: color,
-        });
-        this.dispatchEvent(
-          new CustomEvent(
-            is_draw ? "pen_matrix_changed" : "eraser_matrix_changed",
-            {
-              detail: {
-                x: xi,
-                y: yj,
-                color: color,
-              },
-            }
-          )
-        );
+        if (!ColorUtil.compare_colors(prev_color, color)) {
+          this.canvas_matrix[xi][yj] = color;
+          this.action_buffer.push({
+            x: xi,
+            y: yj,
+            prev_color: prev_color,
+            color: color,
+          });
+          this.dispatchEvent(
+            new CustomEvent(
+              is_draw ? "pen_matrix_changed" : "eraser_matrix_changed",
+              {
+                detail: {
+                  x: xi,
+                  y: yj,
+                  color: color,
+                },
+              }
+            )
+          );
+        }
       }
-    });
+    );
   }
+
   /**
-   * Filters canvas. Puts pixels with a color into move_points.
-   * Better performance than moving the whole canvas.
-   * The Pixels are added to the action_buffer as well.
+   * Filters canvas to get move points
    */
   filter_move_points() {
     this.move_points = [];
     for (let i = 0; i < this.canvas_matrix.length; i++) {
       for (let j = 0; j < this.canvas_matrix[i].length; j++) {
-        if (!this.compare_colors(this.canvas_matrix[i][j], [0, 0, 0, 0])) {
+        if (!ColorUtil.compare_colors(this.canvas_matrix[i][j], [0, 0, 0, 0])) {
           this.move_points.push({
             x: i,
             y: j,
@@ -989,8 +860,9 @@ export class SpriteEditor extends HTMLElement {
       }
     }
   }
+
   /**
-   * Moves the move_pixels.
+   * Moves the move pixels
    * @param {Number} x_diff
    * @param {Number} y_diff
    */
@@ -1005,10 +877,9 @@ export class SpriteEditor extends HTMLElement {
       })
     );
   }
+
   /**
-   * Writes move-changes to canvas_matrix.
-   * Final position points are added to action_buffer.
-   * unshit not push, so [0,0,0,0] are drawn first, when reverting.
+   * Finishes the move operation
    * @param {Number} x_diff
    * @param {Number} y_diff
    */
@@ -1033,167 +904,54 @@ export class SpriteEditor extends HTMLElement {
       }
     });
   }
+
   /**
-   * Sets the startposition for rectangle- and lasso-selection
+   * Sets the start position for selection
    * @param {{x: Number, y: Number}} position
    */
   set_selection_start_point(position) {
-    this.selection_start_point = position;
+    EditorUtil.set_selection_start_point(this, position);
   }
 
   /**
-   * Draws the selection area (Rectangle) and sends event to the canvas
+   * Draws the rectangle selection area
    * @param {{x: Number, y: Number}} position
    */
   draw_rectangle_selection(position) {
-    this.selected_points = [];
-    const y_direction = this.selection_start_point.y - position.y > 0 ? -1 : 1;
-    const x_direction = this.selection_start_point.x - position.x > 0 ? -1 : 1;
-    for (
-      let i = this.selection_start_point.x;
-      x_direction > 0 ? i <= position.x : i >= position.x;
-      i += x_direction
-    ) {
-      for (
-        let j = this.selection_start_point.y;
-        y_direction > 0 ? j <= position.y : j >= position.y;
-        j += y_direction
-      ) {
-        this.selected_points.push({
-          x: i,
-          y: j,
-          prev_color: this.canvas_matrix[i][j],
-          selection_color: this.selection_color,
-        });
-      }
-    }
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.draw_rectangle_selection(this, position);
   }
 
   /**
-   * Draws the selection area (Lasso) and dispatches an event to the canvas.
+   * Draws the lasso selection area
    * @param {Array<{x: number, y: number}>} path
    */
   draw_lasso_selection(path) {
-    this.selected_points = [];
-
-    const { x: x1_start, y: y1_start } = this.selection_start_point;
-    const { x: x2_end, y: y2_end } = path[path.length - 1];
-
-    const linePoints = this.calculate_line_points(
-      x1_start,
-      y1_start,
-      x2_end,
-      y2_end
-    );
-
-    linePoints.forEach((point) => {
-      if (!this.is_point_already_selected(point)) {
-        this.selected_points.push({
-          x: point.x,
-          y: point.y,
-          selection_color: this.selection_color,
-        });
-      }
-    });
-
-    for (let i = 0; i < path.length - 1; i++) {
-      const { x: x1, y: y1 } = path[i];
-      const { x: x2, y: y2 } = path[i + 1];
-      const linePoints = this.calculate_line_points(x1, y1, x2, y2);
-
-      linePoints.forEach((point) => {
-        if (!this.is_point_already_selected(point)) {
-          this.selected_points.push({
-            x: point.x,
-            y: point.y,
-            selection_color: this.selection_color,
-          });
-        }
-      });
-    }
-
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.draw_lasso_selection(this, path);
   }
 
   /**
-   *
    * Fills the selection area with selection color
    * @param {Array<{x: number, y: number}>} pointsInsidePath
    */
   fill_selection(pointsInsidePath) {
-    pointsInsidePath.forEach((point) => {
-      if (!this.is_point_already_selected(point)) {
-        this.selected_points.push({
-          x: point.x,
-          y: point.y,
-          selection_color: this.selection_color,
-        });
-      }
-    });
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.fill_selection(this, pointsInsidePath);
   }
 
   /**
-   * Checks if a point is already selected (already in selected_points)
-   * @param {{x: Number, y: Number}} point
-   * @returns {Boolean}
-   */
-  is_point_already_selected(point) {
-    if (this.selected_points.length === 0) return false;
-    return this.selected_points.some((p) => this.compare_points(p, point));
-  }
-
-  /**
-   * Compares two points
-   * @param {x: Number, y: Number} point1
-   * @param {x: Number, y: Number} point2
-   * @returns {Boolean}
-   */
-
-  compare_points(point1, point2) {
-    return point1.x === point2.x && point1.y === point2.y;
-  }
-
-  /**
-   * Applies dithering effect to a block of pixels
-   * @param {Number} x
-   * @param {Number} y
+   * Determines whether to draw or erase based on the position for dithering
+   * @param {{x: Number, y: Number}} position
+   * @returns {String} "draw" or "erase"
    */
   draw_or_erase(position) {
-    const is_x_odd = position.x % 2 !== 0;
-    const is_y_odd = position.y % 2 !== 0;
-    if ((is_x_odd && !is_y_odd) || (!is_x_odd && is_y_odd)) {
-      return "draw";
-    } else {
-      return "erase";
-    }
+    return EditorUtil.draw_or_erase(position);
   }
 
   /**
-   * Sets the startposition for the movement of the selected area
+   * Sets the start position for moving the selection
    * @param {{x: Number, y: Number}} position
    */
   set_selection_move_start_point(position) {
-    this.selection_move_start_point = position;
+    EditorUtil.set_selection_move_start_point(this, position);
   }
 
   /**
@@ -1201,31 +959,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {{x: Number, y: Number}} position
    */
   move_selected_area(position) {
-    const difference = this.calculate_move_difference(position);
-    this.selected_points = this.selected_points.map((point) => {
-      const x = point.x - difference.x;
-      const y = point.y - difference.y;
-      const prev_color = this.coordinates_in_bounds(x, y)
-        ? this.canvas_matrix[x][y]
-        : [0, 0, 0, 0];
-      return {
-        x: x,
-        y: y,
-        prev_color: prev_color,
-        selection_color: point.selection_color,
-        original_color: point.original_color
-          ? point.original_color
-          : [0, 0, 0, 0],
-      };
-    });
-    this.selection_move_start_point = position;
-    this.dispatchEvent(
-      new CustomEvent("update_selected_area", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
+    EditorUtil.move_selected_area(this, position);
   }
 
   /**
@@ -1234,50 +968,11 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    */
   shape_selection(x, y) {
-    const target_color = this.canvas_matrix[x][y];
-    const queue = [{ x, y }];
-    const visited = {};
-
-    this.selected_points = [];
-
-    while (queue.length > 0) {
-      const { x, y } = queue.shift();
-      const key = `${x}_${y}`;
-
-      if (
-        !visited[key] &&
-        x >= 0 &&
-        x < this.width &&
-        y >= 0 &&
-        y < this.height &&
-        this.compare_colors(this.canvas_matrix[x][y], target_color)
-      ) {
-        visited[key] = true;
-        this.selected_points.push({
-          x,
-          y,
-          prev_color: this.canvas_matrix[x][y],
-          selection_color: this.selection_color,
-        });
-        queue.push({ x: x + 1, y });
-        queue.push({ x: x - 1, y });
-        queue.push({ x, y: y + 1 });
-        queue.push({ x, y: y - 1 });
-      }
-    }
-
-    this.dispatchEvent(
-      new CustomEvent("shape_selection", {
-        detail: {
-          points: this.selected_points,
-        },
-      })
-    );
-    this.draw_shape_selection();
+    EditorUtil.shape_selection(this, x, y);
   }
 
   /**
-   * Draws the selection area based on shape selection and sends event to the canvas
+   * Draws the shape selection area
    */
   draw_shape_selection() {
     this.dispatchEvent(
@@ -1287,18 +982,6 @@ export class SpriteEditor extends HTMLElement {
         },
       })
     );
-  }
-
-  /**
-   * Calculates the difference between the move startpoint and current position
-   * @param {{x: Number, y: Number}} position
-   * @returns {{x: Number, y: Number}}
-   */
-  calculate_move_difference(position) {
-    return {
-      x: this.selection_move_start_point.x - position.x,
-      y: this.selection_move_start_point.y - position.y,
-    };
   }
 
   /**
@@ -1338,9 +1021,12 @@ export class SpriteEditor extends HTMLElement {
       return {
         ...point,
         original_color: original_color,
-        selection_color: this.is_transparent(original_color)
+        selection_color: ColorUtil.is_transparent(original_color)
           ? this.selection_color
-          : this.combine_colors(original_color, this.selection_color),
+          : ColorUtil.blend_colors(
+              ColorUtil.rgba_array_to_string(original_color),
+              ColorUtil.rgba_array_to_string(this.selection_color)
+            ),
       };
     });
     this.dispatchEvent(
@@ -1353,7 +1039,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Copies all the colors to the selected_points and clears all selected_points
+   * Copies and cuts the selected pixels
    */
   cut_selected_pixel() {
     this.copy_selected_pixel();
@@ -1378,14 +1064,18 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Inserts the selected_pixel on the new position
+   * Pastes the selected pixels
    */
   paste_selected_pixel() {
     this.start_action_buffer();
     this.selected_points.forEach((point) => {
       if (
-        this.coordinates_in_bounds(point.x, point.y) &&
-        !this.is_transparent(point.original_color)
+        EditorUtil.coordinates_in_bounds(
+          point.x,
+          point.y,
+          this.canvas_matrix
+        ) &&
+        !ColorUtil.is_transparent(point.original_color)
       ) {
         this.action_buffer.push({
           x: point.x,
@@ -1407,34 +1097,14 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Checks if the color is transparent
-   * @param {Array<Number>} color
-   * @returns {Boolean}
-   */
-  is_transparent(color) {
-    return color[0] === 0 && color[1] === 0 && color[2] === 0 && color[3] === 0;
-  }
-
-  /**
-   * Removes selection, when tool is destroyed
+   * Destroys the selection
    */
   destroy_selection() {
-    this.selection_copied = false;
-    this.selected_points = [];
-    this.dispatchEvent(new CustomEvent("remove_selection"));
+    EditorUtil.destroy_selection(this);
   }
 
   /**
-   * Returns true if two color-Arrays are the same
-   * @param {Array<Number>} color1
-   * @param {Array<Number>} color2
-   */
-  compare_colors(color1, color2) {
-    return JSON.stringify(color1) === JSON.stringify(color2);
-  }
-
-  /**
-   * Gets the color from the canvas and puts it in the color input
+   * Picks a color from the canvas
    * @param {Number} x
    * @param {Number} y
    */
@@ -1442,13 +1112,13 @@ export class SpriteEditor extends HTMLElement {
     const color = this.canvas_matrix[x][y];
     if (color[3] !== 0) {
       this.selected_color = color;
-      const hex_color = this.rgb_array_to_hex(color);
+      const hex_color = ColorUtil.rgb_array_to_hex(color);
       this.sprite_tools.querySelector("#color_input").value = hex_color;
     }
   }
 
   /**
-   * Gets the fitting tool, when clicked
+   * Gets the fitting tool when clicked
    * @param {String} string
    */
   select_tool_from_string(string) {
@@ -1489,36 +1159,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Combines two colors for the copied points
-   * @param {Array<Number>} color1
-   * @param {Array<Number>} color2
-   * @returns
-   */
-  combine_colors(color1, color2) {
-    const r = Math.round((color1[0] + color2[0]) / 2);
-    const g = Math.round((color1[1] + color2[1]) / 2);
-    const b = Math.round((color1[2] + color2[2]) / 2);
-    const a = Math.round((color1[3] + color2[3]) / 2);
-    return [r, g, b, a];
-  }
-
-  /**
-   * Returns true if the x and y coordinate are in the canvas bounds
-   * @param {Number} x
-   * @param {Number} y
-   * @returns {Boolean}
-   */
-  coordinates_in_bounds(x, y) {
-    return (
-      x >= 0 &&
-      y >= 0 &&
-      x < this.canvas_matrix.length &&
-      y < this.canvas_matrix[0].length
-    );
-  }
-
-  /**
-   * Saves the sprite in a JSON
+   * Saves the sprite in a JSON file
    */
   save_as_sprite_file() {
     const filename = "test.sprite";
@@ -1551,7 +1192,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * imports .sprite files into the editor
+   * Imports .sprite files into the editor
    * @param {File} file
    */
   import_from_sprite(file) {
@@ -1564,7 +1205,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * imports .png files into the editor
+   * Imports .png files into the editor
    * @param {File} file
    */
   import_from_png(file) {
@@ -1585,7 +1226,6 @@ export class SpriteEditor extends HTMLElement {
 
   /**
    * Swaps the loaded matrix with the current one
-   * used during the import of png or sprite files
    * @param {Array<Array<Array<Number>>>} loaded_canvas
    */
   handle_loaded_matrix(loaded_canvas) {
@@ -1645,7 +1285,7 @@ export class SpriteEditor extends HTMLElement {
     canvas.width = this.width;
     this.canvas_matrix.forEach((row, i) =>
       row.forEach((pixel, j) => {
-        context.fillStyle = this.color_array_to_rbga(pixel);
+        context.fillStyle = ColorUtil.rgba_array_to_string(pixel);
         context.fillRect(j, i, 1, 1);
       })
     );
@@ -1671,8 +1311,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Turns an ImageData-Array into a two
-   * dimensional Array
+   * Turns an ImageData array into a two-dimensional array
    * @param {Array<Number>} data
    * @returns {Array<Array<Array<Number>>>}
    */
@@ -1692,7 +1331,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Creates a new Matrix for the new frame
+   * Creates a new matrix for the new frame
    */
   add_matrix() {
     this.canvas_matrices.push(this.create_canvas_matrix());
@@ -1740,8 +1379,7 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Called by the ActionStack fires event
-   * to update the frame thumbnail
+   * Called by the ActionStack to update the frame thumbnail
    */
   update_frame_thumbnail() {
     this.dispatchEvent(
@@ -1765,12 +1403,25 @@ export class SpriteEditor extends HTMLElement {
     this.action_stacks.splice(new_index, 0, action_stack);
   }
 
+  /**
+   * Sets the color based on the mouse key
+   * @param {Number} key
+   * @returns {Array<Number>}
+   */
   set_color_by_mousekey(key) {
     let color = this.selected_color;
     if (key === 2) {
       color = this.secondary_color;
     }
     return color;
+  }
+
+  /**
+   * Gets the content of the editor (required for shape_selection)
+   * @returns {Array}
+   */
+  get_content() {
+    return this.canvas_matrix;
   }
 }
 
