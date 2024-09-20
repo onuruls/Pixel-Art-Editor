@@ -185,9 +185,10 @@ export class BackendClient {
    * the given id, from the given type
    * @param {String} file_name
    * @param {String} file_type
+   * @param {Array<Array<String>>} matrix_data
    * @returns {any}
    */
-  static async create_file(folder_id, file_name, file_type) {
+  static async create_file(folder_id, file_name, file_type, matrix_data) {
     const response = await fetch(
       `http://localhost:3000/folders/${folder_id}/files`,
       {
@@ -198,6 +199,7 @@ export class BackendClient {
         body: JSON.stringify({
           name: file_name,
           type: file_type,
+          matrix_data: matrix_data,
         }),
       }
     );
@@ -226,9 +228,31 @@ export class BackendClient {
       }),
     });
     if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
+      throw new Error(response.statusText);
     }
     return await response.json();
+  }
+
+  /**
+   * Sends PUT-Request to update the content of a file.
+   * @param {String} file_id
+   * @param {String} content
+   * @returns {any}
+   */
+  static async write_file(file_id, content) {
+    const response = await fetch(`http://localhost:3000/files/${file_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: content,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    return await response.text();
   }
 
   /**

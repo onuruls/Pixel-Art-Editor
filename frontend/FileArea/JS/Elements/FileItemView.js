@@ -41,32 +41,16 @@ export class FileItemView extends ItemView {
     super.init();
     switch (this.type) {
       case "png":
-        this.icon.addEventListener("dblclick", this.open_png_file.bind(this));
+        this.icon.addEventListener("dblclick", async () => {
+          if (this.file_area.file_system_handler) {
+            await this.file_area.open_sprite_file(this.id);
+          } else {
+            console.error("File system handler is not ready.");
+          }
+        });
         break;
       case "tmx":
         //TODO: Implement TMX file opening
-        break;
-    }
-  }
-
-  /**
-   * Opens the sprite file
-   */
-  open_png_file() {
-    const file_meta_data = this.file_area.file_system_handler.get_file_by_id(
-      this.id
-    );
-    const file_path = `../../../../uploads/${file_meta_data.name}.png`;
-    const file = new File([file_path], `${file_meta_data.name}.png`, {
-      type: "image/png",
-    });
-    switch (this.file_area.selected_editor) {
-      case "SpriteEditor":
-        this.file_area.editor_tool.sprite_editor.import_from_png(file);
-        break;
-      case "MapEditor":
-        //TODO: Implement map editor
-        console.log("Map Editor");
         break;
     }
   }

@@ -29,6 +29,7 @@ file-area-view {
     i {
       font-size: 3rem;
       color: var(--button-hover-bg);
+      transition: color 1s ease;
     }
 
     p {

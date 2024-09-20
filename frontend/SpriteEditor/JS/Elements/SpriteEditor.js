@@ -1209,10 +1209,8 @@ export class SpriteEditor extends HTMLElement {
    * @param {File} file
    */
   import_from_png(file) {
-    console.log(file);
     const reader = new FileReader();
     reader.onload = (e) => {
-      console.log(e.target.result);
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -1247,6 +1245,35 @@ export class SpriteEditor extends HTMLElement {
     this.repaint_canvas();
   }
 
+  save_sprite_file() {
+    const file_system_handler = this.editor_tool.file_area.file_system_handler;
+    if (this.editor_tool.active_file) {
+      file_system_handler
+        .write_file(
+          this.editor_tool.active_file,
+          JSON.stringify(this.canvas_matrix)
+        )
+        .then(() => {
+          file_system_handler.read_directory_content();
+        })
+        .catch((error) => {
+          console.error("Error saving sprite:", error);
+        });
+    } else {
+      const file_name = "sprite";
+      const matrix_data = this.canvas_matrix;
+      this.editor_tool.active_file = file_system_handler
+        .create_file(file_name, "png", matrix_data)
+        .then((created_file) => {
+          this.editor_tool.set_active_file(created_file);
+          return file_system_handler.read_directory_content();
+        })
+        .catch((error) => {
+          console.error("Error saving sprite:", error);
+        });
+    }
+  }
+
   /**
    * Exports the image as a PNG file
    */
@@ -1268,10 +1295,12 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Saves the sprite file (TODO)
+   * Converts an array entry into a color string
+   * @param {Array<Number>} pixel
+   * @returns {String}
    */
-  save_sprite_file() {
-    // TODO
+  color_array_to_rbga(pixel) {
+    return `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3] / 255})`;
   }
 
   /**

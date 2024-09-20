@@ -2,9 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
-const { PNG } = require("pngjs");
-const fs = require("fs");
-const path = require("path");
 
 const app = express();
 
@@ -213,10 +210,10 @@ app.put("/files/move", async (req, res) => {
 });
 
 /**
- * Adds a new File to a folder with a dummy file
+ * Adds a new File to a folder
  */
 app.post("/folders/:folder_id/files", async (req, res) => {
-  const { name, type } = req.body;
+  const { name, type, matrix_data } = req.body;
   const folder_id = req.params.folder_id;
 
   if (!name) {
@@ -231,14 +228,7 @@ app.post("/folders/:folder_id/files", async (req, res) => {
   }
 
   try {
-    const file = await db_client.add_file(folder_id, name, type);
-    if (type === "png") {
-      const png = new PNG({ width: 64, height: 64 });
-      png.pack().pipe(fs.createWriteStream(file.filepath));
-    } else {
-      const dummyContent = "Dummy TMX content";
-      fs.writeFileSync(file.filepath, dummyContent);
-    }
+    const file = await db_client.add_file(folder_id, name, type, matrix_data);
     res.status(201).send(file);
   } catch (error) {
     console.error("Error creating file:", error);
@@ -265,20 +255,26 @@ app.get("/files/:id", async (req, res) => {
 });
 
 /**
- * Serves the file content by file ID
+ * Updates the content of an existing file (PNG).
  */
-app.get("/files/:id/content", async (req, res) => {
+app.put("/files/:id", async (req, res) => {
   const file_id = req.params.id;
+  const matrix_data = JSON.parse(req.body.content);
+
+  if (!matrix_data) {
+    return res.status(400).send("Matrix data is required to update the file");
+  }
 
   try {
     const file = await db_client.get_file(file_id);
     if (!file) {
       return res.status(404).send("File not found");
     }
-    res.sendFile(file.filepath);
+    await db_client.write_file(file_id, matrix_data);
+    res.status(200).send("File updated");
   } catch (error) {
-    console.error("Error serving file:", error);
-    res.status(500).send(error);
+    console.error("Error updating file:", error);
+    res.status(500).send("Error updating file");
   }
 });
 
