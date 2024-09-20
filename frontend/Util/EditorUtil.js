@@ -286,18 +286,6 @@ export class EditorUtil {
   }
 
   /**
-   * Converts an array of RGB values to a hex color string
-   * @param {Array<Number>} color
-   * @returns {String}
-   */
-  static rgb_array_to_hex(color) {
-    const r = color[0].toString(16).padStart(2, "0");
-    const g = color[1].toString(16).padStart(2, "0");
-    const b = color[2].toString(16).padStart(2, "0");
-    return `#${r}${g}${b}`;
-  }
-
-  /**
    * Clamps a number between a minimum and a maximum value
    * @param {Number} value
    * @param {Number} min

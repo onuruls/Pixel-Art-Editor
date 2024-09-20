@@ -19,6 +19,7 @@ import { ShapeSelection } from "../Tools/ShapeSelection.js";
 import { Dithering } from "../Tools/Dithering.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { EditorUtil } from "../../../Util/EditorUtil.js";
+import { ColorUtil } from "../../../Util/ColorUtil.js";
 
 export class SpriteEditor extends HTMLElement {
   /**
@@ -62,6 +63,14 @@ export class SpriteEditor extends HTMLElement {
       "#A4A5A6",
       "#A4A5A6",
     ];
+
+    this.selected_color = ColorUtil.hex_to_rgb_array(
+      this.sprite_tools?.querySelector("#color_input")?.value || "#000000"
+    );
+    this.secondary_color = ColorUtil.hex_to_rgb_array(
+      this.sprite_tools?.querySelector("#secondary_color_input")?.value ||
+        "#FFFFFF"
+    );
   }
 
   /**
@@ -83,10 +92,10 @@ export class SpriteEditor extends HTMLElement {
 
     this.set_listeners();
     this.selected_tool = new Pen(this);
-    this.selected_color = this.hex_to_rgb_array(
+    this.selected_color = ColorUtil.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
-    this.secondary_color = this.hex_to_rgb_array(
+    this.secondary_color = ColorUtil.hex_to_rgb_array(
       this.sprite_tools.querySelector("#secondary_color_input").value
     );
     this.initialized = true;
@@ -177,7 +186,7 @@ export class SpriteEditor extends HTMLElement {
     this.sprite_tools
       .querySelector("#color_input")
       .addEventListener("input", (event) => {
-        this.selected_color = this.hex_to_rgb_array(event.target.value);
+        this.selected_color = ColorUtil.hex_to_rgb_array(event.target.value);
       });
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey) {
@@ -276,21 +285,6 @@ export class SpriteEditor extends HTMLElement {
       }
     }
     return matrix;
-  }
-
-  /**
-   * Converts a hex color string to an RGBA array
-   * @param {String} hex_string
-   * @returns {Array<Number>}
-   */
-  hex_to_rgb_array(hex_string) {
-    hex_string = hex_string.replace(/^#/, "");
-    const bigint = parseInt(hex_string, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    const a = 255;
-    return [r, g, b, a];
   }
 
   /**
@@ -404,7 +398,7 @@ export class SpriteEditor extends HTMLElement {
         this.canvas_matrix,
         (xi, yj) => {
           const prev_color = this.canvas_matrix[xi][yj];
-          if (!EditorUtil.compare_colors(prev_color, color)) {
+          if (!ColorUtil.compare_colors(prev_color, color)) {
             this.update_point(xi, yj, prev_color, color, event_name);
           }
         }
@@ -427,7 +421,7 @@ export class SpriteEditor extends HTMLElement {
       this.canvas_matrix,
       (xi, yj) => {
         const prev_color = this.canvas_matrix[xi][yj];
-        if (!EditorUtil.compare_colors(prev_color, color)) {
+        if (!ColorUtil.compare_colors(prev_color, color)) {
           this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
         }
       }
@@ -459,7 +453,7 @@ export class SpriteEditor extends HTMLElement {
       this.canvas_matrix,
       (xi, yj) => {
         const prev_color = this.canvas_matrix[xi][yj];
-        if (!EditorUtil.compare_colors(prev_color, erase_color)) {
+        if (!ColorUtil.compare_colors(prev_color, erase_color)) {
           this.update_point(
             xi,
             yj,
@@ -512,7 +506,7 @@ export class SpriteEditor extends HTMLElement {
             const prev_color = this.canvas_matrix[xi]?.[yj];
             if (
               prev_color !== undefined &&
-              !EditorUtil.compare_colors(prev_color, color)
+              !ColorUtil.compare_colors(prev_color, color)
             ) {
               this.update_point(
                 xi,
@@ -597,7 +591,7 @@ export class SpriteEditor extends HTMLElement {
       this.canvas_matrix,
       this.canvas_matrix[x][y],
       this.fill_visited,
-      EditorUtil.compare_colors
+      ColorUtil.compare_colors
     );
 
     fill_pixels.forEach((pixel) => {
@@ -635,7 +629,7 @@ export class SpriteEditor extends HTMLElement {
     const fill_pixels = [];
     for (var i = 0; i < this.height; i++) {
       for (var j = 0; j < this.width; j++) {
-        if (EditorUtil.compare_colors(this.canvas_matrix[i][j], prev_color)) {
+        if (ColorUtil.compare_colors(this.canvas_matrix[i][j], prev_color)) {
           this.action_buffer.push({
             x: i,
             y: j,
@@ -686,7 +680,7 @@ export class SpriteEditor extends HTMLElement {
       );
       expanded_shape_points.forEach((point) => {
         const prev_color = this.canvas_matrix[point.x][point.y];
-        if (!EditorUtil.compare_colors(prev_color, this.selected_color)) {
+        if (!ColorUtil.compare_colors(prev_color, this.selected_color)) {
           this.action_buffer.push({
             x: point.x,
             y: point.y,
@@ -754,17 +748,6 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Clamps a number between a minimum and a maximum value
-   * @param {Number} value
-   * @param {Number} min
-   * @param {Number} max
-   * @returns {Number}
-   */
-  clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-  }
-
-  /**
    * Changes the brightness of the pixel
    * @param {Number} x
    * @param {Number} y
@@ -781,12 +764,10 @@ export class SpriteEditor extends HTMLElement {
       (xi, yj) => {
         const prev_color = this.canvas_matrix[xi][yj];
         if (prev_color[3] == 0) return;
-        const new_color = [
-          EditorUtil.clamp(prev_color[0] + brightness, 0, 255),
-          EditorUtil.clamp(prev_color[1] + brightness, 0, 255),
-          EditorUtil.clamp(prev_color[2] + brightness, 0, 255),
-          prev_color[3],
-        ];
+        const new_color = ColorUtil.adjust_brightness_array(
+          prev_color,
+          brightness
+        );
         this.canvas_matrix[xi][yj] = new_color;
         if (
           !this.action_buffer.some(
@@ -831,7 +812,7 @@ export class SpriteEditor extends HTMLElement {
         const prev_color = this.canvas_matrix[xi][yj];
         color = is_draw ? color : [0, 0, 0, 0];
 
-        if (!EditorUtil.compare_colors(prev_color, color)) {
+        if (!ColorUtil.compare_colors(prev_color, color)) {
           this.canvas_matrix[xi][yj] = color;
           this.action_buffer.push({
             x: xi,
@@ -863,9 +844,7 @@ export class SpriteEditor extends HTMLElement {
     this.move_points = [];
     for (let i = 0; i < this.canvas_matrix.length; i++) {
       for (let j = 0; j < this.canvas_matrix[i].length; j++) {
-        if (
-          !EditorUtil.compare_colors(this.canvas_matrix[i][j], [0, 0, 0, 0])
-        ) {
+        if (!ColorUtil.compare_colors(this.canvas_matrix[i][j], [0, 0, 0, 0])) {
           this.move_points.push({
             x: i,
             y: j,
@@ -1042,9 +1021,12 @@ export class SpriteEditor extends HTMLElement {
       return {
         ...point,
         original_color: original_color,
-        selection_color: EditorUtil.is_transparent(original_color)
+        selection_color: ColorUtil.is_transparent(original_color)
           ? this.selection_color
-          : EditorUtil.combine_colors(original_color, this.selection_color),
+          : ColorUtil.blend_colors(
+              ColorUtil.rgba_array_to_string(original_color),
+              ColorUtil.rgba_array_to_string(this.selection_color)
+            ),
       };
     });
     this.dispatchEvent(
@@ -1093,7 +1075,7 @@ export class SpriteEditor extends HTMLElement {
           point.y,
           this.canvas_matrix
         ) &&
-        !EditorUtil.is_transparent(point.original_color)
+        !ColorUtil.is_transparent(point.original_color)
       ) {
         this.action_buffer.push({
           x: point.x,
@@ -1130,7 +1112,7 @@ export class SpriteEditor extends HTMLElement {
     const color = this.canvas_matrix[x][y];
     if (color[3] !== 0) {
       this.selected_color = color;
-      const hex_color = EditorUtil.rgb_array_to_hex(color);
+      const hex_color = ColorUtil.rgb_array_to_hex(color);
       this.sprite_tools.querySelector("#color_input").value = hex_color;
     }
   }
@@ -1276,7 +1258,7 @@ export class SpriteEditor extends HTMLElement {
     canvas.width = this.width;
     this.canvas_matrix.forEach((row, i) =>
       row.forEach((pixel, j) => {
-        context.fillStyle = this.color_array_to_rbga(pixel);
+        context.fillStyle = ColorUtil.rgba_array_to_string(pixel);
         context.fillRect(j, i, 1, 1);
       })
     );
@@ -1290,15 +1272,6 @@ export class SpriteEditor extends HTMLElement {
    */
   save_sprite_file() {
     // TODO
-  }
-
-  /**
-   * Converts an array entry into a color string
-   * @param {Array<Number>} pixel
-   * @returns {String}
-   */
-  color_array_to_rbga(pixel) {
-    return `rgba(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3] / 255})`;
   }
 
   /**

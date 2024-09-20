@@ -1,5 +1,6 @@
 import { SpriteCanvas } from "../SpriteCanvas.js";
 import { CanvasElement } from "./CanvasElement.js";
+import { ColorUtil } from "../../../../Util/ColorUtil.js";
 
 export class HoverCanvas extends CanvasElement {
   /**
@@ -11,8 +12,7 @@ export class HoverCanvas extends CanvasElement {
   constructor(sprite_canvas) {
     super(sprite_canvas);
     this.context = null;
-    this.hover_color = "rgba(180,240,213,0.5)";
-    console.log(this.sprite_editor);
+    this.hover_color = ColorUtil.hover_color;
   }
 
   render() {
@@ -52,6 +52,13 @@ export class HoverCanvas extends CanvasElement {
    */
   remove_hover(event) {
     this.revert_canvas();
+  }
+
+  /**
+   * Clears the hover canvas.
+   */
+  revert_canvas() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
 

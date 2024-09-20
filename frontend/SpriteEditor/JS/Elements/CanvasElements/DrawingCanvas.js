@@ -10,7 +10,6 @@ export class DrawingCanvas extends CanvasElement {
   constructor(sprite_canvas) {
     super(sprite_canvas);
     this.context = null;
-    console.log(this.sprite_editor);
   }
 
   render() {
