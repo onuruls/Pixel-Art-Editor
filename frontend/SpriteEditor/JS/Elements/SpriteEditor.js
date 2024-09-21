@@ -1,6 +1,7 @@
 import { SpritePreview } from "./SpritePreview.js";
 import { SpriteCanvas } from "./SpriteCanvas.js";
 import { SpriteTools } from "./SpriteTools.js";
+import { Frame } from "./Frame.js";
 import { Eraser } from "../Tools/Eraser.js";
 import { Pen } from "../Tools/Pen.js";
 import { MirrorPen } from "../Tools/MirrorPen.js";
@@ -38,7 +39,7 @@ export class SpriteEditor extends HTMLElement {
     this.canvas_wrapper_width = 0;
     this.canvas_wrapper_height = 0;
     this.canvas_matrix = this.create_canvas_matrix();
-    this.canvas_matrices = [this.canvas_matrix];
+    this.canvas_matrixes = [this.canvas_matrix];
     this.fill_visited = {};
     this.action_stack = new ActionStack(this);
     this.action_stacks = [this.action_stack];
@@ -764,10 +765,7 @@ export class SpriteEditor extends HTMLElement {
       (xi, yj) => {
         const prev_color = this.canvas_matrix[xi][yj];
         if (prev_color[3] == 0) return;
-        const new_color = ColorUtil.adjust_brightness_array(
-          prev_color,
-          brightness
-        );
+        const new_color = ColorUtil.adjust_brightness(prev_color, brightness);
         this.canvas_matrix[xi][yj] = new_color;
         if (
           !this.action_buffer.some(
@@ -1111,9 +1109,7 @@ export class SpriteEditor extends HTMLElement {
   pick_color(x, y) {
     const color = this.canvas_matrix[x][y];
     if (color[3] !== 0) {
-      this.selected_color = color;
-      const hex_color = ColorUtil.rgb_array_to_hex(color);
-      this.sprite_tools.querySelector("#color_input").value = hex_color;
+      this.set_selected_color(color);
     }
   }
 
@@ -1225,10 +1221,36 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Swaps the loaded matrix with the current one
-   * @param {Array<Array<Array<Number>>>} loaded_canvas
+   * Handles the loaded file
+   * @param {Object} data
    */
-  handle_loaded_matrix(loaded_canvas) {
+  handle_loaded_file(data) {
+    this.set_selected_color(ColorUtil.hex_to_rgb_array(data.selectedColor));
+    this.set_secondary_color(ColorUtil.hex_to_rgb_array(data.secondaryColor));
+    this.palettes = data.palette;
+    this.palettes.forEach((color, index) => {
+      this.sprite_tools.set_palette_color(index, color);
+    });
+
+    this.canvas_matrixes = [];
+    this.sprite_preview.sprite_frames.frames.forEach((frame) => frame.remove());
+    this.sprite_preview.sprite_frames.frames = [];
+
+    data.frames.forEach((frame, index) => {
+      this.sprite_preview.sprite_frames.add_new_frame();
+      this.canvas_matrix = frame.matrix;
+      this.canvas_matrixes[index] = this.canvas_matrix;
+      this.repaint_canvas();
+    });
+    this.sprite_preview.sprite_frames.switch_active_frame(0);
+    this.action_buffer = [];
+  }
+
+  /**
+   * Swaps the loaded canvas with the current one
+   * @param {Array<Array<Array<Number>>>} canvas
+   */
+  handle_loaded_matrix(canvas) {
     this.start_action_buffer();
     this.canvas_matrix.forEach((row, x) =>
       row.forEach((pixel, y) => {
@@ -1236,41 +1258,43 @@ export class SpriteEditor extends HTMLElement {
           x: x,
           y: y,
           prev_color: pixel,
-          color: loaded_canvas[x][y],
+          color: canvas[x][y],
         });
       })
     );
-    this.canvas_matrix = loaded_canvas;
+    this.canvas_matrix = canvas;
     this.end_action_buffer();
     this.repaint_canvas();
   }
 
   save_sprite_file() {
     const file_system_handler = this.editor_tool.file_area.file_system_handler;
+
+    const sprite_data = {
+      frames: this.canvas_matrixes.map((matrix) => ({
+        matrix,
+      })),
+      palette: this.palettes,
+      selectedColor: ColorUtil.rgb_array_to_hex(this.selected_color),
+      secondaryColor: ColorUtil.rgb_array_to_hex(this.secondary_color),
+    };
+
+    const jsonString = JSON.stringify(sprite_data);
+
     if (this.editor_tool.active_file) {
       file_system_handler
-        .write_file(
-          this.editor_tool.active_file,
-          JSON.stringify(this.canvas_matrix)
-        )
-        .then(() => {
-          file_system_handler.read_directory_content();
-        })
-        .catch((error) => {
-          console.error("Error saving sprite:", error);
-        });
+        .write_file(this.editor_tool.active_file, jsonString)
+        .then(() => file_system_handler.read_directory_content())
+        .catch((error) => console.error("Error saving sprite:", error));
     } else {
       const file_name = "sprite";
-      const matrix_data = this.canvas_matrix;
       this.editor_tool.active_file = file_system_handler
-        .create_file(file_name, "png", matrix_data)
+        .create_file(file_name, "png", sprite_data)
         .then((created_file) => {
           this.editor_tool.set_active_file(created_file);
           return file_system_handler.read_directory_content();
         })
-        .catch((error) => {
-          console.error("Error saving sprite:", error);
-        });
+        .catch((error) => console.error("Error creating sprite file:", error));
     }
   }
 
@@ -1334,7 +1358,7 @@ export class SpriteEditor extends HTMLElement {
    * Creates a new matrix for the new frame
    */
   add_matrix() {
-    this.canvas_matrices.push(this.create_canvas_matrix());
+    this.canvas_matrixes.push(this.create_canvas_matrix());
     this.action_stacks.push(new ActionStack(this));
   }
 
@@ -1343,7 +1367,7 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} index
    */
   remove_matrix(index) {
-    this.canvas_matrices.splice(index, 1);
+    this.canvas_matrixes.splice(index, 1);
     this.action_stacks.splice(index, 1);
   }
 
@@ -1352,10 +1376,10 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} index
    */
   copy_matrix(index) {
-    const matrix = this.canvas_matrices[index];
+    const matrix = this.canvas_matrixes[index];
     const copied_matrix = matrix.map((row) => row.map((color) => [...color]));
     const action_stack = new ActionStack(this);
-    this.canvas_matrices.splice(index + 1, 0, copied_matrix);
+    this.canvas_matrixes.splice(index + 1, 0, copied_matrix);
     this.action_stacks.splice(index + 1, 0, action_stack);
   }
 
@@ -1365,7 +1389,7 @@ export class SpriteEditor extends HTMLElement {
    */
   switch_active_matrix(index) {
     this.current_frame_index = index;
-    this.canvas_matrix = this.canvas_matrices[index];
+    this.canvas_matrix = this.canvas_matrixes[index];
     this.action_stack = this.action_stacks[index];
     this.repaint_canvas();
   }
@@ -1397,8 +1421,8 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} new_index
    */
   update_frame_arrays(old_index, new_index) {
-    const [matrix] = this.canvas_matrices.splice(old_index, 1);
-    this.canvas_matrices.splice(new_index, 0, matrix);
+    const [matrix] = this.canvas_matrixes.splice(old_index, 1);
+    this.canvas_matrixes.splice(new_index, 0, matrix);
     const [action_stack] = this.action_stacks.splice(old_index, 1);
     this.action_stacks.splice(new_index, 0, action_stack);
   }
@@ -1414,6 +1438,40 @@ export class SpriteEditor extends HTMLElement {
       color = this.secondary_color;
     }
     return color;
+  }
+
+  /**
+   * Sets the selected color
+   * @param {Array<Number>} color
+   */
+  set_selected_color(color) {
+    this.selected_color = color;
+    this.sprite_tools.querySelector("#color_input").value =
+      ColorUtil.rgb_array_to_hex(color);
+  }
+
+  /**
+   * Sets the secondary color
+   * @param {Array<Number>} color
+   */
+  set_secondary_color(color) {
+    this.secondary_color = color;
+    this.sprite_tools.querySelector("#secondary_color_input").value =
+      ColorUtil.rgb_array_to_hex(color);
+  }
+
+  set_palette_colors() {
+    const palette_elements =
+      this.sprite_tools.querySelectorAll(".palette-color");
+
+    palette_elements.forEach((element, index) => {
+      if (this.palettes[index]) {
+        const input = element.querySelector("input");
+        if (input) {
+          input.value = this.palettes[index]; // Update input value to reflect the new palette color
+        }
+      }
+    });
   }
 
   /**

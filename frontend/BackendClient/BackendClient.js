@@ -185,10 +185,10 @@ export class BackendClient {
    * the given id, from the given type
    * @param {String} file_name
    * @param {String} file_type
-   * @param {Array<Array<String>>} matrix_data
+   * @param {String} data
    * @returns {any}
    */
-  static async create_file(folder_id, file_name, file_type, matrix_data) {
+  static async create_file(folder_id, file_name, file_type, data) {
     const response = await fetch(
       `http://localhost:3000/folders/${folder_id}/files`,
       {
@@ -199,7 +199,7 @@ export class BackendClient {
         body: JSON.stringify({
           name: file_name,
           type: file_type,
-          matrix_data: matrix_data,
+          data: data,
         }),
       }
     );

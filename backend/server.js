@@ -213,7 +213,7 @@ app.put("/files/move", async (req, res) => {
  * Adds a new File to a folder
  */
 app.post("/folders/:folder_id/files", async (req, res) => {
-  const { name, type, matrix_data } = req.body;
+  const { name, type, data } = req.body;
   const folder_id = req.params.folder_id;
 
   if (!name) {
@@ -228,7 +228,7 @@ app.post("/folders/:folder_id/files", async (req, res) => {
   }
 
   try {
-    const file = await db_client.add_file(folder_id, name, type, matrix_data);
+    const file = await db_client.add_file(folder_id, name, type, data);
     res.status(201).send(file);
   } catch (error) {
     console.error("Error creating file:", error);
@@ -259,9 +259,9 @@ app.get("/files/:id", async (req, res) => {
  */
 app.put("/files/:id", async (req, res) => {
   const file_id = req.params.id;
-  const matrix_data = JSON.parse(req.body.content);
+  const data = JSON.parse(req.body.content);
 
-  if (!matrix_data) {
+  if (!data) {
     return res.status(400).send("Matrix data is required to update the file");
   }
 
@@ -270,7 +270,7 @@ app.put("/files/:id", async (req, res) => {
     if (!file) {
       return res.status(404).send("File not found");
     }
-    await db_client.write_file(file_id, matrix_data);
+    await db_client.write_file(file_id, data);
     res.status(200).send("File updated");
   } catch (error) {
     console.error("Error updating file:", error);

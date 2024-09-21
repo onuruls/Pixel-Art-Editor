@@ -107,12 +107,12 @@ export class FileArea extends HTMLElement {
 
     const fileData = this.file_system_handler.get_file_by_id(file_id);
     if (fileData) {
-      if (fileData.type === "png" && fileData.matrix_data) {
+      if (fileData.type === "png") {
         this.editor_tool.set_active_file(fileData);
         const spriteEditor = this.editor_tool.sprite_editor;
-        spriteEditor.handle_loaded_matrix(fileData.matrix_data);
+        spriteEditor.handle_loaded_file(fileData.data);
       } else {
-        console.error("Unsupported file type or missing matrix data.");
+        console.error("Unsupported file type or missing data.");
       }
     } else {
       console.error("Error loading sprite file.");

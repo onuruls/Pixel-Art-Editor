@@ -81,7 +81,7 @@ const File = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    matrix_data: {
+    data: {
       type: DataTypes.STRING,
       allowNull: false,
     },
