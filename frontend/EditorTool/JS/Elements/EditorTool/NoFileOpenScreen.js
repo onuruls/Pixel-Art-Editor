@@ -1,4 +1,4 @@
-import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
+import { EditorTool } from "../EditorTool.js";
 
 export class NoFileOpenScreen extends HTMLElement {
     /**
@@ -64,7 +64,7 @@ export class NoFileOpenScreen extends HTMLElement {
                 if (file_type === "png") {
                     this.editor_tool.sprite_editor.handle_loaded_matrix(new_file.data.frames[0].matrix);
                 } else if (file_type === "tmx") {
-                    this.editor_tool.map_editor.load_map_data(new_file.data);
+                    console.log("Not implemented yet");
                 }
 
                 this.remove();

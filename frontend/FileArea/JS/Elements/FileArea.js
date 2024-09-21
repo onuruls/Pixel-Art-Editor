@@ -105,12 +105,10 @@ export class FileArea extends HTMLElement {
       return;
     }
 
-    const fileData = this.file_system_handler.get_file_by_id(file_id);
-    if (fileData) {
-      if (fileData.type === "png") {
-        this.editor_tool.set_active_file(fileData);
-        const spriteEditor = this.editor_tool.sprite_editor;
-        spriteEditor.handle_loaded_file(fileData.data);
+    const file_data = this.file_system_handler.get_file_by_id(file_id);
+    if (file_data) {
+      if (file_data.type === "png") {
+        this.editor_tool.set_active_file(file_data);
       } else {
         console.error("Unsupported file type or missing data.");
       }
@@ -118,25 +116,6 @@ export class FileArea extends HTMLElement {
       console.error("Error loading sprite file.");
     }
   }
-
-
-  /**
- * Creates a new map file and opens the MapEditor
- */
-async create_map_file() {
-  const fileName = prompt("Please enter a name for the new map file:");
-  
-  if (fileName) {
-    try {
-      const newFile = await this.file_system_handler.create_file(fileName, "tmx");
-      this.editor_tool.set_active_file(newFile);
-      console.log("MapEditor load not implemented yet.");
-    } catch (error) {
-      console.error("Error creating map file:", error);
-    }
-  }
-}
-
 
 /**
  * Opens the map file
@@ -147,12 +126,10 @@ async open_map_file(file_id) {
     console.error("File system handler is not initialized yet.");
     return;
   }
-
-  // Hole die Daten der Datei mit der entsprechenden ID
-  const fileData = this.file_system_handler.get_file_by_id(file_id);
-  if (fileData) {
-    if (fileData.type === "tmx") {
-      this.editor_tool.set_active_file(fileData);
+  const file_data = this.file_system_handler.get_file_by_id(file_id);
+  if (file_data) {
+    if (file_data.type === "tmx") {
+      this.editor_tool.set_active_file(file_data);
       console.log("MapEditor load not implemented yet.");
     } else {
       console.error("Unsupported file type or missing data.");

@@ -5,7 +5,7 @@ import { MapEditor } from "../../../MapEditor/JS/Elements/MapEditor.js";
 import { TitleScreen } from "./TitleScreen.js";
 import { Project } from "../Classes/Project.js";
 import { BackendClient } from "../../../BackendClient/BackendClient.js";
-import { NoFileOpenScreen } from "./NoFileOpenScreen.js";
+import { NoFileOpenScreen } from "./EditorTool/NoFileOpenScreen.js";
 
 export class EditorTool extends HTMLElement {
   constructor() {
@@ -18,7 +18,7 @@ export class EditorTool extends HTMLElement {
     this.sprite_editor = new SpriteEditor(this);
     this.map_editor = new MapEditor(this);
     this.file_area = new FileArea(this);
-    this.no_file_open_screen = new NoFileOpenScreen(this); 
+    this.no_file_open_screen = new NoFileOpenScreen(this);
     this.project = null;
     this.active_file = null;
 
@@ -81,7 +81,7 @@ export class EditorTool extends HTMLElement {
     this.appendChild(this.editor_container);
     this.appendChild(this.file_area);
 
-    this.show_no_file_open_screen(); 
+    this.show_no_file_open_screen();
   }
 
   /**
@@ -102,24 +102,62 @@ export class EditorTool extends HTMLElement {
     this.set_active_file(null);
   }
 
- /**
- * Sets the active file and updates the UI accordingly
- * @param {File|null} file 
- */
-set_active_file(file) {
-  if (!file) {
+  /**
+   * Sets the active file and updates the UI accordingly
+   * @param {File|null} file 
+   */
+  set_active_file(file) {
+    if (!file) {
+      this.handle_no_file();
+      return;
+    }
+
+    if (this.is_file_already_open(file)) {
+      console.log("File is already open.");
+      return;
+    }
+
+    this.load_editor_for_file(file);
+    this.active_file = file;
+    this.top_menu.update_file_name(file.name);
+    this.remove_no_file_open_screen();
+  }
+
+  /**
+   * Handles the case where no file is open
+   */
+  handle_no_file() {
     this.active_file = null;
     this.top_menu.update_file_name("Untitled File");
     this.show_no_file_open_screen();
-    return;
   }
 
-  if (this.active_file && this.active_file.id === file.id) {
-    console.log("File is already open.");
-    return;
+  /**
+   * Checks if the file is already open
+   * @param {File} file
+   * @returns {boolean}
+   */
+  is_file_already_open(file) {
+    return this.active_file && this.active_file.id === file.id;
   }
 
-  if (file.type === "png") {
+  /**
+   * Loads the appropriate editor for the given file
+   * @param {File} file
+   */
+  load_editor_for_file(file) {
+    if (file.type === "png") {
+      this.load_sprite_editor(file);
+    } else if (file.type === "tmx") {
+      this.load_map_editor(file);
+    }
+  }
+
+  /**
+   * Loads the Sprite Editor with the given file data
+   * @param {File} file
+   */
+  load_sprite_editor(file) {
     if (this.sprite_editor.isConnected) {
       this.sprite_editor.handle_loaded_file(file.data);
     } else {
@@ -127,7 +165,13 @@ set_active_file(file) {
       this.editor_container.appendChild(this.sprite_editor);
       this.sprite_editor.handle_loaded_file(file.data);
     }
-  } else if (file.type === "tmx") {
+  }
+
+  /**
+   * Loads the Map Editor with the given file data (not yet implemented)
+   * @param {File} file
+   */
+  load_map_editor(file) {
     if (this.map_editor.isConnected) {
       console.log("Map Editor load not implemented yet.");
     } else {
@@ -137,17 +181,12 @@ set_active_file(file) {
     }
   }
 
-  this.active_file = file;
-  this.top_menu.update_file_name(file.name);
-  this.remove_no_file_open_screen();
-}
-
   /**
    * Shows the NoFileOpenScreen component
    */
   show_no_file_open_screen() {
     this.remove_sprite_and_map_editors();
-    
+
     if (!this.no_file_open_screen.isConnected) {
       this.editor_container.appendChild(this.no_file_open_screen);
     }
@@ -176,3 +215,4 @@ set_active_file(file) {
 }
 
 customElements.define("editor-tool", EditorTool);
+
