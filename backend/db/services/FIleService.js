@@ -9,13 +9,13 @@ const { Op } = require("sequelize");
 class FileService {
   /**
    * Service for managing file-related operations
-   * @param {number} folder_id
-   * @param {string} name
-   * @param {string} type
-   * @param {Array<Array<string>>} matrix_data
+   * @param {Number} folder_id
+   * @param {String} name
+   * @param {String} type
+   * @param {String} data
    * @returns {Promise<File>}
    */
-  async add_file(folder_id, name, type, matrix_data = null) {
+  async add_file(folder_id, name, type, data) {
     if (!["png", "tmx"].includes(type)) {
       throw new Error("Invalid file type. Only 'png' and 'tmx' are allowed.");
     }
@@ -30,8 +30,9 @@ class FileService {
 
     const file_path = await file_system_service.create_file(name, type);
 
-    if (type === "png" && matrix_data) {
-      const png = this.generate_png(matrix_data);
+    if (type === "png") {
+      const matrix_preview = data.frames[0].matrix;
+      const png = this.generate_png(matrix_preview);
       png.pack().pipe(fs.createWriteStream(file_path));
     } else if (type === "tmx") {
       const dummyContent = "Dummy TMX content";
@@ -43,7 +44,7 @@ class FileService {
       type,
       filepath: file_path,
       folder_id,
-      matrix_data: JSON.stringify(matrix_data),
+      data: JSON.stringify(data),
     });
 
     return new_file;
@@ -65,30 +66,31 @@ class FileService {
       type: file.type,
       folder_id: file.folder_id,
       url: file.filepath,
-      matrix_data: JSON.parse(file.matrix_data),
+      data: JSON.parse(file.data),
     };
   }
 
   /**
    * Updates the file's matrix data and rewrites the PNG file on disk.
-   * @param {number} file_id
-   * @param {Array<Array<string>>} matrix_data
+   * @param {Number} file_id
+   * @param {String} data
    * @returns {Promise<void>}
    */
-  async write_file(file_id, matrix_data) {
+  async write_file(file_id, data) {
     const file = await File.findByPk(file_id);
     if (!file) {
       throw new Error("File not found");
     }
 
-    if (file.type === "png") {
-      const png = this.generate_png(matrix_data);
+    if (file.type === "png" && data) {
+      const preview_matrix = data.frames[0].matrix;
+      const png = this.generate_png(preview_matrix);
       png.pack().pipe(fs.createWriteStream(file.filepath));
     } else {
       throw new Error("Unsupported file type");
     }
 
-    file.matrix_data = JSON.stringify(matrix_data);
+    file.data = JSON.stringify(data);
     await file.save();
   }
 

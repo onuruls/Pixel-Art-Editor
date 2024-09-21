@@ -46,7 +46,7 @@ export class FileSystemHandler {
         entry.folder_id,
         entry.type,
         entry.filepath,
-        JSON.parse(entry.matrix_data)
+        JSON.parse(entry.data)
       );
     } else {
       console.error("Unknown entry type", entry);
@@ -214,23 +214,39 @@ export class FileSystemHandler {
 
   /**
    * Creates a new file.
-   * @param {string} file_name
-   * @param {string} file_type
-   * @param {Array<Array<String>>} matrix_data
+   * @param {String} file_name
+   * @param {String} file_type
+   * @param {String} data
    * @returns {Promise<File>}
    */
-  async create_file(file_name, file_type, matrix_data = null) {
-    if (file_type === "png" && !matrix_data) {
-      matrix_data = Array.from({ length: 64 }, () =>
-        Array(64).fill([0, 0, 0, 0])
-      );
+  async create_file(file_name, file_type, data = null) {
+    if (file_type === "png" && !data) {
+      data = {
+        frames: [
+          {
+            matrix: Array.from({ length: 64 }, () =>
+              Array(64).fill([0, 0, 0, 0])
+            ),
+          },
+        ],
+        palette: [
+          "#A4A5A6",
+          "#A4A5A6",
+          "#A4A5A6",
+          "#A4A5A6",
+          "#A4A5A6",
+          "#A4A5A6",
+        ],
+        selectedColor: "#000000",
+        secondaryColor: "#FFFFFF",
+      };
     }
     try {
       const new_file = await BackendClient.create_file(
         this.active_folder.id,
         file_name,
         file_type,
-        matrix_data
+        data
       );
 
       const fileObject = new File(
@@ -239,7 +255,7 @@ export class FileSystemHandler {
         new_file.folder_id,
         new_file.type,
         new_file.filepath,
-        JSON.parse(new_file.matrix_data)
+        JSON.parse(new_file.data)
       );
       this.active_folder.children.push(fileObject);
       this.read_directory_content();

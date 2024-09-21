@@ -46,8 +46,8 @@ class DbClient {
     );
   }
 
-  async add_file(folder_id, name, type, matrix_data) {
-    return await file_service.add_file(folder_id, name, type, matrix_data);
+  async add_file(folder_id, name, type, data) {
+    return await file_service.add_file(folder_id, name, type, data);
   }
 
   async get_file(id) {
@@ -58,8 +58,8 @@ class DbClient {
     return await file_service.delete_file(id);
   }
 
-  async write_file(file_id, matrix_data) {
-    return await file_service.write_file(file_id, matrix_data);
+  async write_file(file_id, data) {
+    return await file_service.write_file(file_id, data);
   }
 
   async rename_file(id, new_name) {
