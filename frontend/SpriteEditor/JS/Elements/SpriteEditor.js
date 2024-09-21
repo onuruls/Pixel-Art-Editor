@@ -175,6 +175,13 @@ export class SpriteEditor extends HTMLElement {
    * Sets the necessary event listeners
    */
   set_listeners() {
+    this.add_toolbox_listener();
+    this.add_color_input_listener();
+    this.add_keyboard_shortcuts();
+    this.add_import_listener();
+  }
+
+  add_toolbox_listener() {
     const toolbox = this.sprite_tools.querySelector(".toolbox");
     toolbox.addEventListener("click", (event) => {
       const clickedElement = event.target.closest(".tool-button");
@@ -184,11 +191,24 @@ export class SpriteEditor extends HTMLElement {
         this.selected_tool = this.select_tool_from_string(tool);
       }
     });
-    this.sprite_tools
-      .querySelector("#color_input")
-      .addEventListener("input", (event) => {
-        this.selected_color = ColorUtil.hex_to_rgb_array(event.target.value);
-      });
+  }
+
+  add_color_input_listener() {
+    const colorInput = this.sprite_tools.querySelector("#color_input");
+    const secondaryColorInput = this.sprite_tools.querySelector(
+      "#secondary_color_input"
+    );
+
+    colorInput.addEventListener("input", (event) => {
+      this.selected_color = ColorUtil.hex_to_rgb_array(event.target.value);
+    });
+
+    secondaryColorInput.addEventListener("input", (event) => {
+      this.secondary_color = ColorUtil.hex_to_rgb_array(event.target.value);
+    });
+  }
+
+  add_keyboard_shortcuts() {
     document.addEventListener("keydown", (event) => {
       if (event.ctrlKey) {
         switch (event.key) {
@@ -205,11 +225,13 @@ export class SpriteEditor extends HTMLElement {
         this.handle_tool_shortcuts(event);
       }
     });
+  }
+
+  add_import_listener() {
     this.import_input.addEventListener("change", (event) => {
       this.import_sprite(event);
     });
   }
-
   /**
    * Handles tool shortcuts
    * @param {Event} event
@@ -301,6 +323,7 @@ export class SpriteEditor extends HTMLElement {
   end_action_buffer() {
     this.action_stack.push(this.action_buffer);
     this.clear_changed_points();
+    this.save_sprite_file();
   }
 
   /**
@@ -321,6 +344,7 @@ export class SpriteEditor extends HTMLElement {
       );
     }
     this.update_frame_thumbnail();
+    this.save_sprite_file();
   }
 
   /**
@@ -341,6 +365,7 @@ export class SpriteEditor extends HTMLElement {
       );
     }
     this.update_frame_thumbnail();
+    this.save_sprite_file();
   }
 
   /**
@@ -1458,20 +1483,6 @@ export class SpriteEditor extends HTMLElement {
     this.secondary_color = color;
     this.sprite_tools.querySelector("#secondary_color_input").value =
       ColorUtil.rgb_array_to_hex(color);
-  }
-
-  set_palette_colors() {
-    const palette_elements =
-      this.sprite_tools.querySelectorAll(".palette-color");
-
-    palette_elements.forEach((element, index) => {
-      if (this.palettes[index]) {
-        const input = element.querySelector("input");
-        if (input) {
-          input.value = this.palettes[index]; // Update input value to reflect the new palette color
-        }
-      }
-    });
   }
 
   /**
