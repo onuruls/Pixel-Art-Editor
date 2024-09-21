@@ -247,14 +247,8 @@ export class SpriteTools extends SpriteEditorPart {
       "secondary_color_input"
     );
 
-    Util.create_tool_info(primary_color_input, [
-      "Primary color",
-      primary_color_input.value,
-    ]);
-    Util.create_tool_info(secondary_color_input, [
-      "Secondary color",
-      secondary_color_input.value,
-    ]);
+    Util.create_tool_info(primary_color_input, ["Primary color"]);
+    Util.create_tool_info(secondary_color_input, ["Secondary color"]);
 
     swap_button.addEventListener("click", () => {
       const acc_color = primary_color_input.value;
