@@ -119,6 +119,51 @@ export class FileArea extends HTMLElement {
     }
   }
 
+
+  /**
+ * Creates a new map file and opens the MapEditor
+ */
+async create_map_file() {
+  const fileName = prompt("Please enter a name for the new map file:");
+  
+  if (fileName) {
+    try {
+      const newFile = await this.file_system_handler.create_file(fileName, "tmx");
+      this.editor_tool.set_active_file(newFile);
+      console.log("MapEditor load not implemented yet.");
+    } catch (error) {
+      console.error("Error creating map file:", error);
+    }
+  }
+}
+
+
+/**
+ * Opens the map file
+ * @param {number} file_id
+ */
+async open_map_file(file_id) {
+  if (!this.file_system_handler) {
+    console.error("File system handler is not initialized yet.");
+    return;
+  }
+
+  // Hole die Daten der Datei mit der entsprechenden ID
+  const fileData = this.file_system_handler.get_file_by_id(file_id);
+  if (fileData) {
+    if (fileData.type === "tmx") {
+      this.editor_tool.set_active_file(fileData);
+      console.log("MapEditor load not implemented yet.");
+    } else {
+      console.error("Unsupported file type or missing data.");
+    }
+  } else {
+    console.error("Error loading map file.");
+  }
+}
+
+
+
   /**
    * Creates a new folder or file element using the CreateItemHandler.
    * If no file type is specified, it defaults to creating a folder.
