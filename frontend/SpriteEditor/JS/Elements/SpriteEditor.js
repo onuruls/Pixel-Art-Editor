@@ -161,14 +161,12 @@ export class SpriteEditor extends HTMLElement {
     const max_width = this.sprite_canvas_width - 40;
     const height_tile_size = max_height / this.height;
     const width_tile_size = max_width / this.width;
-    this.tile_size = Math.min(height_tile_size, width_tile_size);
-
-    this.tile_size = Math.floor(this.tile_size);
+    this.tile_size = Math.floor(Math.min(height_tile_size, width_tile_size));
 
     this.canvas_wrapper_width = this.tile_size * this.width;
     this.canvas_wrapper_height = this.tile_size * this.height;
-    this.canvas_wrapper.style.width = this.canvas_wrapper_width;
-    this.canvas_wrapper.style.height = this.canvas_wrapper_height;
+    this.canvas_wrapper.style.width = `${this.canvas_wrapper_width}px`;
+    this.canvas_wrapper.style.height = `${this.canvas_wrapper_height}px`;
   }
 
   /**
@@ -299,15 +297,9 @@ export class SpriteEditor extends HTMLElement {
    * @returns {Array<Array<Array<Number>>>}
    */
   create_canvas_matrix() {
-    const matrix = new Array(64);
-    for (var i = 0; i < this.height; i++) {
-      matrix[i] = new Array(64);
-
-      for (var j = 0; j < this.width; j++) {
-        matrix[i][j] = [0, 0, 0, 0];
-      }
-    }
-    return matrix;
+    return Array.from({ length: this.height }, () =>
+      Array.from({ length: this.width }, () => [0, 0, 0, 0])
+    );
   }
 
   /**
@@ -433,13 +425,13 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Handles pen changes on the canvas matrix.
-   * @param {number} x
-   * @param {number} y
-   * @param {number} mousekey
+   * Helper function to apply tool action to the canvas matrix
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Array<Number>} color
+   * @param {String} eventName
    */
-  pen_change_matrix(x, y, mousekey) {
-    let color = this.set_color_by_mousekey(mousekey);
+  apply_tool_action(x, y, color, eventName) {
     EditorUtil.apply_to_pixel_block(
       x,
       y,
@@ -448,10 +440,21 @@ export class SpriteEditor extends HTMLElement {
       (xi, yj) => {
         const prev_color = this.canvas_matrix[xi][yj];
         if (!ColorUtil.compare_colors(prev_color, color)) {
-          this.update_point(xi, yj, prev_color, color, "pen_matrix_changed");
+          this.update_point(xi, yj, prev_color, color, eventName);
         }
       }
     );
+  }
+
+  /**
+   * Handles pen changes on the canvas matrix.
+   * @param {number} x
+   * @param {number} y
+   * @param {number} mousekey
+   */
+  pen_change_matrix(x, y, mousekey) {
+    let color = this.set_color_by_mousekey(mousekey);
+    this.apply_tool_action(x, y, color, "pen_matrix_changed");
 
     if (this.valid_previous_point(this.previous_changed)) {
       this.update_line(
@@ -471,25 +474,7 @@ export class SpriteEditor extends HTMLElement {
    */
   eraser_change_matrix(x, y) {
     const erase_color = [0, 0, 0, 0];
-
-    EditorUtil.apply_to_pixel_block(
-      x,
-      y,
-      this.pixel_size,
-      this.canvas_matrix,
-      (xi, yj) => {
-        const prev_color = this.canvas_matrix[xi][yj];
-        if (!ColorUtil.compare_colors(prev_color, erase_color)) {
-          this.update_point(
-            xi,
-            yj,
-            prev_color,
-            erase_color,
-            "eraser_matrix_changed"
-          );
-        }
-      }
-    );
+    this.apply_tool_action(x, y, erase_color, "eraser_matrix_changed");
 
     if (this.valid_previous_point(this.previous_changed)) {
       this.update_line(
@@ -523,28 +508,7 @@ export class SpriteEditor extends HTMLElement {
 
     points.forEach(({ x, y, prev }) => {
       if (EditorUtil.coordinates_in_bounds(x, y, this.canvas_matrix)) {
-        EditorUtil.apply_to_pixel_block(
-          x,
-          y,
-          this.pixel_size,
-          this.canvas_matrix,
-          (xi, yj) => {
-            const prev_color = this.canvas_matrix[xi]?.[yj];
-            if (
-              prev_color !== undefined &&
-              !ColorUtil.compare_colors(prev_color, color)
-            ) {
-              this.update_point(
-                xi,
-                yj,
-                prev_color,
-                color,
-                "pen_matrix_changed"
-              );
-            }
-          }
-        );
-
+        this.apply_tool_action(x, y, color, "pen_matrix_changed");
         if (this.valid_previous_point(prev)) {
           this.update_line(
             [
@@ -649,24 +613,26 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} mousekey
    */
   fill_same_color_matrix(x, y, mousekey) {
-    let color = this.set_color_by_mousekey(mousekey);
+    const color = this.set_color_by_mousekey(mousekey);
     this.start_action_buffer();
     const prev_color = this.canvas_matrix[x][y];
     const fill_pixels = [];
-    for (var i = 0; i < this.height; i++) {
-      for (var j = 0; j < this.width; j++) {
-        if (ColorUtil.compare_colors(this.canvas_matrix[i][j], prev_color)) {
+
+    this.canvas_matrix.forEach((row, i) => {
+      row.forEach((pixel, j) => {
+        if (ColorUtil.compare_colors(pixel, prev_color)) {
           this.action_buffer.push({
             x: i,
             y: j,
-            prev_color: this.canvas_matrix[i][j],
+            prev_color: pixel,
             color: color,
           });
           this.canvas_matrix[i][j] = color;
           fill_pixels.push({ x: i, y: j });
         }
-      }
-    }
+      });
+    });
+
     this.dispatchEvent(
       new CustomEvent("fill_matrix_changed", {
         detail: {
@@ -1132,9 +1098,11 @@ export class SpriteEditor extends HTMLElement {
    * @param {Number} y
    */
   pick_color(x, y) {
-    const color = this.canvas_matrix[x][y];
-    if (color[3] !== 0) {
-      this.set_selected_color(color);
+    if (EditorUtil.coordinates_in_bounds(x, y, this.canvas_matrix)) {
+      const color = this.canvas_matrix[x][y];
+      if (color[3] !== 0) {
+        this.set_selected_color(color);
+      }
     }
   }
 
@@ -1180,23 +1148,6 @@ export class SpriteEditor extends HTMLElement {
   }
 
   /**
-   * Saves the sprite in a JSON file
-   */
-  save_as_sprite_file() {
-    const filename = "test.sprite";
-    const jsonString = JSON.stringify(this.canvas_matrix);
-    const blob = new Blob([jsonString], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const download_link = document.createElement("a");
-    download_link.href = url;
-    download_link.download = filename;
-    this.appendChild(download_link);
-    download_link.click();
-    this.removeChild(download_link);
-    URL.revokeObjectURL(url);
-  }
-
-  /**
    * Imports the selected sprite into the sprite editor
    * @param {Event} event
    */
@@ -1207,22 +1158,7 @@ export class SpriteEditor extends HTMLElement {
     const file_type = parts[parts.length - 1];
     if (file_type === "png" && file) {
       this.import_from_png(file);
-    } else {
-      this.import_from_sprite(file);
     }
-  }
-
-  /**
-   * Imports .sprite files into the editor
-   * @param {File} file
-   */
-  import_from_sprite(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const file_content = e.target.result;
-      this.handle_loaded_matrix(JSON.parse(file_content));
-    };
-    reader.readAsText(file);
   }
 
   /**
@@ -1292,7 +1228,7 @@ export class SpriteEditor extends HTMLElement {
     this.repaint_canvas();
   }
 
-  save_sprite_file() {
+  async save_sprite_file() {
     const file_system_handler = this.editor_tool.file_area.file_system_handler;
 
     const sprite_data = {
@@ -1306,20 +1242,25 @@ export class SpriteEditor extends HTMLElement {
 
     const jsonString = JSON.stringify(sprite_data);
 
-    if (this.editor_tool.active_file) {
-      file_system_handler
-        .write_file(this.editor_tool.active_file, jsonString)
-        .then(() => file_system_handler.read_directory_content())
-        .catch((error) => console.error("Error saving sprite:", error));
-    } else {
-      const file_name = "sprite";
-      this.editor_tool.active_file = file_system_handler
-        .create_file(file_name, "png", sprite_data)
-        .then((created_file) => {
-          this.editor_tool.set_active_file(created_file);
-          return file_system_handler.read_directory_content();
-        })
-        .catch((error) => console.error("Error creating sprite file:", error));
+    try {
+      if (this.editor_tool.active_file) {
+        await file_system_handler.write_file(
+          this.editor_tool.active_file,
+          jsonString
+        );
+        await file_system_handler.read_directory_content();
+      } else {
+        const file_name = "sprite";
+        const created_file = await file_system_handler.create_file(
+          file_name,
+          "png",
+          sprite_data
+        );
+        this.editor_tool.set_active_file(created_file);
+        await file_system_handler.read_directory_content();
+      }
+    } catch (error) {
+      console.error("Error saving sprite:", error);
     }
   }
 
@@ -1366,16 +1307,17 @@ export class SpriteEditor extends HTMLElement {
    */
   image_data_to_matrix(data) {
     const result = this.create_canvas_matrix();
-    const segment_size = 4;
-    const row_size = 64;
-    data.forEach((color, index) => {
-      const row = Math.floor(index / (row_size * segment_size));
-      const col = Math.floor(
-        (index % (row_size * segment_size)) / segment_size
-      );
-      const colorIndex = index % segment_size;
-      result[row][col][colorIndex] = color;
-    });
+    for (let index = 0; index < data.length; index += 4) {
+      const pixelIndex = index / 4;
+      const row = Math.floor(pixelIndex / this.width);
+      const col = pixelIndex % this.width;
+      result[row][col] = [
+        data[index], // Red
+        data[index + 1], // Green
+        data[index + 2], // Blue
+        data[index + 3], // Alpha
+      ];
+    }
     return result;
   }
 

@@ -10,14 +10,9 @@ export class Tool {
     this.canvas = sprite_editor.sprite_canvas.drawing_canvas.canvas;
     this.is_drawing = false;
     this.is_shift_pressed = false;
-    this.hover_position = {
-      x: 0,
-      y: 0,
-    };
-    this.last_position = {
-      x: 0,
-      y: 0,
-    };
+    this.is_ctrl_pressed = false;
+    this.hover_position = { x: 0, y: 0 };
+    this.last_position = { x: 0, y: 0 };
     this.handle_key_down_events = this.handle_key_down_events.bind(this);
     this.handle_key_up_events = this.handle_key_up_events.bind(this);
     this.init();
@@ -44,6 +39,7 @@ export class Tool {
    */
   handle_key_down_events(e) {
     this.is_shift_pressed = e.shiftKey;
+    this.is_ctrl_pressed = e.ctrlKey;
   }
 
   /**
@@ -51,6 +47,7 @@ export class Tool {
    */
   handle_key_up_events(e) {
     this.is_shift_pressed = e.shiftKey;
+    this.is_ctrl_pressed = e.ctrlKey;
   }
 
   /**
