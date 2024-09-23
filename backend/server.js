@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 const body_parser = require("body-parser");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
@@ -14,6 +16,9 @@ app.use(
     allowedHeaders: ["Content-Type"],
   })
 );
+
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /**
  * Creates a new Project
@@ -221,8 +226,8 @@ app.post("/folders/:folder_id/files", async (req, res) => {
     return res.status(400).send("File name is required");
   }
 
-  const validTypes = ["png", "tmx"];
-  if (!type || !validTypes.includes(type)) {
+  const valid_types = ["png", "tmx"];
+  if (!type || !valid_types.includes(type)) {
     return res
       .status(400)
       .send("Invalid file type. Only 'png' and 'tmx' are allowed.");
@@ -312,6 +317,22 @@ app.delete("/files/:id", async (req, res) => {
     console.error("Error deleting file:", error);
     res.status(500).send("Error deleting file");
   }
+});
+
+/**
+ * Endpoint to retrieve all PNG files from the uploads directory.
+ */
+app.get('/sprites', (req, res) => {
+  const sprite_dir = path.join(__dirname, 'uploads');
+
+  fs.readdir(sprite_dir, (err, files) => {
+    if (err) {
+      console.error("Error reading directory:", err);
+      return res.status(500).send("Error reading directory");
+    }
+    const png_files = files.filter(file => path.extname(file) === '.png');
+    res.status(200).json(png_files);
+  });
 });
 
 app.put("/map_files/:id", async (req, res) => {

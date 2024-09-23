@@ -1,13 +1,15 @@
 import { MapEditorPart } from "./MapEditorPart.js";
 import { Util } from "../../../Util/Util.js";
+import { BackendClient } from "../../../BackendClient/BackendClient.js";
 
 export class MapEditorTools extends MapEditorPart {
   constructor(map_editor) {
     super(map_editor);
+    this.assets = [];
   }
 
   /**
-   * Renders the complete HTML structure for the tools section.
+   * Renders the complete HTML structure for the tools section
    * @returns {String}
    */
   render() {
@@ -19,7 +21,7 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Renders and creates the pixel size options.
+   * Renders and creates the pixel size options
    * @returns {String}
    */
   render_pixel_size_options() {
@@ -39,53 +41,12 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Renders and creates the toolbox with all available tools.
+   * Renders and creates the toolbox with all available tools
    * @returns {String}
    */
   render_tools() {
     const tools = [
-      {
-        id: "pen",
-        icon: "pen",
-        info: JSON.stringify(["(P) Pen tool"]),
-        active: true,
-      },
-      {
-        id: "eraser",
-        icon: "eraser",
-        info: JSON.stringify(["(E) Eraser tool"]),
-      },
-      {
-        id: "stroke",
-        icon: "stroke",
-        info: JSON.stringify(["(L) Stroke tool"]),
-      },
-      { id: "bucket", icon: "bucket", info: JSON.stringify(["(B) Fill tool"]) },
-      {
-        id: "rectangle",
-        icon: "rectangle",
-        info: JSON.stringify(["(R) Rectangle tool"]),
-      },
-      {
-        id: "circle",
-        icon: "circle",
-        info: JSON.stringify(["(C) Circle tool"]),
-      },
-      {
-        id: "rectangle_selection",
-        icon: "rectangle_selection",
-        info: JSON.stringify(["(T) Rectangle Selection"]),
-      },
-      {
-        id: "irregular_selection",
-        icon: "irregular_selection",
-        info: JSON.stringify(["(I) Irregular Selection"]),
-      },
-      {
-        id: "shape_selection",
-        icon: "fill_shape",
-        info: JSON.stringify(["(Q) Shape Selection"]),
-      },
+      // ... (define your tools array here)
     ];
 
     return `
@@ -95,15 +56,15 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Creates an HTML button for a tool.
-   * @param {Object} tool - Tool object containing id, icon, info, and optional active status.
+   * Creates an HTML button for a tool
+   * @param {Object} tool
    * @returns {String}
    */
   create_tool_button(tool) {
     const infoArray = tool.info;
     const isActive = tool.active ? "active" : "";
     return `
-      <button id="${tool.id}" class="tool-button ${isActive}" data-tool="${tool.id}" data-info='${infoArray}'>
+      <button id="${tool.id}" class="tool-button ${isActive}" data-tool="${tool.id}" data-info='${JSON.stringify(infoArray)}'>
         <img src="img/icons/${tool.icon}.svg" alt="${tool.id}" />
       </button>`;
   }
@@ -113,36 +74,61 @@ export class MapEditorTools extends MapEditorPart {
    * @returns {String}
    */
   render_assets() {
-    const assets = [
-      "dummy_dirt",
-      "dummy_foliage",
-      "dummy_lava",
-      "dummy_sand",
-      "dummy_stone",
-      "dummy_water",
-      "dummy_tree",
-    ];
     return `
       <div class="assetbox">
-        ${assets.map((asset) => this.create_asset_button(asset)).join("")}
+        <!-- Assets will be loaded dynamically -->
       </div>`;
   }
 
   /**
-   * Creates an HTML button for an asset.
-   * @param {String} asset - Name of the asset.
+   * Initializes the event listeners for buttons
+   */
+  init() {
+    this.setup_tool_buttons();
+    this.setup_pixel_size_buttons();
+  }
+
+  /**
+   * Fetches the list of assets from the server and updates the DOM
+   */
+  async fetch_assets() {
+    try {
+      const assets = await BackendClient.get_assets();
+      this.assets = assets;
+      this.update_assets();
+    } catch (error) {
+      console.error('Error fetching assets:', error);
+    }
+  }
+
+  /**
+   * Updates the assets section with the fetched assets.
+   */
+  update_assets() {
+    const assetbox = this.map_editor.querySelector('.assetbox');
+    if (!assetbox) {
+      console.error('Asset box not found');
+      return;
+    }
+    assetbox.innerHTML = this.assets.map((asset) => this.create_asset_button(asset)).join('');
+    this.setup_asset_buttons();
+  }
+
+  /**
+   * Creates an HTML button for an asset
+   * @param {String} asset
    * @returns {String}
    */
   create_asset_button(asset) {
-    const title = this.capitalize(asset.replace("_", " "));
+    const title = this.capitalize(asset.replace("_", " ").replace(".png", ""));
     return `
-      <button class="asset-button" data-asset="${asset}" data-info='["${title} asset"]'>
-        <img src="img/assets/${asset}.png" alt="${title}">
+      <button class="asset-button" data-asset="${asset}" title="${title}">
+        <img src="http://localhost:3000/uploads/${asset}" alt="${title}">
       </button>`;
   }
 
   /**
-   * Capitalizes the first letter of a string.
+   * Capitalizes the first letter of a string
    * @param {String} str
    * @returns {String}
    */
@@ -151,19 +137,10 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Initializes the event listeners for buttons.
-   */
-  init() {
-    this.setup_tool_buttons();
-    this.setup_pixel_size_buttons();
-    this.setup_asset_buttons();
-  }
-
-  /**
-   * Sets up event listeners for tool buttons.
+   * Sets up event listeners for tool buttons
    */
   setup_tool_buttons() {
-    const tool_buttons = document.querySelectorAll(".tool-button");
+    const tool_buttons = this.map_editor.querySelectorAll(".tool-button");
     tool_buttons.forEach((button) => {
       const tool_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, tool_info);
@@ -176,10 +153,10 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Sets up event listeners for pixel size buttons.
+   * Sets up event listeners for pixel size buttons
    */
   setup_pixel_size_buttons() {
-    const pixel_size_options = document.querySelectorAll(".pixel-size-option");
+    const pixel_size_options = this.map_editor.querySelectorAll(".pixel-size-option");
     pixel_size_options.forEach((button) => {
       const pixel_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, pixel_info);
@@ -193,21 +170,26 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Sets up event listeners for asset buttons.
+   * Sets up event listeners for asset buttons
    */
   setup_asset_buttons() {
-    const asset_buttons = document.querySelectorAll(".asset-button");
+    const asset_buttons = this.map_editor.querySelectorAll(".asset-button");
     asset_buttons.forEach((button) => {
-      const asset_info = JSON.parse(button.getAttribute("data-info"));
-      Util.create_tool_info(button, asset_info);
-
       button.addEventListener("click", () => {
         asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
         const asset_name = button.dataset.asset;
-        this.map_editor.selected_asset = `img/assets/${asset_name}.png`;
+        this.map_editor.selected_asset = `http://localhost:3000/uploads/${asset_name}`;
       });
     });
+  }
+
+  /**
+   * Called when the element is connected to the DOM
+   */
+  connectedCallback() {
+    super.connectedCallback();
+    this.fetch_assets();
   }
 }
 

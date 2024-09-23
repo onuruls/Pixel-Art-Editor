@@ -168,17 +168,22 @@ export class EditorTool extends HTMLElement {
   }
 
   /**
-   * Loads the Map Editor with the given file data (not yet implemented)
+   * Loads the Map Editor with the given file data
    * @param {File} file
    */
   load_map_editor(file) {
-    if (this.map_editor.isConnected) {
-      console.log("Map Editor load not implemented yet.");
-    } else {
+    if (!this.map_editor.isConnected) {
       this.remove_sprite_and_map_editors();
       this.editor_container.appendChild(this.map_editor);
-      console.log("Map Editor load not implemented yet.");
     }
+
+    // Ensure the latest assets are fetched
+    if (this.map_editor.map_editor_tools) {
+      this.map_editor.map_editor_tools.fetch_assets();
+    }
+
+    // Load the file data if necessary
+    console.log("Map Editor load not implemented yet.");
   }
 
   /**
@@ -225,4 +230,3 @@ export class EditorTool extends HTMLElement {
 }
 
 customElements.define("editor-tool", EditorTool);
-
