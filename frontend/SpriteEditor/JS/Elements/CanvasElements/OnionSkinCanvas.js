@@ -55,13 +55,13 @@ export class OnionSkinCanvas extends CanvasElement {
 
     if (currentFrameIndex > 0) {
       this.draw_frame(
-        this.sprite_editor.canvas_matrices[currentFrameIndex - 1]
+        this.sprite_editor.canvas_matrixes[currentFrameIndex - 1]
       );
     }
 
-    if (currentFrameIndex < this.sprite_editor.canvas_matrices.length - 1) {
+    if (currentFrameIndex < this.sprite_editor.canvas_matrixes.length - 1) {
       this.draw_frame(
-        this.sprite_editor.canvas_matrices[currentFrameIndex + 1]
+        this.sprite_editor.canvas_matrixes[currentFrameIndex + 1]
       );
     }
   }

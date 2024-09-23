@@ -207,7 +207,14 @@ export class SpriteTools extends SpriteEditorPart {
       palette.addEventListener("click", (event) => {
         const index = palette.getAttribute("data-index");
         if (event.ctrlKey) {
-          this.sprite_editor.palettes[index] = palette.value;
+          palette.addEventListener(
+            "input",
+            () => {
+              const newColor = palette.value;
+              this.set_palette_color(index, newColor);
+            },
+            { once: true }
+          );
         } else if (event.shiftKey) {
           this.hide_color_input(palette);
           const color = this.sprite_editor.selected_color;
@@ -217,16 +224,18 @@ export class SpriteTools extends SpriteEditorPart {
         } else {
           this.hide_color_input(palette);
           const color = palette.value;
-          document.getElementById("color_input").value = color;
-          this.sprite_editor.selected_color = ColorUtil.hex_to_rgb_array(color);
+          this.sprite_editor.set_selected_color(
+            ColorUtil.hex_to_rgb_array(color)
+          );
         }
       });
 
       palette.addEventListener("contextmenu", (event) => {
         event.preventDefault();
         const color = palette.value;
-        document.getElementById("secondary_color_input").value = color;
-        this.sprite_editor.secondary_color = ColorUtil.hex_to_rgb_array(color);
+        this.sprite_editor.set_secondary_color(
+          ColorUtil.hex_to_rgb_array(color)
+        );
       });
     });
   }
@@ -238,27 +247,24 @@ export class SpriteTools extends SpriteEditorPart {
       "secondary_color_input"
     );
 
-    Util.create_tool_info(primary_color_input, [
-      "Primary color",
-      primary_color_input.value,
-    ]);
-    Util.create_tool_info(secondary_color_input, [
-      "Secondary color",
-      secondary_color_input.value,
-    ]);
+    Util.create_tool_info(primary_color_input, ["Primary color"]);
+    Util.create_tool_info(secondary_color_input, ["Secondary color"]);
 
     swap_button.addEventListener("click", () => {
-      const primary_color = primary_color_input.value;
-      primary_color_input.value = secondary_color_input.value;
-      secondary_color_input.value = primary_color;
-
-      this.sprite_editor.selected_color = ColorUtil.hex_to_rgb_array(
-        primary_color_input.value
+      const acc_color = primary_color_input.value;
+      this.sprite_editor.set_selected_color(
+        ColorUtil.hex_to_rgb_array(secondary_color_input.value)
       );
-      this.sprite_editor.secondary_color = ColorUtil.hex_to_rgb_array(
-        secondary_color_input.value
+      this.sprite_editor.set_secondary_color(
+        ColorUtil.hex_to_rgb_array(acc_color)
       );
     });
+  }
+
+  set_palette_color(index, color) {
+    const palette_colors = document.querySelectorAll(".palette-color");
+    palette_colors[index].value = color;
+    this.sprite_editor.palettes[index] = color;
   }
 
   hide_color_input(palette) {

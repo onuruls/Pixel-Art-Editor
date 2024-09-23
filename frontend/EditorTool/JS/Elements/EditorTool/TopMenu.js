@@ -13,7 +13,6 @@ export class TopMenu extends HTMLElement {
     super();
     this.classList.add("top-menu");
     this.editor_tool = editor_tool;
-    this.editor_name = "Map Editor";
     this.project_name = "Untitled Project";
     this.project_container = null;
     this.project_name_element = null;
@@ -26,30 +25,10 @@ export class TopMenu extends HTMLElement {
   }
 
   init() {
-    this.editor_button = this.create_editor_button();
-    this.appendChild(this.editor_button);
-    this.editor_button.addEventListener(
-      "click",
-      this.editor_tool.change_editor.bind(this.editor_tool)
-    );
     const file_container = this.create_file_container();
     this.appendChild(file_container);
     const project_container = this.create_project_container();
     this.appendChild(project_container);
-  }
-
-  /**
-   * @returns {HTMLButtonElement}
-   * */
-  create_editor_button() {
-    const editor_button = document.createElement("button");
-    const icon = document.createElement("i");
-    icon.classList.add("fa-solid", "fa-circle-chevron-left", "fa-fw");
-    icon.setAttribute("alt", this.editor_name);
-    editor_button.setAttribute("id", "switch_to");
-    editor_button.appendChild(icon);
-    editor_button.appendChild(document.createTextNode(this.editor_name));
-    return editor_button;
   }
 
   /**
@@ -171,15 +150,6 @@ export class TopMenu extends HTMLElement {
 
     this.project_name_element.textContent = this.project_name;
     input_container.replaceWith(this.project_name_element);
-  }
-
-  /**
-   * Sets the editor name after switch
-   * @param {string} name
-   */
-  set_editor_name(name) {
-    this.querySelector("#switch_to i").alt = name;
-    this.querySelector("#switch_to").lastChild.textContent = name;
   }
 }
 

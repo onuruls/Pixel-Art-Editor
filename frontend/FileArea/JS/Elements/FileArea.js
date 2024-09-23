@@ -105,19 +105,41 @@ export class FileArea extends HTMLElement {
       return;
     }
 
-    const fileData = this.file_system_handler.get_file_by_id(file_id);
-    if (fileData) {
-      if (fileData.type === "png" && fileData.matrix_data) {
-        this.editor_tool.set_active_file(fileData);
-        const spriteEditor = this.editor_tool.sprite_editor;
-        spriteEditor.handle_loaded_matrix(fileData.matrix_data);
+    const file_data = this.file_system_handler.get_file_by_id(file_id);
+    if (file_data) {
+      if (file_data.type === "png") {
+        this.editor_tool.set_active_file(file_data);
       } else {
-        console.error("Unsupported file type or missing matrix data.");
+        console.error("Unsupported file type or missing data.");
       }
     } else {
       console.error("Error loading sprite file.");
     }
   }
+
+/**
+ * Opens the map file
+ * @param {number} file_id
+ */
+async open_map_file(file_id) {
+  if (!this.file_system_handler) {
+    console.error("File system handler is not initialized yet.");
+    return;
+  }
+  const file_data = this.file_system_handler.get_file_by_id(file_id);
+  if (file_data) {
+    if (file_data.type === "tmx") {
+      this.editor_tool.set_active_file(file_data);
+      console.log("MapEditor load not implemented yet.");
+    } else {
+      console.error("Unsupported file type or missing data.");
+    }
+  } else {
+    console.error("Error loading map file.");
+  }
+}
+
+
 
   /**
    * Creates a new folder or file element using the CreateItemHandler.
