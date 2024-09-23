@@ -192,14 +192,14 @@ export class BackendClient {
     if (!response.ok) {
       throw new Error(response.statusText);
     }
-    const data = await response.json();
+    const file = await response.json();
     return new File(
-      data.id,
-      data.name,
-      data.folder_id,
-      data.type,
-      data.url,
-      data.data
+      file.id,
+      file.name,
+      file.folder_id,
+      file.type,
+      file.url,
+      file.data
     );
   }
 
@@ -208,7 +208,7 @@ export class BackendClient {
    * the given id, from the given type
    * @param {String} file_name
    * @param {String} file_type
-   * @param {String} data
+   * @param {JSON} data
    * @returns {any}
    */
   static async create_file(folder_id, file_name, file_type, data) {
@@ -268,7 +268,7 @@ export class BackendClient {
       headers: {
         "Content-Type": "application/json",
       },
-      body: { content },
+      body: JSON.stringify({ content }),
     });
     if (!response.ok) {
       throw new Error(response.statusText);
@@ -336,7 +336,7 @@ export class BackendClient {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(file.matrix_data),
+      body: JSON.stringify(file.data),
     });
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);

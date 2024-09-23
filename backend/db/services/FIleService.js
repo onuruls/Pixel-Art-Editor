@@ -12,7 +12,7 @@ class FileService {
    * @param {Number} folder_id
    * @param {String} name
    * @param {String} type
-   * @param {String} data
+   * @param {JSON} data
    * @returns {Promise<File>}
    */
   async add_file(folder_id, name, type, data) {
@@ -43,6 +43,7 @@ class FileService {
       name,
       type,
       filepath: file_path,
+      data,
       folder_id,
     });
 
@@ -65,15 +66,14 @@ class FileService {
       type: file.type,
       folder_id: file.folder_id,
       url: file.filepath,
-      matrix_data: file.matrix_data,
       data: file.data,
     };
   }
 
   /**
-   * Updates the file's matrix data and rewrites the PNG file on disk.
+   * Updates the file's data and rewrites the PNG file on disk.
    * @param {Number} file_id
-   * @param {String} data
+   * @param {JSON} data
    * @returns {Promise<void>}
    */
   async write_file(file_id, data) {
@@ -90,7 +90,8 @@ class FileService {
       throw new Error("Unsupported file type");
     }
 
-    file.data = JSON.stringify(data);
+    file.data = data;
+
     await file.save();
   }
 

@@ -46,7 +46,6 @@ export class FileSystemHandler {
         entry.folder_id,
         entry.type,
         entry.filepath,
-        entry.matrix_data,
         entry.data
       );
     } else {
