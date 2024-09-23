@@ -1,6 +1,5 @@
 import { MapEditorPart } from "./MapEditorPart.js";
 import { Util } from "../../../Util/Util.js";
-import { BackendClient } from "../../../BackendClient/BackendClient.js";
 
 export class MapEditorTools extends MapEditorPart {
   constructor(map_editor) {
@@ -9,7 +8,7 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Renders the complete HTML structure for the tools section
+   * Renders the complete HTML structure for the tools section.
    * @returns {String}
    */
   render() {
@@ -21,7 +20,7 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Renders and creates the pixel size options
+   * Renders and creates the pixel size options.
    * @returns {String}
    */
   render_pixel_size_options() {
@@ -41,12 +40,53 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Renders and creates the toolbox with all available tools
+   * Renders and creates the toolbox with all available tools.
    * @returns {String}
    */
   render_tools() {
     const tools = [
-      // ... (define your tools array here)
+      {
+        id: "pen",
+        icon: "pen",
+        info: JSON.stringify(["(P) Pen tool"]),
+        active: true,
+      },
+      {
+        id: "eraser",
+        icon: "eraser",
+        info: JSON.stringify(["(E) Eraser tool"]),
+      },
+      {
+        id: "stroke",
+        icon: "stroke",
+        info: JSON.stringify(["(L) Stroke tool"]),
+      },
+      { id: "bucket", icon: "bucket", info: JSON.stringify(["(B) Fill tool"]) },
+      {
+        id: "rectangle",
+        icon: "rectangle",
+        info: JSON.stringify(["(R) Rectangle tool"]),
+      },
+      {
+        id: "circle",
+        icon: "circle",
+        info: JSON.stringify(["(C) Circle tool"]),
+      },
+      {
+        id: "rectangle_selection",
+        icon: "rectangle_selection",
+        info: JSON.stringify(["(T) Rectangle Selection"]),
+      },
+      {
+        id: "irregular_selection",
+        icon: "irregular_selection",
+        info: JSON.stringify(["(I) Irregular Selection"]),
+      },
+      {
+        id: "shape_selection",
+        icon: "fill_shape",
+        info: JSON.stringify(["(Q) Shape Selection"]),
+      },
     ];
 
     return `
@@ -56,15 +96,15 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Creates an HTML button for a tool
-   * @param {Object} tool
+   * Creates an HTML button for a tool.
+   * @param {Object} tool - Tool object containing id, icon, info, and optional active status.
    * @returns {String}
    */
   create_tool_button(tool) {
     const infoArray = tool.info;
     const isActive = tool.active ? "active" : "";
     return `
-      <button id="${tool.id}" class="tool-button ${isActive}" data-tool="${tool.id}" data-info='${JSON.stringify(infoArray)}'>
+      <button id="${tool.id}" class="tool-button ${isActive}" data-tool="${tool.id}" data-info='${infoArray}'>
         <img src="img/icons/${tool.icon}.svg" alt="${tool.id}" />
       </button>`;
   }
@@ -76,24 +116,29 @@ export class MapEditorTools extends MapEditorPart {
   render_assets() {
     return `
       <div class="assetbox">
-        <!-- Assets will be loaded dynamically -->
+        <!-- Assets will be loaded here dynamically -->
       </div>`;
   }
 
   /**
-   * Initializes the event listeners for buttons
+   * Initializes the event listeners for buttons.
    */
   init() {
     this.setup_tool_buttons();
     this.setup_pixel_size_buttons();
+    this.fetch_assets();
   }
 
   /**
-   * Fetches the list of assets from the server and updates the DOM
+   * Fetches the list of assets from the server and updates the DOM.
    */
   async fetch_assets() {
     try {
-      const assets = await BackendClient.get_assets();
+      const response = await fetch('http://localhost:3000/sprites');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch assets: ${response.statusText}`);
+      }
+      const assets = await response.json();
       this.assets = assets;
       this.update_assets();
     } catch (error) {
@@ -115,20 +160,20 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Creates an HTML button for an asset
-   * @param {String} asset
+   * Creates an HTML button for an asset.
+   * @param {String} asset - Name of the asset.
    * @returns {String}
    */
   create_asset_button(asset) {
     const title = this.capitalize(asset.replace("_", " ").replace(".png", ""));
     return `
-      <button class="asset-button" data-asset="${asset}" title="${title}">
+      <button class="asset-button" data-asset="${asset}" data-info='["${title} asset"]'>
         <img src="http://localhost:3000/uploads/${asset}" alt="${title}">
       </button>`;
   }
 
   /**
-   * Capitalizes the first letter of a string
+   * Capitalizes the first letter of a string.
    * @param {String} str
    * @returns {String}
    */
@@ -137,7 +182,7 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Sets up event listeners for tool buttons
+   * Sets up event listeners for tool buttons.
    */
   setup_tool_buttons() {
     const tool_buttons = this.map_editor.querySelectorAll(".tool-button");
@@ -153,7 +198,7 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Sets up event listeners for pixel size buttons
+   * Sets up event listeners for pixel size buttons.
    */
   setup_pixel_size_buttons() {
     const pixel_size_options = this.map_editor.querySelectorAll(".pixel-size-option");
@@ -170,11 +215,14 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Sets up event listeners for asset buttons
+   * Sets up event listeners for asset buttons.
    */
   setup_asset_buttons() {
     const asset_buttons = this.map_editor.querySelectorAll(".asset-button");
     asset_buttons.forEach((button) => {
+      const asset_info = JSON.parse(button.getAttribute("data-info"));
+      Util.create_tool_info(button, asset_info);
+
       button.addEventListener("click", () => {
         asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
@@ -182,14 +230,6 @@ export class MapEditorTools extends MapEditorPart {
         this.map_editor.selected_asset = `http://localhost:3000/uploads/${asset_name}`;
       });
     });
-  }
-
-  /**
-   * Called when the element is connected to the DOM
-   */
-  connectedCallback() {
-    super.connectedCallback();
-    this.fetch_assets();
   }
 }
 

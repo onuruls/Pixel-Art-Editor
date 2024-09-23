@@ -225,7 +225,7 @@ export class MapEditor extends HTMLElement {
     this.map_canvas.remove_layer_canvas(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
-    this.map_file.update_matrix_data(this.layer_manager.layers);
+    this.map_file.update_data(this.layer_manager.layers);
     BackendClient.save_map_file(this.map_file);
   }
 
@@ -241,7 +241,7 @@ export class MapEditor extends HTMLElement {
     );
     this.dispatchEvent(new CustomEvent("layers-updated"));
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
-    this.map_file.update_matrix_data(this.layer_manager.layers);
+    this.map_file.update_data(this.layer_manager.layers);
     BackendClient.save_map_file(this.map_file);
   }
 
@@ -253,7 +253,7 @@ export class MapEditor extends HTMLElement {
     this.layer_manager.switch_layer(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
-    this.map_file.update_matrix_data(this.layer_manager.layers);
+    this.map_file.update_data(this.layer_manager.layers);
     BackendClient.save_map_file(this.map_file);
   }
 
@@ -266,7 +266,7 @@ export class MapEditor extends HTMLElement {
     });
     this.destroy_selection();
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
-    this.map_file.update_matrix_data(this.layer_manager.layers);
+    this.map_file.update_data(this.layer_manager.layers);
     BackendClient.save_map_file(this.map_file);
   }
 
@@ -278,7 +278,7 @@ export class MapEditor extends HTMLElement {
       this.apply_redo(point);
     });
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
-    this.map_file.update_matrix_data(this.layer_manager.layers);
+    this.map_file.update_data(this.layer_manager.layers);
     BackendClient.save_map_file(this.map_file);
   }
 
@@ -367,7 +367,7 @@ export class MapEditor extends HTMLElement {
     }
     this.action_buffer = [];
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
-    this.map_file.update_matrix_data(this.layer_manager.layers);
+    this.map_file.update_data(this.layer_manager.layers);
     BackendClient.save_map_file(this.map_file);
   }
 

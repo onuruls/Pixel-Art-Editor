@@ -81,11 +81,6 @@ const File = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    matrix_data: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
-    },
     data: {
       type: DataTypes.JSON,
       allowNull: false,

@@ -85,6 +85,17 @@ export class EditorTool extends HTMLElement {
   }
 
   /**
+   * Shows the NoFileOpenScreen component
+   */
+  show_no_file_open_screen() {
+    this.remove_sprite_and_map_editors();
+
+    if (!this.no_file_open_screen.isConnected) {
+      this.editor_container.appendChild(this.no_file_open_screen);
+    }
+  }
+
+  /**
    * Changes between Sprite and Map Editor
    */
   change_editor() {
@@ -104,7 +115,7 @@ export class EditorTool extends HTMLElement {
 
   /**
    * Sets the active file and updates the UI accordingly
-   * @param {File|null} file 
+   * @param {File|null} file
    */
   set_active_file(file) {
     if (!file) {
@@ -184,17 +195,6 @@ export class EditorTool extends HTMLElement {
 
     // Load the file data if necessary
     console.log("Map Editor load not implemented yet.");
-  }
-
-  /**
-   * Shows the NoFileOpenScreen component
-   */
-  show_no_file_open_screen() {
-    this.remove_sprite_and_map_editors();
-
-    if (!this.no_file_open_screen.isConnected) {
-      this.editor_container.appendChild(this.no_file_open_screen);
-    }
   }
 
   /**
