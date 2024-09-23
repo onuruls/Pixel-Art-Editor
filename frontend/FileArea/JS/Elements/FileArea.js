@@ -117,29 +117,26 @@ export class FileArea extends HTMLElement {
     }
   }
 
-/**
- * Opens the map file
- * @param {number} file_id
- */
-async open_map_file(file_id) {
-  if (!this.file_system_handler) {
-    console.error("File system handler is not initialized yet.");
-    return;
-  }
-  const file_data = this.file_system_handler.get_file_by_id(file_id);
-  if (file_data) {
-    if (file_data.type === "tmx") {
-      this.editor_tool.set_active_file(file_data);
-      console.log("MapEditor load not implemented yet.");
-    } else {
-      console.error("Unsupported file type or missing data.");
+  /**
+   * Opens the map file
+   * @param {number} file_id
+   */
+  async open_map_file(file_id) {
+    if (!this.file_system_handler) {
+      console.error("File system handler is not initialized yet.");
+      return;
     }
-  } else {
-    console.error("Error loading map file.");
+    const file_data = this.file_system_handler.get_file_by_id(file_id);
+    if (file_data) {
+      if (file_data.type === "tmx") {
+        this.editor_tool.set_active_file(file_data);
+      } else {
+        console.error("Unsupported file type or missing data.");
+      }
+    } else {
+      console.error("Error loading map file.");
+    }
   }
-}
-
-
 
   /**
    * Creates a new folder or file element using the CreateItemHandler.

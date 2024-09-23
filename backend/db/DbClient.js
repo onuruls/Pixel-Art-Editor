@@ -70,8 +70,8 @@ class DbClient {
     return await file_service.move_file_to_folder(file_id, target_folder_id);
   }
 
-  async save_map_file(file_id, matrix_data) {
-    return await file_service.save_map_file(file_id, matrix_data);
+  async save_map_file(file_id, data) {
+    return await file_service.save_map_file(file_id, data);
   }
 }
 

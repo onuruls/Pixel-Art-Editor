@@ -57,7 +57,7 @@ export class MapEditor extends HTMLElement {
    */
   load_map_editor(map_file, editor_container) {
     if (this.map_file && this.map_file.id === map_file.id) return;
-    this.load_file_assets(map_file).then(() => {
+    this.load_file_assets(map_file.data).then(() => {
       this.map_file = map_file;
       this.clear_editor(editor_container);
       this.load_file();
@@ -439,16 +439,17 @@ export class MapEditor extends HTMLElement {
   /**
    * Called when a file is loaded into the MapEditor
    * Loads all the assets
-   * @param {File} file
+   * @param {JSON} file_data
    * @returns {Promise}
    */
-  load_file_assets(file) {
+  load_file_assets(file_data) {
     const assets = [];
-    file.matrix_data.forEach((row) =>
-      row.content.forEach((col) => assets.push(...col))
+    file_data.forEach((layer) =>
+      layer.content.forEach((row) => row.forEach((col) => assets.push(...col)))
     );
     const unique_assets = [...new Set(assets)];
     const filtered_assets = unique_assets.filter((asset) => asset !== "");
+    if (filtered_assets.length === 0) return Promise.resolve();
     return this.load_assets(filtered_assets);
   }
 
@@ -950,8 +951,8 @@ export class MapEditor extends HTMLElement {
    * opened
    */
   load_file() {
-    if (this.map_file.matrix_data.length > 0) {
-      this.map_file.matrix_data.forEach((layer) => this.load_layer(layer));
+    if (this.map_file.data[0].content.length > 0) {
+      this.map_file.data.forEach((layer) => this.load_layer(layer));
     } else {
       this.add_layer();
     }

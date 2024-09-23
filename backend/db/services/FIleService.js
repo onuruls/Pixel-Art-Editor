@@ -42,7 +42,7 @@ class FileService {
           };
           break;
         case "tmx":
-          data = { layers: [{ matrix: default_matrix }] };
+          data = [{ content: [], visible: null }];
           break;
       }
     }
@@ -221,12 +221,12 @@ class FileService {
   /**
    * Updates MapEditor-File after changes
    * @param {*} file_id
-   * @param {*} matrix_data
+   * @param {*} data
    */
-  async save_map_file(file_id, matrix_data) {
+  async save_map_file(file_id, data) {
     const file = await File.findByPk(file_id);
     if (!file) throw new Error("File not found");
-    file.matrix_data = matrix_data;
+    file.data = data;
     file.save();
   }
 }

@@ -338,9 +338,9 @@ app.get("/sprites", (req, res) => {
 
 app.put("/map_files/:id", async (req, res) => {
   const file_id = req.params.id;
-  const matrix_data = req.body;
+  const data = req.body;
   try {
-    await db_client.save_map_file(file_id, matrix_data);
+    await db_client.save_map_file(file_id, data);
     res.status(200).send("File saved");
   } catch (error) {
     console.error("Error saving file:", error);
