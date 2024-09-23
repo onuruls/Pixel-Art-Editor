@@ -69,6 +69,10 @@ class DbClient {
   async move_file_to_folder(file_id, target_folder_id) {
     return await file_service.move_file_to_folder(file_id, target_folder_id);
   }
+
+  async save_map_file(file_id, matrix_data) {
+    return await file_service.save_map_file(file_id, matrix_data);
+  }
 }
 
 module.exports = DbClient;

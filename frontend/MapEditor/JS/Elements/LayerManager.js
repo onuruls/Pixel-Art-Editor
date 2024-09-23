@@ -31,6 +31,23 @@ export class LayerManager {
   }
 
   /**
+   * Loads a single layer when, a file is loaded into the MapEditor
+   * @param {{content: Array<Array<String>>, visible: Boolean}} full_layer
+   * @returns {Number}
+   */
+  load_layer(full_layer) {
+    const newIndex = this.layers.length;
+    this.layers.push(full_layer);
+    this.layer_stacks.set(newIndex, new ActionStack());
+
+    if (newIndex === 0) {
+      this.active_layer_index = 0;
+    }
+
+    return newIndex;
+  }
+
+  /**
    * Removes a layer at the specified index
    * @param {number} index
    */
@@ -188,5 +205,14 @@ export class LayerManager {
       remaining_entries = rest;
     }
     return matrix;
+  }
+
+  /**
+   * Resets the LayerManager before another file is loaded
+   */
+  reset() {
+    this.layers = [];
+    this.active_layer_index = 0;
+    this.layer_stacks = new Map();
   }
 }

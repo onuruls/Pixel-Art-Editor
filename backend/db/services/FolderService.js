@@ -41,7 +41,8 @@ class FolderService {
           type: file.type,
           url: file.filepath,
           folder_id: file.folder_id,
-          data: JSON.parse(file.data),
+          matrix_data: file.matrix_data,
+          data: file.data,
         });
       });
     }
