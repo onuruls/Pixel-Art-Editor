@@ -79,6 +79,8 @@ map-editor-tools {
     width: min-content;
     padding: 0.5rem 0.5rem;
     background-color: var(--container-bg);
+    max-height: 200px; 
+    overflow-y: auto;
   }
 
   .asset-button {
@@ -87,11 +89,12 @@ map-editor-tools {
     cursor: pointer;
     transition: background-color 0.3s;
 
+ 
     &:hover {
-      filter: invert(25%) brightness(100%) contrast(100%);
+      background-color: rgba(0, 0, 0, 0.1);
     }
     &.active {
-      filter: invert(35%) brightness(100%) contrast(100%);
+      background-color: rgba(0, 0, 0, 0.2);
     }
 
     img {

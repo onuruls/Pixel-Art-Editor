@@ -292,4 +292,16 @@ export class BackendClient {
     }
     return await response.text();
   }
+
+   /**
+   * Fetches the list of assets from the server.
+   * @returns {Promise<Array<String>>}
+   */
+   static async get_assets() {
+    const response = await fetch('http://localhost:3000/sprites');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch assets: ${response.statusText}`);
+    }
+    return await response.json();
+  }
 }
