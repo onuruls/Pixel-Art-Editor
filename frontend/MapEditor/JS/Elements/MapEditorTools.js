@@ -4,6 +4,7 @@ import { Util } from "../../../Util/Util.js";
 export class MapEditorTools extends MapEditorPart {
   constructor(map_editor) {
     super(map_editor);
+    this.assets = [];
   }
 
   /**
@@ -113,19 +114,49 @@ export class MapEditorTools extends MapEditorPart {
    * @returns {String}
    */
   render_assets() {
-    const assets = [
-      "dummy_dirt",
-      "dummy_foliage",
-      "dummy_lava",
-      "dummy_sand",
-      "dummy_stone",
-      "dummy_water",
-      "dummy_tree",
-    ];
     return `
       <div class="assetbox">
-        ${assets.map((asset) => this.create_asset_button(asset)).join("")}
+        <!-- Assets will be loaded here dynamically -->
       </div>`;
+  }
+
+  /**
+   * Initializes the event listeners for buttons.
+   */
+  init() {
+    this.setup_tool_buttons();
+    this.setup_pixel_size_buttons();
+    this.fetch_assets();
+  }
+
+  /**
+   * Fetches the list of assets from the server and updates the DOM.
+   */
+  async fetch_assets() {
+    try {
+      const response = await fetch('http://localhost:3000/sprites');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch assets: ${response.statusText}`);
+      }
+      const assets = await response.json();
+      this.assets = assets;
+      this.update_assets();
+    } catch (error) {
+      console.error('Error fetching assets:', error);
+    }
+  }
+
+  /**
+   * Updates the assets section with the fetched assets.
+   */
+  update_assets() {
+    const assetbox = this.map_editor.querySelector('.assetbox');
+    if (!assetbox) {
+      console.error('Asset box not found');
+      return;
+    }
+    assetbox.innerHTML = this.assets.map((asset) => this.create_asset_button(asset)).join('');
+    this.setup_asset_buttons();
   }
 
   /**
@@ -134,10 +165,10 @@ export class MapEditorTools extends MapEditorPart {
    * @returns {String}
    */
   create_asset_button(asset) {
-    const title = this.capitalize(asset.replace("_", " "));
+    const title = this.capitalize(asset.replace("_", " ").replace(".png", ""));
     return `
       <button class="asset-button" data-asset="${asset}" data-info='["${title} asset"]'>
-        <img src="img/assets/${asset}.png" alt="${title}">
+        <img src="http://localhost:3000/uploads/${asset}" alt="${title}">
       </button>`;
   }
 
@@ -151,19 +182,10 @@ export class MapEditorTools extends MapEditorPart {
   }
 
   /**
-   * Initializes the event listeners for buttons.
-   */
-  init() {
-    this.setup_tool_buttons();
-    this.setup_pixel_size_buttons();
-    this.setup_asset_buttons();
-  }
-
-  /**
    * Sets up event listeners for tool buttons.
    */
   setup_tool_buttons() {
-    const tool_buttons = document.querySelectorAll(".tool-button");
+    const tool_buttons = this.map_editor.querySelectorAll(".tool-button");
     tool_buttons.forEach((button) => {
       const tool_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, tool_info);
@@ -179,7 +201,7 @@ export class MapEditorTools extends MapEditorPart {
    * Sets up event listeners for pixel size buttons.
    */
   setup_pixel_size_buttons() {
-    const pixel_size_options = document.querySelectorAll(".pixel-size-option");
+    const pixel_size_options = this.map_editor.querySelectorAll(".pixel-size-option");
     pixel_size_options.forEach((button) => {
       const pixel_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, pixel_info);
@@ -196,7 +218,7 @@ export class MapEditorTools extends MapEditorPart {
    * Sets up event listeners for asset buttons.
    */
   setup_asset_buttons() {
-    const asset_buttons = document.querySelectorAll(".asset-button");
+    const asset_buttons = this.map_editor.querySelectorAll(".asset-button");
     asset_buttons.forEach((button) => {
       const asset_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, asset_info);
@@ -205,7 +227,7 @@ export class MapEditorTools extends MapEditorPart {
         asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
         const asset_name = button.dataset.asset;
-        this.map_editor.selected_asset = `img/assets/${asset_name}.png`;
+        this.map_editor.selected_asset = `http://localhost:3000/uploads/${asset_name}`;
       });
     });
   }
