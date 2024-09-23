@@ -86,6 +86,7 @@ export class MapEditor extends HTMLElement {
     this.appendComponents();
     this.set_listeners();
     this.selected_tool = new Pen(this);
+    this.map_canvas.input_canvas.set_tool_liseners();
     this.initialized = true;
     this.dispatchEvent(new CustomEvent("layers-updated"));
     const size_obs = new ResizeObserver((entries) => {
@@ -154,6 +155,7 @@ export class MapEditor extends HTMLElement {
           const tool = clickedElement.dataset.tool;
           this.selected_tool.destroy();
           this.selected_tool = this.select_tool_from_string(tool);
+          this.map_canvas.input_canvas.set_tool_liseners();
         }
       });
 

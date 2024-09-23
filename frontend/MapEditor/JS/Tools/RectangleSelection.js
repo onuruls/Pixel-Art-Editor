@@ -9,7 +9,6 @@ export class RectangleSelection extends SelectionTool {
    */
   constructor(map_editor) {
     super(map_editor);
-    this.canvas.style.cursor = `crosshair`;
     this.is_moving = false;
     this.stopped_drawing = false;
     this.last_move_position = { x: -1, y: -1 };

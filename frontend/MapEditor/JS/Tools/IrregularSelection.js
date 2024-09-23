@@ -7,7 +7,6 @@ export class IrregularSelection extends SelectionTool {
    */
   constructor(map_editor) {
     super(map_editor);
-    this.canvas.style.cursor = `crosshair`;
     this.path = [];
     this.is_drawing = false;
     this.is_moving = false;

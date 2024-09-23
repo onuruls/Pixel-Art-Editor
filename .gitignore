@@ -1,3 +1,4 @@
 /backend/node_modules
 /backend/db/database.db
- backend/uploads/
+/backend/uploads
+/uploads

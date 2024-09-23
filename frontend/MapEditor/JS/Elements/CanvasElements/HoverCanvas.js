@@ -11,6 +11,9 @@ export class HoverCanvas extends CanvasElement {
   constructor(canvas) {
     super(canvas);
     this.hover_color = "rgba(180,240,213,0.5)";
+    this.draw_hover_bind = this.draw_hover.bind(this);
+    this.remove_hover_bind = this.remove_hover.bind(this);
+    this.zoom_changed_bind = this.zoom_changed.bind(this);
   }
 
   /**
@@ -25,14 +28,34 @@ export class HoverCanvas extends CanvasElement {
    * Initializes the Canvas
    */
   init() {
-    this.map_editor.addEventListener("hover_matrix_changed", (event) =>
-      this.draw_hover(event)
+    this.map_editor.addEventListener(
+      "hover_matrix_changed",
+      this.draw_hover_bind
     );
-    this.map_editor.addEventListener("remove_hover", () => this.remove_hover());
-    this.map_editor.addEventListener("zoom_changed", (event) => {
-      this.remove_hover();
-      this.draw_hover(event);
-    });
+    this.map_editor.addEventListener("remove_hover", this.remove_hover_bind);
+    this.map_editor.addEventListener("zoom_changed", this.zoom_changed_bind);
+  }
+
+  /**
+   * Disables all the EventListeners of the canvas
+   * Called when disconnected from DOM
+   */
+  disable_listeners() {
+    this.map_editor.removeEventListener(
+      "hover_matrix_changed",
+      this.draw_hover_bind
+    );
+    this.map_editor.removeEventListener("remove_hover", this.remove_hover_bind);
+    this.map_editor.removeEventListener("zoom_changed", this.zoom_changed_bind);
+  }
+
+  /**
+   * Called when the zoom changed
+   * @param {Event} event
+   */
+  zoom_changed(event) {
+    this.remove_hover();
+    this.draw_hover(event);
   }
 
   /**

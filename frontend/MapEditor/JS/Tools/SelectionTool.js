@@ -8,6 +8,7 @@ export class SelectionTool extends Tool {
    */
   constructor(map_editor) {
     super(map_editor);
+    this.canvas = map_editor.map_canvas.input_canvas.canvas;
     this.canvas.style.cursor = `crosshair`;
     this.is_moving = false;
     this.last_move_position = { x: -1, y: -1 };
