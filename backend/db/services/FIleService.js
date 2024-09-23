@@ -28,6 +28,25 @@ class FileService {
       name = await helper.generate_unique_name(folder_id, name, true, type);
     }
 
+    if (!data) {
+      const default_matrix = Array.from({ length: 64 }, () =>
+        Array(64).fill([0, 0, 0, 0])
+      );
+      switch (type) {
+        case "png":
+          data = {
+            frames: [{ matrix: default_matrix }],
+            palette: Array(6).fill("#A4A5A6"),
+            selectedColor: "#000000",
+            secondaryColor: "#FFFFFF",
+          };
+          break;
+        case "tmx":
+          data = { layers: [{ matrix: default_matrix }] };
+          break;
+      }
+    }
+
     const file_path = await file_system_service.create_file(name, type);
 
     if (type === "png") {
@@ -35,7 +54,7 @@ class FileService {
       const png = this.generate_png(matrix_preview);
       png.pack().pipe(fs.createWriteStream(file_path));
     } else if (type === "tmx") {
-      const dummyContent = "Dummy TMX content";
+      const dummyContent = JSON.stringify(data);
       fs.writeFileSync(file_path, dummyContent);
     }
 
