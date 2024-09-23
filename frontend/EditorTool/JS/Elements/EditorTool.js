@@ -178,23 +178,16 @@ export class EditorTool extends HTMLElement {
     }
   }
 
-  /**
-   * Loads the Map Editor with the given file data
-   * @param {File} file
-   */
+
   load_map_editor(file) {
     if (!this.map_editor.isConnected) {
       this.remove_sprite_and_map_editors();
       this.editor_container.appendChild(this.map_editor);
     }
-
-    // Ensure the latest assets are fetched
-    if (this.map_editor.map_editor_tools) {
-      this.map_editor.map_editor_tools.fetch_assets();
+    if (this.map_editor.map_tools) {
+      this.map_editor.map_tools.fetch_assets();
     }
-
-    // Load the file data if necessary
-    console.log("Map Editor load not implemented yet.");
+    this.map_editor.load_map_editor(file, this.editor_container);
   }
 
   /**
@@ -218,14 +211,9 @@ export class EditorTool extends HTMLElement {
     }
   }
 
-  /**
-   * Called when MapEditor-File is double clicked
-   * Opens the file in the MapEditor
-   * @param {String} file_id
-   */
   async open_map_file(file_id) {
     const map_file = await BackendClient.get_file_by_id(file_id);
-    this.map_editor.load_map_editor(map_file, this.editor_container);
+    this.set_active_file(map_file);
   }
 }
 

@@ -79,8 +79,23 @@ map-editor-tools {
     width: min-content;
     padding: 0.5rem 0.5rem;
     background-color: var(--container-bg);
-    max-height: 200px; 
+    max-height: 250px; 
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-bg) var(--container-bg);
+  }
+
+  .assetbox::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .assetbox::-webkit-scrollbar-track {
+    background: var(--container-bg);
+  }
+
+  .assetbox::-webkit-scrollbar-thumb {
+    background-color: var(--primary-bg);
+    border-radius: 3px;
   }
 
   .asset-button {
@@ -89,17 +104,15 @@ map-editor-tools {
     cursor: pointer;
     transition: background-color 0.3s;
 
- 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-    &.active {
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-
     img {
       width: 50px;
       height: 50px;
+      transition: filter 0.3s;
+    }
+
+    &:hover img,
+    &.active img {
+      filter: brightness(50%);
     }
   }
 }
