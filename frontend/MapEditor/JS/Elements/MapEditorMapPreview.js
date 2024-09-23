@@ -37,6 +37,7 @@ export class MapEditorMapPreview extends MapEditorPart {
     this.appendChild(this.canvas);
     this.appendChild(this.zoom_canvas);
     this.map_editor.addEventListener("reload_map_preview", () => {
+      console.log("RELOADING PREVIEW");
       this.reload_preview();
     });
     this.map_editor.addEventListener("zoom_changed", () => {
@@ -79,6 +80,8 @@ export class MapEditorMapPreview extends MapEditorPart {
   reload_preview() {
     this.clear_map_canvas();
     const combined_matrix = this.map_editor.layer_manager.combine_layers();
+    const flat_matrix = combined_matrix.flat();
+    const unique_assets = [...new Set(flat_matrix)];
     combined_matrix.forEach((col, col_i) =>
       col.forEach((asset, row_i) => {
         this.draw_single_tile(col_i, row_i, asset);
@@ -100,16 +103,25 @@ export class MapEditorMapPreview extends MapEditorPart {
    * @param {String} asset
    */
   draw_single_tile(x, y, asset) {
-    const img = this.map_editor.image_cache[asset];
-    if (img) {
-      this.preview_context.drawImage(
-        img,
-        x * this.tile_size,
-        y * this.tile_size,
-        this.tile_size,
-        this.tile_size
-      );
-    }
+    this.map_editor
+      .load_image(asset)
+      .then((img_) => {
+        this.preview_context.drawImage(
+          img_,
+          x * this.tile_size,
+          y * this.tile_size,
+          this.tile_size,
+          this.tile_size
+        );
+      })
+      .catch((error) => {
+        this.preview_context.clearRect(
+          x * this.tile_size,
+          y * this.tile_size,
+          this.tile_size,
+          this.tile_size
+        );
+      });
   }
 
   /**

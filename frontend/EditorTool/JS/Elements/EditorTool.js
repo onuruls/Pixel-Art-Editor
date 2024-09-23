@@ -73,7 +73,6 @@ export class EditorTool extends HTMLElement {
     this.project = project;
     this.title_screen.remove();
     this.appendChild(this.top_menu);
-    this.editor_container.appendChild(this.sprite_editor);
     this.appendChild(this.editor_container);
     this.appendChild(this.file_area);
   }
@@ -104,6 +103,16 @@ export class EditorTool extends HTMLElement {
       this.active_file = null;
       this.top_menu.update_file_name("Untitled File");
     }
+  }
+
+  /**
+   * Called when MapEditor-File is double clicked
+   * Opens the file in the MapEditor
+   * @param {String} file_id
+   */
+  async open_map_file(file_id) {
+    const map_file = await BackendClient.get_file_by_id(file_id);
+    this.map_editor.load_map_editor(map_file, this.editor_container);
   }
 }
 

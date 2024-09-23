@@ -43,7 +43,6 @@ class FileService {
       type,
       filepath: file_path,
       folder_id,
-      matrix_data: JSON.stringify(matrix_data),
     });
 
     return new_file;
@@ -65,7 +64,8 @@ class FileService {
       type: file.type,
       folder_id: file.folder_id,
       url: file.filepath,
-      matrix_data: JSON.parse(file.matrix_data),
+      matrix_data: file.matrix_data,
+      data: file.data,
     };
   }
 
@@ -194,6 +194,18 @@ class FileService {
       }
     }
     return png;
+  }
+
+  /**
+   * Updates MapEditor-File after changes
+   * @param {*} file_id
+   * @param {*} matrix_data
+   */
+  async save_map_file(file_id, matrix_data) {
+    const file = await File.findByPk(file_id);
+    if (!file) throw new Error("File not found");
+    file.matrix_data = matrix_data;
+    file.save();
   }
 }
 

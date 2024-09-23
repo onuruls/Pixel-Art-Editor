@@ -1,3 +1,5 @@
+import { File } from "../EditorTool/JS/Classes/File.js";
+
 export class BackendClient {
   // ----- Projects -----
   // --------------------
@@ -181,6 +183,28 @@ export class BackendClient {
   // ---------------------
 
   /**
+   * Fetches a single File from the backend and returns it as a File-Object
+   * @param {Number} file_id
+   * @returns {File}
+   */
+  static async get_file_by_id(file_id) {
+    const response = await fetch(`http://localhost:3000/files/${file_id}`);
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const data = await response.json();
+    return new File(
+      data.id,
+      data.name,
+      data.folder_id,
+      data.type,
+      data.url,
+      data.matrix_data,
+      data.data
+    );
+  }
+
+  /**
    * Sends POST-Request to create a new file in the folder with
    * the given id, from the given type
    * @param {String} file_name
@@ -286,6 +310,24 @@ export class BackendClient {
   static async delete_file_by_id(file_id) {
     const response = await fetch(`http://localhost:3000/files/${file_id}`, {
       method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+    return await response.text();
+  }
+
+  /**
+   * Sends PUT-Request to save the map file
+   * @param {File} file
+   */
+  static async save_map_file(file) {
+    const response = await fetch(`http://localhost:3000/map_files/${file.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(file.matrix_data),
     });
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);

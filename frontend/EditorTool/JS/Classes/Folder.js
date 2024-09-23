@@ -31,7 +31,8 @@ export class Folder extends Item {
           child.folder_id,
           child.type,
           child.url,
-          child.matrix_data
+          child.matrix_data,
+          child.data
         );
         return item;
       }

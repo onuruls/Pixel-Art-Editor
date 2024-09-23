@@ -50,7 +50,9 @@ export class FileItemView extends ItemView {
         });
         break;
       case "tmx":
-        //TODO: Implement TMX file opening
+        this.addEventListener("dblclick", () => {
+          this.file_area.editor_tool.open_map_file(this.id);
+        });
         break;
     }
   }
