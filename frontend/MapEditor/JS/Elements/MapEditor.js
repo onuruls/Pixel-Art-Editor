@@ -14,6 +14,8 @@ import { RectangleSelection } from "../Tools/RectangleSelection.js";
 import { IrregularSelection } from "../Tools/IrregularSelection.js";
 import { ShapeSelection } from "../Tools/ShapeSelection.js";
 import { EditorUtil } from "../../../Util/EditorUtil.js";
+import { File } from "../../../EditorTool/JS/Classes/File.js";
+import { BackendClient } from "../../../BackendClient/BackendClient.js";
 
 export class MapEditor extends HTMLElement {
   /**
@@ -23,6 +25,7 @@ export class MapEditor extends HTMLElement {
   constructor(editor_tool) {
     super();
     this.editor_tool = editor_tool;
+    this.map_file = null;
     this.selected_tool = null;
     this.layer_manager = new LayerManager(this);
     this.width = 100;
@@ -47,6 +50,26 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Loads the map file and appends the editor to the
+   * editor_container
+   * @param {File} map_file
+   * @param {HTMLDivElement} editor_container
+   */
+  load_map_editor(map_file, editor_container) {
+    if (this.map_file && this.map_file.id === map_file.id) return;
+    this.load_file_assets(map_file).then(() => {
+      this.map_file = map_file;
+      this.clear_editor(editor_container);
+      this.load_file();
+      this.map_canvas.redraw_every_layer();
+      this.dispatchEvent(new CustomEvent("layers-updated"));
+      // setTimeout(() => {
+      this.dispatchEvent(new CustomEvent("reload_map_preview"));
+      // }, 0);
+    });
+  }
+
+  /**
    * From HTMLElement called when element is mounted
    */
   connectedCallback() {
@@ -64,7 +87,6 @@ export class MapEditor extends HTMLElement {
     this.set_listeners();
     this.selected_tool = new Pen(this);
     this.initialized = true;
-    this.add_layer();
     this.dispatchEvent(new CustomEvent("layers-updated"));
     const size_obs = new ResizeObserver((entries) => {
       entries.forEach((e) => {
@@ -184,6 +206,17 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Loads a layer from the file
+   * @param {Array<Array<String>>} layer
+   */
+  load_layer(layer) {
+    const new_layer_index = this.layer_manager.load_layer(layer);
+    const layer_canvas = new DrawingCanvas(this.map_canvas, new_layer_index);
+    this.map_canvas.add_layer_canvas(layer_canvas);
+    this.layer_manager.active_layer_index = new_layer_index;
+  }
+
+  /**
    * Removes a layer at the specified index
    * @param {number} index
    */
@@ -192,6 +225,8 @@ export class MapEditor extends HTMLElement {
     this.map_canvas.remove_layer_canvas(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
+    this.map_file.update_matrix_data(this.layer_manager.layers);
+    BackendClient.save_map_file(this.map_file);
   }
 
   /**
@@ -206,6 +241,8 @@ export class MapEditor extends HTMLElement {
     );
     this.dispatchEvent(new CustomEvent("layers-updated"));
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
+    this.map_file.update_matrix_data(this.layer_manager.layers);
+    BackendClient.save_map_file(this.map_file);
   }
 
   /**
@@ -216,6 +253,8 @@ export class MapEditor extends HTMLElement {
     this.layer_manager.switch_layer(index);
     this.dispatchEvent(new CustomEvent("layers-updated"));
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
+    this.map_file.update_matrix_data(this.layer_manager.layers);
+    BackendClient.save_map_file(this.map_file);
   }
 
   /**
@@ -227,6 +266,8 @@ export class MapEditor extends HTMLElement {
     });
     this.destroy_selection();
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
+    this.map_file.update_matrix_data(this.layer_manager.layers);
+    BackendClient.save_map_file(this.map_file);
   }
 
   /**
@@ -237,6 +278,8 @@ export class MapEditor extends HTMLElement {
       this.apply_redo(point);
     });
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
+    this.map_file.update_matrix_data(this.layer_manager.layers);
+    BackendClient.save_map_file(this.map_file);
   }
 
   /**
@@ -324,6 +367,8 @@ export class MapEditor extends HTMLElement {
     }
     this.action_buffer = [];
     this.dispatchEvent(new CustomEvent("reload_map_preview"));
+    this.map_file.update_matrix_data(this.layer_manager.layers);
+    BackendClient.save_map_file(this.map_file);
   }
 
   /**
@@ -379,6 +424,32 @@ export class MapEditor extends HTMLElement {
         img.onerror = reject;
       }
     });
+  }
+
+  /**
+   * Loading alle Assets at "once" when loading a file
+   * @param {Array<String>} assets
+   * @returns {Promise}
+   */
+  load_assets(assets) {
+    const promises = assets.map((asset) => this.load_image(asset));
+    return Promise.all(promises);
+  }
+
+  /**
+   * Called when a file is loaded into the MapEditor
+   * Loads all the assets
+   * @param {File} file
+   * @returns {Promise}
+   */
+  load_file_assets(file) {
+    const assets = [];
+    file.matrix_data.forEach((row) =>
+      row.content.forEach((col) => assets.push(...col))
+    );
+    const unique_assets = [...new Set(assets)];
+    const filtered_assets = unique_assets.filter((asset) => asset !== "");
+    return this.load_assets(filtered_assets);
   }
 
   /**
@@ -875,9 +946,31 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
-   * Saves the File in the Backend
+   * Loads the data from the file, when the MapEditor is
+   * opened
    */
-  save_file() {}
+  load_file() {
+    if (this.map_file.matrix_data.length > 0) {
+      this.map_file.matrix_data.forEach((layer) => this.load_layer(layer));
+    } else {
+      this.add_layer();
+    }
+  }
+
+  /**
+   *
+   * @param {HTMLDivElement} editor_container
+   */
+  clear_editor(editor_container) {
+    if (!this.isConnected) {
+      while (editor_container.firstChild) {
+        editor_container.removeChild(editor_container.firstChild);
+      }
+      editor_container.appendChild(this);
+    }
+    this.layer_manager.reset();
+    this.map_canvas.reset();
+  }
 }
 
 customElements.define("map-editor", MapEditor);

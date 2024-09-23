@@ -92,6 +92,14 @@ export class MapEditorCanvas extends MapEditorPart {
     }
   }
 
+  reset() {
+    this.layer_canvases.forEach((canvas) => {
+      this.canvas_wrapper.removeChild(canvas);
+      canvas.active = false;
+    });
+    this.layer_canvases = [];
+  }
+
   /**
    * Rearranges the canvases when layers are reordered
    * @param {number} fromIndex

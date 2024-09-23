@@ -2,12 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const body_parser = require("body-parser");
 const DbClient = require("./db/DbClient");
 const db_client = new DbClient();
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
     origin: "http://127.0.0.1:5500",
@@ -334,6 +335,17 @@ app.get('/sprites', (req, res) => {
   });
 });
 
+app.put("/map_files/:id", async (req, res) => {
+  const file_id = req.params.id;
+  const matrix_data = req.body;
+  try {
+    await db_client.save_map_file(file_id, matrix_data);
+    res.status(200).send("File saved");
+  } catch (error) {
+    console.error("Error saving file:", error);
+    res.status(500).send("Error saving file");
+  }
+});
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

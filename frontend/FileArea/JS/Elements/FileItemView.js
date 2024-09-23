@@ -50,12 +50,17 @@ export class FileItemView extends ItemView {
         });
         break;
       case "tmx":
+<<<<<<< HEAD
+        this.addEventListener("dblclick", () => {
+          this.file_area.editor_tool.open_map_file(this.id);
+=======
         this.icon.addEventListener("dblclick", async () => {
           if (this.file_area.file_system_handler) {
             await this.file_area.open_map_file(this.id);
           } else {
             console.error("File system handler is not ready.");
           }
+>>>>>>> main
         });
         break;
     }

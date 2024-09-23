@@ -46,7 +46,8 @@ export class FileSystemHandler {
         entry.folder_id,
         entry.type,
         entry.filepath,
-        JSON.parse(entry.data)
+        entry.matrix_data,
+        entry.data
       );
     } else {
       console.error("Unknown entry type", entry);
@@ -66,6 +67,7 @@ export class FileSystemHandler {
 
   /**
    * Finds a file by its ID.
+   * @returns {File}
    */
   get_file_by_id(file_id) {
     return this.entries.find(
@@ -255,7 +257,8 @@ export class FileSystemHandler {
         new_file.folder_id,
         new_file.type,
         new_file.filepath,
-        JSON.parse(new_file.data)
+        new_file.matrix_data,
+        new_file.data
       );
       this.active_folder.children.push(fileObject);
       this.read_directory_content();

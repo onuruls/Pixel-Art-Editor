@@ -217,6 +217,16 @@ export class EditorTool extends HTMLElement {
       this.map_editor.remove();
     }
   }
+
+  /**
+   * Called when MapEditor-File is double clicked
+   * Opens the file in the MapEditor
+   * @param {String} file_id
+   */
+  async open_map_file(file_id) {
+    const map_file = await BackendClient.get_file_by_id(file_id);
+    this.map_editor.load_map_editor(map_file, this.editor_container);
+  }
 }
 
 customElements.define("editor-tool", EditorTool);
