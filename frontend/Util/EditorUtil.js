@@ -317,8 +317,8 @@ export class EditorUtil {
     let new_scale = zoom_up ? scale + 0.1 : scale - 0.1;
     new_scale = Math.min(max_scale, Math.max(min_scale, new_scale));
 
-    const deltaX = mouseX * (scale - new_scale);
-    const deltaY = mouseY * (scale - new_scale);
+    const deltaX = mouseX * (new_scale - scale);
+    const deltaY = mouseY * (new_scale - scale);
 
     return { new_scale, deltaX, deltaY };
   }

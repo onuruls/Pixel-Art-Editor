@@ -874,19 +874,24 @@ export class MapEditor extends HTMLElement {
    */
   mouse_wheel_used_on_canvas(event) {
     const { x, y } = this.get_mouse_position(event);
-    if (event.deltaY > 0) {
+    if (event.deltaY < 0) {
       this.apply_zoom(
         true,
         x * this.tile_size * this.scale,
         y * this.tile_size * this.scale
       );
+      this.canvas_wrapper.style.cursor = "zoom-in";
     } else {
       this.apply_zoom(
         false,
         x * this.tile_size * this.scale,
         y * this.tile_size * this.scale
       );
+      this.canvas_wrapper.style.cursor = "zoom-out";
     }
+    setTimeout(() => {
+      this.canvas_wrapper.style.cursor = "crosshair";
+    }, 200);
   }
 
   /**
