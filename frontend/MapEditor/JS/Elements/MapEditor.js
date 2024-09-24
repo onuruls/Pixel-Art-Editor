@@ -47,6 +47,9 @@ export class MapEditor extends HTMLElement {
     this.selection_move_start_point = { x: 0, y: 0 };
     this.selection_copied = false;
     this.previous_changed = { x: null, y: null };
+    this.tools_clicked_bind = this.tools_clicked.bind(this);
+    this.keydown_handler_bind = this.keydown_handler.bind(this);
+    this.mousewheel_handler_bind = this.mousewheel_handler.bind(this);
   }
 
   /**
@@ -143,37 +146,64 @@ export class MapEditor extends HTMLElement {
     this.append(this.map_tools, this.map_canvas, this.map_selection_area);
   }
 
+  disconnectedCallback() {
+    this.map_tools
+      .querySelector(".toolbox")
+      .removeEventListener("click", this.tools_clicked_bind);
+    document.removeEventListener("keydown", this.keydown_handler_bind);
+    this.canvas_wrapper.removeEventListener(
+      "wheel",
+      this.mousewheel_handler_bind
+    );
+  }
+
   /**
    * Sets the necessary eventlisteners
    */
   set_listeners() {
     this.map_tools
       .querySelector(".toolbox")
-      .addEventListener("click", (event) => {
-        const clickedElement = event.target.closest(".tool-button");
-        if (clickedElement) {
-          const tool = clickedElement.dataset.tool;
-          this.selected_tool.destroy();
-          this.selected_tool = this.select_tool_from_string(tool);
-          this.map_canvas.input_canvas.set_tool_liseners();
-        }
-      });
+      .addEventListener("click", this.tools_clicked_bind);
+    document.addEventListener("keydown", this.keydown_handler_bind);
+    this.canvas_wrapper.addEventListener("wheel", this.mousewheel_handler_bind);
+  }
 
-    document.addEventListener("keydown", (event) => {
-      if (event.ctrlKey && event.key === "z") {
-        this.revert_last_action();
-      }
-      if (event.ctrlKey && event.key === "y") {
-        this.redo_last_action();
-      }
-    });
+  /**
+   * Called when toolbox is clicked
+   * @param {Event} event
+   */
+  tools_clicked(event) {
+    const clickedElement = event.target.closest(".tool-button");
+    if (clickedElement) {
+      const tool = clickedElement.dataset.tool;
+      this.selected_tool.destroy();
+      this.selected_tool = this.select_tool_from_string(tool);
+      this.map_canvas.input_canvas.set_tool_liseners();
+    }
+  }
 
-    this.canvas_wrapper.addEventListener("wheel", (event) => {
-      if (event.ctrlKey) {
-        event.preventDefault();
-        this.mouse_wheel_used_on_canvas(event);
-      }
-    });
+  /**
+   * Handles the keydown events
+   * @param {Event} event
+   */
+  keydown_handler(event) {
+    if (event.ctrlKey && event.key === "z") {
+      this.revert_last_action();
+    }
+    if (event.ctrlKey && event.key === "y") {
+      this.redo_last_action();
+    }
+  }
+
+  /**
+   * Handles the mousewheel events
+   * @param {Event} event
+   */
+  mousewheel_handler(event) {
+    if (event.ctrlKey) {
+      event.preventDefault();
+      this.mouse_wheel_used_on_canvas(event);
+    }
   }
 
   /**
