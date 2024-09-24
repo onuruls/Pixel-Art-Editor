@@ -14,6 +14,11 @@ export class MapEditorMapPreview extends MapEditorPart {
     this.zoom_context = this.zoom_canvas.getContext("2d");
     this.navigating = false;
     this.tile_size = 0;
+    this.reload_preview_bind = this.reload_preview.bind(this);
+    this.update_zoom_bind = this.update_zoom.bind(this);
+    this.mouse_down_bind = this.mouse_down.bind(this);
+    this.mouse_move_bind = this.mouse_move.bind(this);
+    this.mouse_up_bind = this.mouse_up.bind(this);
   }
 
   /**
@@ -36,29 +41,51 @@ export class MapEditorMapPreview extends MapEditorPart {
   init() {
     this.appendChild(this.canvas);
     this.appendChild(this.zoom_canvas);
-    this.map_editor.addEventListener("reload_map_preview", () => {
-      console.log("RELOADING PREVIEW");
-      this.reload_preview();
-    });
-    this.map_editor.addEventListener("zoom_changed", () => {
-      this.update_zoom();
-    });
-    this.map_editor.canvas_wrapper.addEventListener("scroll", () => {
-      this.update_zoom();
-    });
+    this.map_editor.addEventListener(
+      "reload_map_preview",
+      this.reload_preview_bind
+    );
+    this.map_editor.addEventListener("zoom_changed", this.update_zoom_bind);
+    this.map_editor.canvas_wrapper.addEventListener(
+      "scroll",
+      this.update_zoom_bind
+    );
     this.resize_canvas();
-    this.zoom_canvas.addEventListener("mousedown", (event) => {
-      this.navigating = true;
+    this.zoom_canvas.addEventListener("mousedown", this.mouse_down_bind);
+    this.zoom_canvas.addEventListener("mousemove", this.mouse_move_bind);
+    document.addEventListener("mouseup", this.mouse_up_bind);
+  }
+
+  disconnectedCallback() {
+    this.appendChild(this.canvas);
+    this.appendChild(this.zoom_canvas);
+    this.map_editor.removeEventListener(
+      "reload_map_preview",
+      this.reload_preview_bind
+    );
+    this.map_editor.removeEventListener("zoom_changed", this.update_zoom_bind);
+    this.map_editor.canvas_wrapper.removeEventListener(
+      "scroll",
+      this.update_zoom_bind
+    );
+    this.zoom_canvas.removeEventListener("mousedown", this.mouse_down_bind);
+    this.zoom_canvas.removeEventListener("mousemove", this.mouse_move_bind);
+    document.removeEventListener("mouseup", this.mouse_up_bind);
+  }
+
+  mouse_down() {
+    this.navigating = true;
+    this.scroll_to_click(event);
+  }
+
+  mouse_move() {
+    if (this.navigating) {
       this.scroll_to_click(event);
-    });
-    this.zoom_canvas.addEventListener("mousemove", (event) => {
-      if (this.navigating) {
-        this.scroll_to_click(event);
-      }
-    });
-    document.addEventListener("mouseup", (event) => {
-      this.navigating = false;
-    });
+    }
+  }
+
+  mouse_up() {
+    this.navigating = false;
   }
 
   /**

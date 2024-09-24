@@ -16,6 +16,10 @@ export class ProjectView extends HTMLElement {
     this.created_at = this.create_created_at();
     this.appendChild(this.project_name);
     this.appendChild(this.created_at);
+    this.set_project_bind = this.title_screen.editor_tool.set_project.bind(
+      this.title_screen.editor_tool,
+      this.project
+    );
     this.init();
   }
 
@@ -58,23 +62,11 @@ export class ProjectView extends HTMLElement {
   }
 
   init() {
-    this.addEventListener(
-      "click",
-      this.title_screen.editor_tool.set_project.bind(
-        this.title_screen.editor_tool,
-        this.project
-      )
-    );
+    this.addEventListener("click", this.set_project_bind);
   }
 
   disconnectedCallback() {
-    this.removeEventListener(
-      "click",
-      this.title_screen.editor_tool.set_project.bind(
-        this.title_screen.editor_tool,
-        this.project
-      )
-    );
+    this.removeEventListener("click", this.set_project_bind);
   }
 }
 

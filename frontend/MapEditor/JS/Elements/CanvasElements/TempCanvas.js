@@ -10,6 +10,9 @@ export class TempCanvas extends CanvasElement {
    */
   constructor(canvas) {
     super(canvas);
+    this.draw_temp_shape_bind = this.draw_temp_shape.bind(this);
+    this.update_selected_area_bind = this.update_selected_area.bind(this);
+    this.remove_selection_bind = this.remove_selection.bind(this);
     this.selection_color = [196, 252, 250, 123];
   }
 
@@ -26,15 +29,18 @@ export class TempCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.map_editor.addEventListener("draw_temp_shape", (e) => {
-      this.draw_temp_shape(e);
-    });
-    this.map_editor.addEventListener("update_selected_area", (e) => {
-      this.update_selected_area(e);
-    });
-    this.map_editor.addEventListener("remove_selection", (e) => {
-      this.remove_selection(e);
-    });
+    this.map_editor.addEventListener(
+      "draw_temp_shape",
+      this.draw_temp_shape_bind
+    );
+    this.map_editor.addEventListener(
+      "update_selected_area",
+      this.update_selected_area_bind
+    );
+    this.map_editor.addEventListener(
+      "remove_selection",
+      this.remove_selection_bind
+    );
   }
 
   /**
@@ -94,6 +100,21 @@ export class TempCanvas extends CanvasElement {
    */
   remove_selection(event) {
     this.revert_canvas();
+  }
+
+  disable_listeners() {
+    this.map_editor.removeEventListener(
+      "draw_temp_shape",
+      this.draw_temp_shape_bind
+    );
+    this.map_editor.removeEventListener(
+      "update_selected_area",
+      this.update_selected_area_bind
+    );
+    this.map_editor.removeEventListener(
+      "remove_selection",
+      this.remove_selection_bind
+    );
   }
 }
 

@@ -18,9 +18,11 @@ export class TopMenu extends HTMLElement {
     this.project_name_element = null;
     this.file_container = null;
     this.file_name_element = null;
-  }
-
-  connectedCallback() {
+    this.input_container = this.create_input_container();
+    this.show_input_field_bind = this.show_input_field.bind(this);
+    this.keydown_bind = this.keydown.bind(this);
+    this.rename_bind = this.rename_project.bind(this, this.input_container);
+    this.remove_input_bind = this.remove_input.bind(this);
     this.init();
   }
 
@@ -29,6 +31,37 @@ export class TopMenu extends HTMLElement {
     this.appendChild(file_container);
     const project_container = this.create_project_container();
     this.appendChild(project_container);
+  }
+
+  connectedCallback() {
+    this.input.addEventListener("keydown", this.keydown_bind);
+    this.submit_icon.addEventListener("click", this.rename_bind);
+    this.cancel_icon.addEventListener("click", this.remove_input_bind);
+  }
+
+  disconnectedCallback() {
+    this.input.removeEventListener("keydown", this.keydown_bind);
+    this.submit_icon.removeEventListener("click", this.rename_bind);
+    this.cancel_icon.removeEventListener("click", this.remove_input_bind);
+  }
+
+  /**
+   * Handles the keydown events
+   * @param {Event} event
+   */
+  keydown(e) {
+    if (e.key === "Enter") {
+      this.rename_project(this.input_container);
+    } else if (e.key === "Escape") {
+      this.input_container.replaceWith(this.project_label);
+    }
+  }
+
+  /**
+   * Removes the input
+   */
+  remove_input() {
+    this.input_container.replaceWith(this.project_label);
   }
 
   /**
@@ -57,18 +90,19 @@ export class TopMenu extends HTMLElement {
     this.project_container = document.createElement("div");
     this.project_container.classList.add("project-container");
 
-    const project_label = document.createElement("span");
-    project_label.textContent = "Project: ";
+    this.project_label = document.createElement("span");
+    this.project_label.textContent = "Project: ";
 
     this.project_name = this.editor_tool.project?.name || this.project_name;
     this.project_name_element = document.createElement("span");
     this.project_name_element.textContent = this.project_name;
 
-    this.project_container.appendChild(project_label);
+    this.project_container.appendChild(this.project_label);
     this.project_container.appendChild(this.project_name_element);
 
-    this.project_name_element.addEventListener("click", () =>
-      this.show_input_field()
+    this.project_name_element.addEventListener(
+      "click",
+      this.show_input_field_bind
     );
 
     return this.project_container;
@@ -83,48 +117,38 @@ export class TopMenu extends HTMLElement {
   }
 
   /**
-   * Shows the input field for renaming the project
+   * Creates the input container for the project rename
+   * @returns {HTMLDivElement}
    */
-  show_input_field() {
+  create_input_container() {
     const input_container = document.createElement("div");
     input_container.classList.add("input-container");
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.classList.add("rename-input");
-    input.value = this.project_name;
+    this.input = document.createElement("input");
+    this.input.type = "text";
+    this.input.classList.add("rename-input");
+    this.input.value = this.project_name;
 
-    const submit_icon = document.createElement("i");
-    submit_icon.classList.add("fa-solid", "fa-check", "submit-icon");
+    this.submit_icon = document.createElement("i");
+    this.submit_icon.classList.add("fa-solid", "fa-check", "submit-icon");
 
-    const cancel_icon = document.createElement("i");
-    cancel_icon.classList.add("fa-solid", "fa-xmark", "cancel-icon");
+    this.cancel_icon = document.createElement("i");
+    this.cancel_icon.classList.add("fa-solid", "fa-xmark", "cancel-icon");
 
-    input_container.appendChild(input);
-    input_container.appendChild(submit_icon);
-    input_container.appendChild(cancel_icon);
+    input_container.appendChild(this.input);
+    input_container.appendChild(this.submit_icon);
+    input_container.appendChild(this.cancel_icon);
+    return input_container;
+  }
 
-    const project_label =
+  /**
+   * Shows the input field for renaming the project
+   */
+  show_input_field() {
+    this.project_label =
       this.project_container.querySelector("span:last-child");
-    project_label.replaceWith(input_container);
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        this.rename_project(input_container);
-      } else if (e.key === "Escape") {
-        input_container.replaceWith(project_label);
-      }
-    });
-
-    submit_icon.addEventListener("click", () => {
-      this.rename_project(input_container);
-    });
-
-    cancel_icon.addEventListener("click", () => {
-      input_container.replaceWith(project_label);
-    });
-
-    input.focus();
+    this.project_label.replaceWith(this.input_container);
+    this.input.focus();
   }
 
   /**

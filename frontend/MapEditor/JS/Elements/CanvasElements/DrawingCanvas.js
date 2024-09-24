@@ -12,6 +12,14 @@ export class DrawingCanvas extends CanvasElement {
     super(canvas);
     this.layerIndex = layerIndex;
     this._active = true;
+    this.layers_updated_bind = this.layers_updated.bind(this);
+    this.draw_pen_canvas_bind = this.draw_pen_canvas.bind(this);
+    this.erase_canvas_bind = this.erase_canvas.bind(this);
+    this.redraw_canvas_bind = this.redraw_canvas.bind(this);
+    this.draw_shape_bind = this.draw_shape.bind(this);
+    this.fill_matrix_changed_bind = this.fill_matrix_changed.bind(this);
+    this.paste_selected_area_bind = this.paste_selected_area.bind(this);
+    this.cut_selected_area_bind = this.cut_selected_area.bind(this);
   }
 
   set active(value) {
@@ -52,70 +60,59 @@ export class DrawingCanvas extends CanvasElement {
   enable_listeners() {
     this.map_editor.addEventListener(
       "layers-updated",
-      this.layers_updated.bind(this)
+      this.layers_updated_bind
     );
     this.map_editor.addEventListener(
       "pen_matrix_changed",
-      this.draw_pen_canvas.bind(this)
+      this.draw_pen_canvas_bind
     );
     this.map_editor.addEventListener(
       "eraser_matrix_changed",
-      this.erase_canvas.bind(this)
+      this.erase_canvas_bind
     );
-    this.map_editor.addEventListener(
-      "zoom_changed",
-      this.redraw_canvas.bind(this)
-    );
-    this.map_editor.addEventListener("draw_shape", this.draw_shape.bind(this));
+    this.map_editor.addEventListener("zoom_changed", this.redraw_canvas_bind);
+    this.map_editor.addEventListener("draw_shape", this.draw_shape_bind);
     this.map_editor.addEventListener(
       "fill_matrix_changed",
-      this.fill_matrix_changed.bind(this)
+      this.fill_matrix_changed_bind
     );
     this.map_editor.addEventListener(
       "paste_selected_area",
-      this.paste_selected_area.bind(this)
+      this.paste_selected_area_bind
     );
     this.map_editor.addEventListener(
       "cut_selected_area",
-      this.cut_selected_area.bind(this)
+      this.cut_selected_area_bind
     );
   }
 
   /**
-   * DIsables all the EventListeners of the DrawingCanvas
+   * Disables all the EventListeners of the canvas
+   * Called when disconnected from DOM
    */
   disable_listeners() {
     this.map_editor.addEventListener(
       "layers-updated",
-      this.layers_updated.bind(this)
+      this.layers_updated_bind
     );
-    this.removeEventListener(
-      "pen_matrix_changed",
-      this.draw_pen_canvas.bind(this)
-    );
-    this.removeEventListener(
-      "eraser_matrix_changed",
-      this.erase_canvas.bind(this)
-    );
+    this.removeEventListener("pen_matrix_changed", this.draw_pen_canvas_bind);
+    this.removeEventListener("eraser_matrix_changed", this.erase_canvas_bind);
     this.map_editor.removeEventListener(
       "zoom_changed",
-      this.redraw_canvas.bind(this)
+      this.redraw_canvas_bind
     );
-    this.map_editor.removeEventListener(
-      "draw_shape",
-      this.draw_shape.bind(this)
-    );
+    this.map_editor.removeEventListener("draw_shape", this.draw_shape_bind);
     this.map_editor.removeEventListener(
       "fill_matrix_changed",
-      this.fill_matrix_changed.bind(this)
+      this.fill_matrix_changed_bind
     );
     this.map_editor.removeEventListener(
       "paste_selected_area",
-      this.paste_selected_area.bind(this)
+      this.paste_selected_area_bind
     );
     this.map_editor.removeEventListener(
       "cut_selected_area",
-      this.cut_selected_area.bind(this)
+      this.cut_selected_area_bind
     );
   }
 
