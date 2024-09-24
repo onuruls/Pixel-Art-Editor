@@ -477,7 +477,7 @@ export class MapEditor extends HTMLElement {
   load_file_assets(file_data) {
     const assets = [];
     file_data.forEach((layer) =>
-      layer.content.forEach((row) => row.forEach((col) => assets.push(...col)))
+      layer.content.forEach((row) => row.forEach((col) => assets.push(col)))
     );
     const unique_assets = [...new Set(assets)];
     const filtered_assets = unique_assets.filter((asset) => asset !== "");
