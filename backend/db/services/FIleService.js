@@ -208,7 +208,7 @@ class FileService {
     for (let y = 0; y < 64; y++) {
       for (let x = 0; x < 64; x++) {
         const idx = (64 * y + x) << 2;
-        const pixel = matrix_data[y][x];
+        const pixel = matrix_data[x][y];
         png.data[idx] = pixel[0];
         png.data[idx + 1] = pixel[1];
         png.data[idx + 2] = pixel[2];

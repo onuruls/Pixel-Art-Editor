@@ -187,6 +187,12 @@ export class FileArea extends HTMLElement {
           } else {
             console.warn("Unknown item type:", item);
           }
+          if (
+            selected_item.id == this.editor_tool.active_file.id ||
+            selected_item.id == this.editor_tool.active_file.folder_id
+          ) {
+            this.editor_tool.handle_no_file();
+          }
           selected_item.remove();
         })
       );
