@@ -207,20 +207,14 @@ export class DrawingCanvas extends CanvasElement {
    */
   fill_matrix_changed(event) {
     if (!this._active) return;
-    const scale = this.map_editor.tile_size * this.map_editor.scale;
+    const size = this.map_editor.tile_size * this.map_editor.scale;
     const points = event.detail.points;
     const asset = event.detail.asset;
     points.forEach((point) => {
-      const x = point.x * scale;
-      const y = point.y * scale;
-      this.context.clearRect(x, y, scale, scale);
-      this.context.drawImage(
-        asset,
-        point.x * scale,
-        point.y * scale,
-        scale,
-        scale
-      );
+      const x = point.x * size;
+      const y = point.y * size;
+      this.context.clearRect(x, y, size, size);
+      this.context.drawImage(asset, point.x * size, point.y * size, size, size);
     });
   }
 

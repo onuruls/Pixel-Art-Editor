@@ -44,17 +44,17 @@ export class CanvasElement extends HTMLElement {
    * @param {String} asset
    */
   paint_single_pixel(x, y, asset) {
-    const scale = this.map_editor.scale * this.map_editor.tile_size;
+    const size = this.map_editor.scale * this.map_editor.tile_size;
 
     if (this.map_editor.image_cache[asset]) {
       const img = this.map_editor.image_cache[asset];
-      this.context.drawImage(img, x * scale, y * scale, scale, scale);
+      this.context.drawImage(img, x * size, y * size, size, size);
     } else {
       const img = new Image();
       img.src = asset;
       img.onload = () => {
         this.map_editor.image_cache[asset] = img;
-        this.context.drawImage(img, x * scale, y * scale, scale, scale);
+        this.context.drawImage(img, x * size, y * size, size, size);
       };
     }
   }
@@ -65,8 +65,8 @@ export class CanvasElement extends HTMLElement {
    * @param {Number} y
    */
   erase_single_pixel(x, y) {
-    const scale = this.map_editor.scale * this.map_editor.tile_size;
-    this.context.clearRect(x * scale, y * scale, scale, scale);
+    const size = this.map_editor.scale * this.map_editor.tile_size;
+    this.context.clearRect(x * size, y * size, size, size);
   }
 
   /**
@@ -83,14 +83,14 @@ export class CanvasElement extends HTMLElement {
   draw_shape(event) {
     const selected_assset = event.detail.asset;
     const points = event.detail.points;
-    const scale = this.map_editor.scale * this.map_editor.tile_size;
+    const size = this.map_editor.scale * this.map_editor.tile_size;
     points.forEach((point) => {
       this.context.drawImage(
         selected_assset,
-        point.x * scale,
-        point.y * scale,
-        scale,
-        scale
+        point.x * size,
+        point.y * size,
+        size,
+        size
       );
     });
   }
