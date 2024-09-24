@@ -7,10 +7,11 @@ export class Tool {
    */
   constructor(map_editor) {
     this.map_editor = map_editor;
-    this.canvas = map_editor.map_canvas.input_canvas.canvas;
     this.is_drawing = false;
     this.hover_position = { x: 0, y: 0 };
     this.last_position = { x: 0, y: 0 };
+    this.handle_key_down_events_bind = this.handle_key_down_events.bind(this);
+    this.handle_key_up_events_bind = this.handle_key_up_events.bind(this);
     this.init();
   }
 
@@ -18,25 +19,17 @@ export class Tool {
    * Initializes the tool and adds necessary event listeners.
    */
   init() {
-    document.addEventListener(
-      "keydown",
-      this.handle_key_down_events.bind(this)
-    );
-    document.addEventListener("keydown", this.handle_key_up_events.bind(this));
+    document.addEventListener("keydown", this.handle_key_down_events_bind);
+    document.addEventListener("keydown", this.handle_key_up_events_bind);
   }
 
   /**
    * Removes all key listeners
    */
   destroy() {
-    document.removeEventListener(
-      "keydown",
-      this.handle_key_down_events.bind(this)
-    );
-    document.removeEventListener(
-      "keydown",
-      this.handle_key_up_events.bind(this)
-    );
+    document.removeEventListener("keydown", this.handle_key_down_events_bind);
+    document.removeEventListener("keydown", this.handle_key_up_events_bind);
+    console.log("!");
   }
 
   /**

@@ -32,6 +32,7 @@ export class Tool {
   destroy() {
     document.removeEventListener("keydown", this.handle_key_down_events);
     document.removeEventListener("keyup", this.handle_key_up_events);
+    console.log("!");
   }
 
   /**
