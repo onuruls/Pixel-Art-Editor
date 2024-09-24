@@ -7,7 +7,7 @@ export class ColorUtil {
   static secondary_color_default = "rgba(255, 255, 255, 1)";
 
   /**
-   * Retrieves a color by key from the predefined colors.
+   * Retrieves a color by key from the predefined colors
    * @param {string} key
    * @returns {string}
    * @throws {Error}
@@ -21,25 +21,39 @@ export class ColorUtil {
   }
 
   /**
-   * Converts an RGBA string to an array of numeric values.
+   * Converts an RGBA string to an array of numeric values
    * @param {string} rgba_string
    * @returns {Array<number>}
    */
   static rgba_string_to_array(rgba_string) {
+    if (Array.isArray(rgba_string)) {
+      return rgba_string;
+    }
+
+    if (typeof rgba_string !== "string") {
+      console.error(
+        `Expected a string, but received a ${typeof rgba_string}:`,
+        rgba_string
+      );
+      return [0, 0, 0, 255];
+    }
+
     const matches = rgba_string.match(/rgba?\(([^)]+)\)/);
-    if (!matches) return null;
+    if (!matches) {
+      console.error("Invalid RGBA string format:", rgba_string);
+      return [0, 0, 0, 255];
+    }
 
-    const components = matches[1].split(",").map((component) => {
-      return parseFloat(component.trim());
-    });
-
+    const components = matches[1]
+      .split(",")
+      .map((component) => parseFloat(component.trim()));
     const [r, g, b, a = 1] = components;
     const alpha = Math.round(a * 255);
     return [r, g, b, alpha];
   }
 
   /**
-   * Converts an array of numeric color values to an RGBA string.
+   * Converts an array of numeric color values to an RGBA string
    * @param {Array<number>} color_array
    * @returns {string}
    */
@@ -51,14 +65,18 @@ export class ColorUtil {
 
   /**
    * Blends two colors together.
-   * @param {string} color1
-   * @param {string} color2
+   * @param {string | Array<number>} color1
+   * @param {string | Array<number>} color2
    * @param {number} weight
    * @returns {string}
    */
   static blend_colors(color1, color2, weight = 0.5) {
-    const c1 = ColorUtil.rgba_string_to_array(color1);
-    const c2 = ColorUtil.rgba_string_to_array(color2);
+    const c1 = Array.isArray(color1)
+      ? color1
+      : ColorUtil.rgba_string_to_array(color1);
+    const c2 = Array.isArray(color2)
+      ? color2
+      : ColorUtil.rgba_string_to_array(color2);
 
     const r = Math.round(c1[0] * weight + c2[0] * (1 - weight));
     const g = Math.round(c1[1] * weight + c2[1] * (1 - weight));
@@ -69,13 +87,24 @@ export class ColorUtil {
   }
 
   /**
-   * Compares two colors for equality.
-   * @param {string} color1
-   * @param {string} color2
+   * Compares two colors.
+   * @param {string | Array<number>} color1
+   * @param {string | Array<number>} color2
    * @returns {boolean}
    */
   static compare_colors(color1, color2) {
-    return color1 === color2;
+    if (typeof color1 === "string")
+      color1 = ColorUtil.rgba_string_to_array(color1);
+    if (typeof color2 === "string")
+      color2 = ColorUtil.rgba_string_to_array(color2);
+
+    if (Array.isArray(color1) && Array.isArray(color2)) {
+      return (
+        color1.length === color2.length &&
+        color1.every((v, i) => v === color2[i])
+      );
+    }
+    return false;
   }
 
   /**
@@ -113,18 +142,21 @@ export class ColorUtil {
    * @returns {Array<number>}
    */
   static hex_to_rgb_array(hex_string) {
+    if (!hex_string) {
+      console.error("hex_to_rgb_array called with undefined hex_string");
+      return [0, 0, 0, 0];
+    }
     hex_string = hex_string.replace(/^#/, "");
     const bigint = parseInt(hex_string, 16);
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
-    const a = 255;
-    return [r, g, b, a];
+    return [r, g, b, 255];
   }
 
   /**
    * Converts an array of RGB values to a hex color string
-   * @param {Array<number>} color_array -
+   * @param {Array<number>} color_array
    * @returns {string}
    */
   static rgb_array_to_hex(color_array) {
@@ -137,12 +169,24 @@ export class ColorUtil {
 
   /**
    * Adjusts the brightness of a color
-   * @param {string} color
+   * @param {string | Array<number>} color
    * @param {number} amount
-   * @returns {string}
+   * @returns {string | Array<number>}
    */
   static adjust_brightness(color, amount) {
-    const color_array = ColorUtil.rgba_string_to_array(color);
+    let color_array;
+    if (Array.isArray(color)) {
+      color_array = color;
+    } else if (typeof color === "string") {
+      color_array = ColorUtil.rgba_string_to_array(color);
+    } else {
+      console.error(
+        `Expected a string or array, but received a ${typeof color}:`,
+        color
+      );
+      return color;
+    }
+
     if (!color_array) return color;
 
     const [r, g, b, a] = color_array;
@@ -150,6 +194,10 @@ export class ColorUtil {
     const new_g = ColorUtil.clamp(g + amount, 0, 255);
     const new_b = ColorUtil.clamp(b + amount, 0, 255);
 
-    return ColorUtil.rgba_array_to_string([new_r, new_g, new_b, a]);
+    const new_color_array = [new_r, new_g, new_b, a];
+
+    return Array.isArray(color)
+      ? new_color_array
+      : ColorUtil.rgba_array_to_string(new_color_array);
   }
 }
