@@ -13,8 +13,8 @@ export class Tool {
     this.is_ctrl_pressed = false;
     this.hover_position = { x: 0, y: 0 };
     this.last_position = { x: 0, y: 0 };
-    this.handle_key_down_events = this.handle_key_down_events.bind(this);
-    this.handle_key_up_events = this.handle_key_up_events.bind(this);
+    this.handle_key_down_events_bind = this.handle_key_down_events.bind(this);
+    this.handle_key_up_events_bind = this.handle_key_up_events.bind(this);
     this.init();
   }
 
@@ -22,16 +22,16 @@ export class Tool {
    * Adds all key listeners
    */
   init() {
-    document.addEventListener("keydown", this.handle_key_down_events);
-    document.addEventListener("keyup", this.handle_key_up_events);
+    document.addEventListener("keydown", this.handle_key_down_events_bind);
+    document.addEventListener("keyup", this.handle_key_up_events_bind);
   }
 
   /**
    * Removes all key listeners
    */
   destroy() {
-    document.removeEventListener("keydown", this.handle_key_down_events);
-    document.removeEventListener("keyup", this.handle_key_up_events);
+    document.removeEventListener("keydown", this.handle_key_down_events_bind);
+    document.removeEventListener("keyup", this.handle_key_up_events_bind);
     console.log("!");
   }
 

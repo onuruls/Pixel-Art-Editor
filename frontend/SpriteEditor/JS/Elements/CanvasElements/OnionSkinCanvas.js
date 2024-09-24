@@ -14,6 +14,9 @@ export class OnionSkinCanvas extends CanvasElement {
     this.opacity = 0.25;
     this.is_onion_skin_active = false;
     this.onion_skin_button = this.create_onion_skin_button();
+    this.toggle_onion_skin_bind = this.toggle_onion_skin.bind(this);
+    this.clear_canvas_bind = this.clear_canvas.bind(this);
+    this.repaint_canvas_bind = this.repaint_canvas.bind(this);
   }
 
   /**
@@ -35,15 +38,40 @@ export class OnionSkinCanvas extends CanvasElement {
     });
     observer.observe(this.sprite_editor, { childList: true, subtree: true });
 
-    this.sprite_editor.addEventListener("repaint_canvas", () => {
-      if (this.is_onion_skin_active) {
-        this.update_onion_skin();
-      }
-    });
+    this.sprite_editor.addEventListener(
+      "repaint_canvas",
+      this.repaint_canvas_bind
+    );
 
-    this.sprite_editor.addEventListener("remove_selection", () => {
-      this.clear_canvas();
-    });
+    this.sprite_editor.addEventListener(
+      "remove_selection",
+      this.clear_canvas_bind
+    );
+  }
+
+  disconnectedCanvas() {
+    this.sprite_editor.removeEventListener(
+      "repaint_canvas",
+      this.repaint_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "remove_selection",
+      this.clear_canvas_bind
+    );
+    this.onion_skin_button.removeEventListener(
+      "click",
+      this.toggle_onion_skin_bind
+    );
+  }
+
+  /**
+   * Called when repaint_canvas event is emitted from the SpriteEditor
+   * @param {Event} event
+   */
+  repaint_canvas(event) {
+    if (this.is_onion_skin_active) {
+      this.update_onion_skin();
+    }
   }
 
   /**
@@ -147,7 +175,7 @@ export class OnionSkinCanvas extends CanvasElement {
       animationPreviewControls.appendChild(this.onion_skin_button);
       this.onion_skin_button.addEventListener(
         "click",
-        this.toggle_onion_skin.bind(this)
+        this.toggle_onion_skin_bind
       );
       observer.disconnect();
     }

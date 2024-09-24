@@ -5,6 +5,13 @@ import { ColorUtil } from "../../../Util/ColorUtil.js";
 export class SpriteTools extends SpriteEditorPart {
   constructor(sprite_editor) {
     super(sprite_editor);
+    this.tool_buttons = null;
+    this.pixel_size_options = null;
+    this.palette_colors = null;
+    this.tool_buttons_clicked_bind = this.tool_button_clicked.bind(this);
+    this.pixel_button_clicked_bind = this.pixel_button_clicked.bind(this);
+    this.palette_clicked_bind = this.palette_clicked.bind(this);
+    this.palette_context_bind = this.palette_context.bind(this);
   }
 
   /**
@@ -173,71 +180,94 @@ export class SpriteTools extends SpriteEditorPart {
   }
 
   setup_tool_buttons() {
-    const tool_buttons = document.querySelectorAll(".tool-button");
-    tool_buttons.forEach((button) => {
+    this.tool_buttons = document.querySelectorAll(".tool-button");
+    this.tool_buttons.forEach((button) => {
       const tool_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, tool_info);
-
-      button.addEventListener("click", () => {
-        tool_buttons.forEach((btn) => btn.classList.remove("active"));
-        button.classList.add("active");
-      });
+      if (button.id === "mirror_pen") button.classList.add("active");
+      button.addEventListener("click", this.tool_buttons_clicked_bind);
     });
+  }
+
+  /**
+   * Called when tool button is clicked
+   * @param {Event} event
+   */
+  tool_button_clicked(event) {
+    this.tool_buttons.forEach((btn) => btn.classList.remove("active"));
+    if (event.target.tagName === "BUTTON") {
+      event.target.classList.add("active");
+    } else {
+      event.target.parentNode.classList.add("active");
+    }
   }
 
   setup_pixel_size_buttons() {
-    const pixel_size_options = document.querySelectorAll(".pixel-size-option");
-    pixel_size_options.forEach((button) => {
+    this.pixel_size_options = document.querySelectorAll(".pixel-size-option");
+    this.pixel_size_options.forEach((button) => {
       const pixel_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, pixel_info);
-
-      button.addEventListener("click", () => {
-        pixel_size_options.forEach((btn) => btn.classList.remove("active"));
-        button.classList.add("active");
-        this.sprite_editor.set_pixel_size(button.dataset.size);
-      });
+      button.addEventListener("click", this.pixel_button_clicked_bind);
     });
   }
 
+  /**
+   * Callen when a pixel button is clicked
+   * @param {Event} event
+   */
+  pixel_button_clicked(event) {
+    this.pixel_size_options.forEach((btn) => btn.classList.remove("active"));
+    event.target.classList.add("active");
+    this.sprite_editor.set_pixel_size(event.target.dataset.size);
+  }
+
   setup_palette_colors() {
-    const palette_colors = document.querySelectorAll(".palette-color");
-    palette_colors.forEach((palette) => {
+    this.palette_colors = document.querySelectorAll(".palette-color");
+    this.palette_colors.forEach((palette) => {
       const palette_info = JSON.parse(palette.getAttribute("data-info"));
       Util.create_tool_info(palette, palette_info);
-      palette.addEventListener("click", (event) => {
-        const index = palette.getAttribute("data-index");
-        if (event.ctrlKey) {
-          palette.addEventListener(
-            "input",
-            () => {
-              const newColor = palette.value;
-              this.set_palette_color(index, newColor);
-            },
-            { once: true }
-          );
-        } else if (event.shiftKey) {
-          this.hide_color_input(palette);
-          const color = this.sprite_editor.selected_color;
-          const hex_color = ColorUtil.rgb_array_to_hex(color);
-          this.sprite_editor.palettes[index] = hex_color;
-          palette.value = hex_color;
-        } else {
-          this.hide_color_input(palette);
-          const color = palette.value;
-          this.sprite_editor.set_selected_color(
-            ColorUtil.hex_to_rgb_array(color)
-          );
-        }
-      });
+      palette.addEventListener("click", this.palette_clicked_bind);
 
-      palette.addEventListener("contextmenu", (event) => {
-        event.preventDefault();
-        const color = palette.value;
-        this.sprite_editor.set_secondary_color(
-          ColorUtil.hex_to_rgb_array(color)
-        );
-      });
+      palette.addEventListener("contextmenu", this.palette_context_bind);
     });
+  }
+
+  /**
+   * Callen when a palette is clicked
+   * @param {Event} event
+   */
+  palette_clicked(event) {
+    const index = event.target.getAttribute("data-index");
+    if (event.ctrlKey) {
+      event.target.addEventListener(
+        "input",
+        () => {
+          const newColor = event.target.value;
+          this.set_palette_color(index, newColor);
+        },
+        { once: true }
+      );
+    } else if (event.shiftKey) {
+      this.hide_color_input(event.target);
+      const color = this.sprite_editor.selected_color;
+      const hex_color = ColorUtil.rgb_array_to_hex(color);
+      this.sprite_editor.palettes[index] = hex_color;
+      event.target.value = hex_color;
+    } else {
+      this.hide_color_input(event.target);
+      const color = event.target.value;
+      this.sprite_editor.set_selected_color(ColorUtil.hex_to_rgb_array(color));
+    }
+  }
+
+  /**
+   * Callen when palette is rightclicked
+   * @param {Event} event
+   */
+  palette_context(event) {
+    event.preventDefault();
+    const color = event.target.value;
+    this.sprite_editor.set_secondary_color(ColorUtil.hex_to_rgb_array(color));
   }
 
   setup_color_inputs() {
@@ -262,8 +292,7 @@ export class SpriteTools extends SpriteEditorPart {
   }
 
   set_palette_color(index, color) {
-    const palette_colors = document.querySelectorAll(".palette-color");
-    palette_colors[index].value = color;
+    this.palette_colors[index].value = color;
     this.sprite_editor.palettes[index] = color;
   }
 
