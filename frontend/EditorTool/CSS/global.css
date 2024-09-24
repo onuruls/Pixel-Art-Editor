@@ -25,6 +25,7 @@ body {
 
   --active-accent: #8f76d9;
   --neutral-accent: #777;
+  --selected-accent: rgb(119, 119, 149);
 
   --title: whitesmoke;
   --title-stroke: black;
