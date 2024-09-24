@@ -18,7 +18,7 @@ app.use(
 );
 
 // Serve static files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /**
  * Creates a new Project
@@ -265,9 +265,9 @@ app.get("/files/:id", async (req, res) => {
  */
 app.put("/files/:id", async (req, res) => {
   const file_id = req.params.id;
-  const data = JSON.parse(req.body.content);
+  const { content } = req.body;
 
-  if (!data) {
+  if (!content) {
     return res.status(400).send("Matrix data is required to update the file");
   }
 
@@ -276,7 +276,8 @@ app.put("/files/:id", async (req, res) => {
     if (!file) {
       return res.status(404).send("File not found");
     }
-    await db_client.write_file(file_id, data);
+
+    await db_client.write_file(file_id, content);
     res.status(200).send("File updated");
   } catch (error) {
     console.error("Error updating file:", error);
@@ -322,24 +323,24 @@ app.delete("/files/:id", async (req, res) => {
 /**
  * Endpoint to retrieve all PNG files from the uploads directory.
  */
-app.get('/sprites', (req, res) => {
-  const sprite_dir = path.join(__dirname, 'uploads');
+app.get("/sprites", (req, res) => {
+  const sprite_dir = path.join(__dirname, "uploads");
 
   fs.readdir(sprite_dir, (err, files) => {
     if (err) {
       console.error("Error reading directory:", err);
       return res.status(500).send("Error reading directory");
     }
-    const png_files = files.filter(file => path.extname(file) === '.png');
+    const png_files = files.filter((file) => path.extname(file) === ".png");
     res.status(200).json(png_files);
   });
 });
 
 app.put("/map_files/:id", async (req, res) => {
   const file_id = req.params.id;
-  const matrix_data = req.body;
+  const data = req.body;
   try {
-    await db_client.save_map_file(file_id, matrix_data);
+    await db_client.save_map_file(file_id, data);
     res.status(200).send("File saved");
   } catch (error) {
     console.error("Error saving file:", error);

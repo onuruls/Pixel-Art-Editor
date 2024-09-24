@@ -1240,13 +1240,11 @@ export class SpriteEditor extends HTMLElement {
       secondaryColor: ColorUtil.rgb_array_to_hex(this.secondary_color),
     };
 
-    const jsonString = JSON.stringify(sprite_data);
-
     try {
       if (this.editor_tool.active_file) {
         await file_system_handler.write_file(
           this.editor_tool.active_file,
-          jsonString
+          sprite_data
         );
         await file_system_handler.read_directory_content();
       } else {

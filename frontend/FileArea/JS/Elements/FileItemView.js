@@ -50,7 +50,6 @@ export class FileItemView extends ItemView {
         });
         break;
       case "tmx":
-
         this.icon.addEventListener("dblclick", async () => {
           if (this.file_area.file_system_handler) {
             await this.file_area.open_map_file(this.id);
@@ -61,7 +60,6 @@ export class FileItemView extends ItemView {
         break;
     }
   }
-  
 
   /**
    * Adds the file extension to the name for display purposes.

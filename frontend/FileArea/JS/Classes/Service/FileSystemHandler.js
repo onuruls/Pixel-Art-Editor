@@ -46,7 +46,6 @@ export class FileSystemHandler {
         entry.folder_id,
         entry.type,
         entry.filepath,
-        entry.matrix_data,
         entry.data
       );
     } else {
@@ -257,7 +256,6 @@ export class FileSystemHandler {
         new_file.folder_id,
         new_file.type,
         new_file.filepath,
-        new_file.matrix_data,
         new_file.data
       );
       this.active_folder.children.push(fileObject);

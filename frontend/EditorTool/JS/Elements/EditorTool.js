@@ -85,6 +85,17 @@ export class EditorTool extends HTMLElement {
   }
 
   /**
+   * Shows the NoFileOpenScreen component
+   */
+  show_no_file_open_screen() {
+    this.remove_sprite_and_map_editors();
+
+    if (!this.no_file_open_screen.isConnected) {
+      this.editor_container.appendChild(this.no_file_open_screen);
+    }
+  }
+
+  /**
    * Changes between Sprite and Map Editor
    */
   change_editor() {
@@ -104,23 +115,21 @@ export class EditorTool extends HTMLElement {
 
   /**
    * Sets the active file and updates the UI accordingly
-   * @param {File|null} file 
+   * @param {File|null} file
    */
   set_active_file(file) {
     if (!file) {
       this.handle_no_file();
-      return;
+    } else {
+      if (this.is_file_already_open(file)) {
+        console.log("File is already open.");
+      } else {
+        this.load_editor_for_file(file);
+        this.active_file = file;
+        this.top_menu.update_file_name(file.name);
+        this.remove_no_file_open_screen();
+      }
     }
-
-    if (this.is_file_already_open(file)) {
-      console.log("File is already open.");
-      return;
-    }
-
-    this.load_editor_for_file(file);
-    this.active_file = file;
-    this.top_menu.update_file_name(file.name);
-    this.remove_no_file_open_screen();
   }
 
   /**
@@ -128,7 +137,7 @@ export class EditorTool extends HTMLElement {
    */
   handle_no_file() {
     this.active_file = null;
-    this.top_menu.update_file_name("Untitled File");
+    this.top_menu.update_file_name("-");
     this.show_no_file_open_screen();
   }
 
@@ -167,7 +176,6 @@ export class EditorTool extends HTMLElement {
     }
   }
 
-
   load_map_editor(file) {
     if (!this.map_editor.isConnected) {
       this.remove_sprite_and_map_editors();
@@ -177,17 +185,6 @@ export class EditorTool extends HTMLElement {
       this.map_editor.map_tools.fetch_assets();
     }
     this.map_editor.load_map_editor(file, this.editor_container);
-  }
-
-  /**
-   * Shows the NoFileOpenScreen component
-   */
-  show_no_file_open_screen() {
-    this.remove_sprite_and_map_editors();
-
-    if (!this.no_file_open_screen.isConnected) {
-      this.editor_container.appendChild(this.no_file_open_screen);
-    }
   }
 
   /**

@@ -12,7 +12,7 @@ class FileService {
    * @param {Number} folder_id
    * @param {String} name
    * @param {String} type
-   * @param {String} data
+   * @param {JSON} data
    * @returns {Promise<File>}
    */
   async add_file(folder_id, name, type, data) {
@@ -28,6 +28,25 @@ class FileService {
       name = await helper.generate_unique_name(folder_id, name, true, type);
     }
 
+    if (!data) {
+      const default_matrix = Array.from({ length: 64 }, () =>
+        Array(64).fill([0, 0, 0, 0])
+      );
+      switch (type) {
+        case "png":
+          data = {
+            frames: [{ matrix: default_matrix }],
+            palette: Array(6).fill("#A4A5A6"),
+            selectedColor: "#000000",
+            secondaryColor: "#FFFFFF",
+          };
+          break;
+        case "tmx":
+          data = [{ content: [], visible: null }];
+          break;
+      }
+    }
+
     const file_path = await file_system_service.create_file(name, type);
 
     if (type === "png") {
@@ -35,7 +54,7 @@ class FileService {
       const png = this.generate_png(matrix_preview);
       png.pack().pipe(fs.createWriteStream(file_path));
     } else if (type === "tmx") {
-      const dummyContent = "Dummy TMX content";
+      const dummyContent = JSON.stringify(data);
       fs.writeFileSync(file_path, dummyContent);
     }
 
@@ -43,6 +62,7 @@ class FileService {
       name,
       type,
       filepath: file_path,
+      data,
       folder_id,
     });
 
@@ -65,15 +85,14 @@ class FileService {
       type: file.type,
       folder_id: file.folder_id,
       url: file.filepath,
-      matrix_data: file.matrix_data,
       data: file.data,
     };
   }
 
   /**
-   * Updates the file's matrix data and rewrites the PNG file on disk.
+   * Updates the file's data and rewrites the PNG file on disk.
    * @param {Number} file_id
-   * @param {String} data
+   * @param {JSON} data
    * @returns {Promise<void>}
    */
   async write_file(file_id, data) {
@@ -90,7 +109,8 @@ class FileService {
       throw new Error("Unsupported file type");
     }
 
-    file.data = JSON.stringify(data);
+    file.data = data;
+
     await file.save();
   }
 
@@ -201,12 +221,12 @@ class FileService {
   /**
    * Updates MapEditor-File after changes
    * @param {*} file_id
-   * @param {*} matrix_data
+   * @param {*} data
    */
-  async save_map_file(file_id, matrix_data) {
+  async save_map_file(file_id, data) {
     const file = await File.findByPk(file_id);
     if (!file) throw new Error("File not found");
-    file.matrix_data = matrix_data;
+    file.data = data;
     file.save();
   }
 }
