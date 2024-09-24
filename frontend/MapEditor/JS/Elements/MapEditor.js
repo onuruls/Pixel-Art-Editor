@@ -79,6 +79,8 @@ export class MapEditor extends HTMLElement {
     if (!this.initialized) {
       this.init();
     }
+    this.set_listeners();
+    this.map_canvas.input_canvas.set_tool_liseners();
   }
 
   /**

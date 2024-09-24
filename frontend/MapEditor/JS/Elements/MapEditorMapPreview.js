@@ -41,6 +41,9 @@ export class MapEditorMapPreview extends MapEditorPart {
   init() {
     this.appendChild(this.canvas);
     this.appendChild(this.zoom_canvas);
+  }
+
+  set_listeners() {
     this.map_editor.addEventListener(
       "reload_map_preview",
       this.reload_preview_bind
