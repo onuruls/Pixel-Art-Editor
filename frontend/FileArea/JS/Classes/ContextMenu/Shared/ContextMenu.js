@@ -11,6 +11,7 @@ export class ContextMenu {
   }
 
   /**
+   * Configures the context menu.
    * @returns {void}
    */
   configure() {
@@ -26,6 +27,7 @@ export class ContextMenu {
   }
 
   /**
+   * Adds an option to the context menu.
    * @param {Function} action
    * @param {string} label
    * @returns {void}
@@ -42,13 +44,36 @@ export class ContextMenu {
   }
 
   /**
-   * Shows the context menu at the event's location.
+   * Shows the context menu at the event's location, adjusting for viewport boundaries.
    * @param {MouseEvent} event
    * @returns {void}
    */
   show(event) {
-    this.menu_element.style.left = `${event.pageX}px`;
-    this.menu_element.style.top = `${event.pageY}px`;
+    this.menu_element.style.visibility = "hidden";
+    this.menu_element.style.display = "block";
+    this.menu_element.style.left = "0px";
+    this.menu_element.style.top = "0px";
+
+    const menuRect = this.menu_element.getBoundingClientRect();
+
+    const viewportHeight = window.innerHeight;
+
+    let left = event.clientX;
+    let top = event.clientY;
+
+    // Adjust vertical position if the menu would overflow to the bottom
+    if (top + menuRect.height > viewportHeight) {
+      top = top - menuRect.height;
+      if (top < 0) top = 0; // Ensure it doesn't go off-screen to the top
+    }
+
+    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+    this.menu_element.style.left = `${left + scrollLeft}px`;
+    this.menu_element.style.top = `${top + scrollTop}px`;
+
+    this.menu_element.style.visibility = "visible";
     this.menu_element.classList.add("visible");
   }
 
@@ -58,5 +83,6 @@ export class ContextMenu {
    */
   hide() {
     this.menu_element.classList.remove("visible");
+    this.menu_element.style.display = "none";
   }
 }

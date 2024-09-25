@@ -54,6 +54,10 @@ export class RenameItemHandler {
         await this.rename_item(item, new_name);
         item.name = new_name;
         this.file_area_view.rebuild_view();
+        const rename_event = new CustomEvent("itemRenamed", {
+          detail: { item },
+        });
+        this.file_area_view.dispatchEvent(rename_event);
       } catch (error) {
         console.error("Failed to rename the item:", error);
         p_element.textContent = original_name;

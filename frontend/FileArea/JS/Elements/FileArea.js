@@ -16,34 +16,23 @@ export class FileArea extends HTMLElement {
   constructor(editor_tool) {
     super();
     this.editor_tool = editor_tool;
-    this.file_system_handler = null;
-    this.operation_in_progress = false;
-    this.selected_editor = "SpriteEditor";
 
-    this.css = this.create_css_link();
-    this.appendChild(this.css);
+    this.appendChild(this.create_css_link());
 
     this.file_view = new FileAreaView(this);
     this.file_tools_right = new FileAreaTools(this);
 
-    this.appendChild(this.file_view);
-    this.appendChild(this.file_tools_right);
+    this.append(this.file_view, this.file_tools_right);
   }
 
-  /**
-   * @returns {HTMLLinkElement}
-   */
   create_css_link() {
     const css = document.createElement("link");
-    css.setAttribute("href", "../FileArea/CSS/Elements/FileArea.css");
-    css.setAttribute("rel", "stylesheet");
-    css.setAttribute("type", "text/css");
+    css.href = "../FileArea/CSS/Elements/FileArea.css";
+    css.rel = "stylesheet";
+    css.type = "text/css";
     return css;
   }
 
-  /**
-   * From HTMLElement - called when mounted to DOM.
-   */
   async connectedCallback() {
     this.file_system_handler = new FileSystemHandler(
       this.file_view,
@@ -63,20 +52,24 @@ export class FileArea extends HTMLElement {
 
     this.file_view.rebuild_view();
 
-    this.set_listeners();
+    this.file_view.addEventListener(
+      "itemRenamed",
+      this.handle_item_renamed.bind(this)
+    );
+
     this.set_global_click_listener();
   }
 
-  /**
-   * Initializes all event listeners.
-   */
-  set_listeners() {}
+  disconnectedCallback() {
+    this.file_view.removeEventListener("itemRenamed", this.handle_item_renamed);
+    document.removeEventListener("click", this.global_click_listener);
+  }
 
   /**
    * Sets a global click listener to deselect all items.
    */
   set_global_click_listener() {
-    this.global_click_listener = (event) => this.handle_global_click(event);
+    this.global_click_listener = this.handle_global_click.bind(this);
     document.addEventListener("click", this.global_click_listener);
   }
 
@@ -96,10 +89,10 @@ export class FileArea extends HTMLElement {
   }
 
   /**
-   * Opens the sprite file
+   * Opens the file with the given ID.
    * @param {number} file_id
    */
-  async open_sprite_file(file_id) {
+  async open_file(file_id) {
     if (!this.file_system_handler) {
       console.error("File system handler is not initialized yet.");
       return;
@@ -107,59 +100,34 @@ export class FileArea extends HTMLElement {
 
     const file_data = this.file_system_handler.get_file_by_id(file_id);
     if (file_data) {
-      if (file_data.type === "png") {
+      if (["png", "tmx"].includes(file_data.type)) {
         this.editor_tool.set_active_file(file_data);
       } else {
         console.error("Unsupported file type or missing data.");
       }
     } else {
-      console.error("Error loading sprite file.");
+      console.error("Error loading file.");
     }
   }
 
   /**
-   * Opens the map file
-   * @param {number} file_id
+   * Creates a new item (folder or file).
+   * @param {string} file_type
    */
-  async open_map_file(file_id) {
-    if (!this.file_system_handler) {
-      console.error("File system handler is not initialized yet.");
-      return;
-    }
-    const file_data = this.file_system_handler.get_file_by_id(file_id);
-    if (file_data) {
-      if (file_data.type === "tmx") {
-        this.editor_tool.set_active_file(file_data);
-      } else {
-        console.error("Unsupported file type or missing data.");
-      }
-    } else {
-      console.error("Error loading map file.");
-    }
+  async create_new_item(file_type = "folder") {
+    await this.create_handler.create_new_item(file_type);
   }
 
   /**
-   * Creates a new folder or file element using the CreateItemHandler.
-   * If no file type is specified, it defaults to creating a folder.
-   * @param {string} fileType
-   */
-  async create_new_item(fileType = "folder") {
-    await this.create_handler.create_new_item(fileType);
-  }
-
-  /**
-   * General method to rename selected items (both files and folders).
+   * Renames the selected item.
    */
   async rename_selected_items() {
-    if (this.file_view.selection_handler.selected_items.size === 1) {
-      const selected_item = Array.from(
-        this.file_view.selection_handler.selected_items
-      )[0];
-      const id = this.get_selected_item_id(selected_item);
+    const selected_item =
+      Array.from(this.file_view.selection_handler.selected_items)[0] || null;
+    if (selected_item) {
       const item = this.get_item_by_type(selected_item);
-
       if (item) {
-        this.rename_handler.start_rename(item, selected_item);
+        this.rename_handler.start_rename(item, selected_item, (new_name) => {});
       }
     } else {
       console.warn("Please select a single item to rename.");
@@ -167,7 +135,21 @@ export class FileArea extends HTMLElement {
   }
 
   /**
-   * General method to delete selected items (both files and folders).
+   * Handles the item renamed event to update top menu
+   * @param {CustomEvent} event
+   */
+  handle_item_renamed(event) {
+    const renamed_item = event.detail.item;
+    if (
+      this.editor_tool.active_file &&
+      this.editor_tool.active_file.id === renamed_item.id
+    ) {
+      this.editor_tool.top_menu.update_file_name(renamed_item.name);
+    }
+  }
+
+  /**
+   * Deletes the selected items.
    */
   async delete_selected_items() {
     const selected_items = Array.from(
@@ -177,70 +159,69 @@ export class FileArea extends HTMLElement {
     if (selected_items.length > 0) {
       await Promise.all(
         selected_items.map(async (selected_item) => {
-          const id = this.get_selected_item_id(selected_item);
           const item = this.get_item_by_type(selected_item);
 
           if (item instanceof Folder) {
-            await this.file_system_handler.delete_folder_by_id(id);
+            await this.file_system_handler.delete_folder_by_id(item.id);
           } else if (item instanceof File) {
-            await this.file_system_handler.delete_file_by_id(id);
+            await this.file_system_handler.delete_file_by_id(item.id);
           } else {
             console.warn("Unknown item type:", item);
           }
+
           if (
-            selected_item.id == this.editor_tool.active_file.id ||
-            selected_item.id == this.editor_tool.active_file.folder_id
+            this.editor_tool.active_file &&
+            (selected_item.id == this.editor_tool.active_file.id ||
+              selected_item.id == this.editor_tool.active_file.folder_id)
           ) {
             this.editor_tool.handle_no_file();
           }
+
           selected_item.remove();
         })
       );
     } else {
       console.warn("No items selected to delete.");
     }
-    this.file_system_handler.read_directory_content();
+    await this.file_system_handler.read_directory_content();
   }
 
   /**
-   * Moves selected items (both files and folders) to a target folder.
+   * Moves selected items to a target folder.
    * @param {number} target_folder_id
    */
   async move_selected_items_to_folder(target_folder_id) {
-    const { selected_items } = this.file_view.selection_handler;
+    const selected_items = Array.from(
+      this.file_view.selection_handler.selected_items
+    );
 
-    for (const item of selected_items) {
-      if (item instanceof FolderItemView) {
+    for (const selected_item of selected_items) {
+      const item = this.get_item_by_type(selected_item);
+
+      if (item instanceof Folder) {
         await this.file_system_handler.move_folder_by_id(
           item.id,
           target_folder_id
         );
-      } else if (item instanceof FileItemView) {
+      } else if (item instanceof File) {
         await this.file_system_handler.move_file_by_id(
           item.id,
           target_folder_id
         );
+      } else {
+        console.warn("Unknown item type:", item);
       }
     }
-    this.file_system_handler.read_directory_content();
+    await this.file_system_handler.read_directory_content();
   }
 
   /**
-   * Gets the ID of the selected item.
+   * Gets the item (folder or file) based on its type.
    * @param {ItemView} selected_item
-   * @returns {number}
-   */
-  get_selected_item_id(selected_item) {
-    return Number(selected_item.id);
-  }
-
-  /**
-   * Gets the item (folder or file) based on its type (FolderItemView or FileItemView).
-   * @param {ItemView} selected_item
-   * @returns {Folder|File}
+   * @returns {Folder|File|null}
    */
   get_item_by_type(selected_item) {
-    const id = this.get_selected_item_id(selected_item);
+    const id = Number(selected_item.id);
 
     if (selected_item instanceof FolderItemView) {
       return this.file_system_handler.get_folder_by_id(id);
