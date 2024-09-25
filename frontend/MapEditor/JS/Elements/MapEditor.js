@@ -874,7 +874,7 @@ export class MapEditor extends HTMLElement {
    */
   mouse_wheel_used_on_canvas(event) {
     const { x, y } = this.get_mouse_position(event);
-    if (event.deltaY > 0) {
+    if (event.deltaY < 0) {
       this.apply_zoom(
         true,
         x * this.tile_size * this.scale,
