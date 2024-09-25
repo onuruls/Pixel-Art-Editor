@@ -11,12 +11,7 @@ export class AddProjectInputs extends HTMLElement {
     this.title_screen = title_screen;
     this.name_input = this.create_name_input();
     this.button_div = this.create_button_div();
-    this.back_button = this.create_back_button();
-    this.submit_button = this.create_submit_button();
-    this.button_div.appendChild(this.back_button);
-    this.button_div.appendChild(this.submit_button);
-    this.appendChild(this.name_input);
-    this.appendChild(this.button_div);
+    this.append(this.name_input, this.button_div);
   }
 
   /**
@@ -34,33 +29,24 @@ export class AddProjectInputs extends HTMLElement {
    * @returns {HTMLDivElement}
    */
   create_button_div() {
-    return Util.create_element("div", "", ["button-div"], "");
-  }
+    const button_div = Util.create_element("div", "", ["button-div"]);
 
-  /**
-   *
-   * @returns {HTMLButtonElement}
-   */
-  create_back_button() {
-    return Util.create_button(
+    const back_button = Util.create_button(
       "back_button",
       ["btn"],
       "Back",
       this.title_screen.back_button_clicked.bind(this.title_screen)
     );
-  }
 
-  /**
-   *
-   * @returns {HTMLButtonElement}
-   */
-  create_submit_button() {
-    return Util.create_button(
+    const submit_button = Util.create_button(
       "create_button",
       ["btn"],
       "Create",
       this.submit_button_clicked.bind(this)
     );
+
+    button_div.append(back_button, submit_button);
+    return button_div;
   }
 
   /**

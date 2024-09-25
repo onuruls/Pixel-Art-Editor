@@ -4,7 +4,7 @@ import { TitleScreen } from "../TitleScreen.js";
 
 export class ProjectView extends HTMLElement {
   /**
-   * View of a project in the ProjctOverView
+   * View of a project in the ProjectsOverview
    * @param {TitleScreen} title_screen
    * @param {Project} project
    */
@@ -12,22 +12,18 @@ export class ProjectView extends HTMLElement {
     super();
     this.title_screen = title_screen;
     this.project = project;
-    this.project_name = this.create_project_name();
-    this.created_at = this.create_created_at();
-    this.appendChild(this.project_name);
-    this.appendChild(this.created_at);
-    this.set_project_bind = this.title_screen.editor_tool.set_project.bind(
-      this.title_screen.editor_tool,
-      this.project
-    );
+    this.handle_project_click = this.handle_project_click.bind(this);
+    this.project_name_element = this.create_project_name_element();
+    this.created_at_element = this.create_created_at_element();
+    this.append(this.project_name_element, this.created_at_element);
     this.init();
   }
 
   /**
-   *
+   * Creates the project name element
    * @returns {HTMLParagraphElement}
    */
-  create_project_name() {
+  create_project_name_element() {
     return Util.create_element(
       "p",
       this.project._id,
@@ -35,38 +31,44 @@ export class ProjectView extends HTMLElement {
       this.project.name
     );
   }
+
   /**
-   *
+   * Creates the created_at element with formatted date
    * @returns {HTMLParagraphElement}
    */
-  create_created_at() {
+  create_created_at_element() {
     const date = new Date(this.project.created_at);
-    const formattedDate = `${date.getHours().toString().padStart(2, "0")}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}:${date
-      .getSeconds()
-      .toString()
-      .padStart(2, "0")} - ${date.getDate().toString().padStart(2, "0")}.${(
-      date.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}.${date.getFullYear()}`;
+    const formatted_date = date.toLocaleString("en-GB", {
+      hour12: false,
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
 
     return Util.create_element(
       "p",
       this.project._id,
       ["project-date"],
-      `Created at: ${formattedDate}`
+      `Created at: ${formatted_date}`
     );
   }
 
   init() {
-    this.addEventListener("click", this.set_project_bind);
+    this.addEventListener("click", this.handle_project_click);
+  }
+
+  /**
+   * Handles the click event on the project view
+   */
+  handle_project_click() {
+    this.title_screen.editor_tool.set_project(this.project);
   }
 
   disconnectedCallback() {
-    this.removeEventListener("click", this.set_project_bind);
+    this.removeEventListener("click", this.handle_project_click);
   }
 }
 

@@ -11,8 +11,7 @@ export class InitialButtons extends HTMLElement {
     this.title_screen = title_screen;
     this.new_button = this.create_new_button();
     this.open_button = this.create_open_button();
-    this.appendChild(this.new_button);
-    this.appendChild(this.open_button);
+    this.append(this.new_button, this.open_button);
   }
 
   /**
