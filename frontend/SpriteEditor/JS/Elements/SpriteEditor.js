@@ -89,6 +89,7 @@ export class SpriteEditor extends HTMLElement {
     if (!this.initialized) {
       this.init();
     }
+    this.set_listeners();
   }
 
   /**
@@ -98,8 +99,6 @@ export class SpriteEditor extends HTMLElement {
     this.appendCSS();
     this.appendComponents();
     this.create_file_input();
-
-    this.set_listeners();
     this.selected_tool = new Pen(this);
     this.sprite_canvas.input_canvas.set_tool_listeners();
     this.selected_color = ColorUtil.hex_to_rgb_array(
@@ -1250,6 +1249,8 @@ export class SpriteEditor extends HTMLElement {
     });
     this.sprite_preview.sprite_frames.switch_active_frame(0);
     this.action_buffer = [];
+    this.sprite_canvas.input_canvas.set_tool_listeners();
+    this.selected_tool.canvas = this.sprite_canvas.drawing_canvas.canvas;
   }
 
   /**

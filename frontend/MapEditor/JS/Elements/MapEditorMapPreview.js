@@ -60,8 +60,6 @@ export class MapEditorMapPreview extends MapEditorPart {
   }
 
   disconnectedCallback() {
-    this.appendChild(this.canvas);
-    this.appendChild(this.zoom_canvas);
     this.map_editor.removeEventListener(
       "reload_map_preview",
       this.reload_preview_bind

@@ -20,7 +20,7 @@ export class Tool {
    */
   init() {
     document.addEventListener("keydown", this.handle_key_down_events_bind);
-    document.addEventListener("keydown", this.handle_key_up_events_bind);
+    document.addEventListener("keyup", this.handle_key_up_events_bind);
   }
 
   /**
@@ -28,7 +28,7 @@ export class Tool {
    */
   destroy() {
     document.removeEventListener("keydown", this.handle_key_down_events_bind);
-    document.removeEventListener("keydown", this.handle_key_up_events_bind);
+    document.removeEventListener("keyup", this.handle_key_up_events_bind);
     console.log("!");
   }
 

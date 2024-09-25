@@ -53,6 +53,9 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.canvas_wrapper.append(this.temp_canvas);
     this.canvas_wrapper.append(this.hover_canvas);
     this.canvas_wrapper.append(this.input_canvas);
+  }
+
+  set_listeners() {
     this.canvas_wrapper.addEventListener("contextmenu", this.contextmenu_bind);
   }
 

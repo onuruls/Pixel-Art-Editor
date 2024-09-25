@@ -59,11 +59,6 @@ export class SpriteFrames extends HTMLElement {
       frame.classList.add("selected");
       this.frame_container.appendChild(frame);
     });
-    this.new_frame_container.addEventListener("click", this.add_new_frame_bind);
-    this.sprite_editor.addEventListener(
-      "update_frame_thumbnail",
-      this.update_frame_img_bind
-    );
   }
 
   /**
@@ -222,6 +217,11 @@ export class SpriteFrames extends HTMLElement {
    */
   connectedCallback() {
     this.sprite_editor.update_frame_thumbnail();
+    this.new_frame_container.addEventListener("click", this.add_new_frame_bind);
+    this.sprite_editor.addEventListener(
+      "update_frame_thumbnail",
+      this.update_frame_img_bind
+    );
   }
 
   /**
