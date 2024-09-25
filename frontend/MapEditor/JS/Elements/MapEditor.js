@@ -880,18 +880,13 @@ export class MapEditor extends HTMLElement {
         x * this.tile_size * this.scale,
         y * this.tile_size * this.scale
       );
-      this.canvas_wrapper.style.cursor = "zoom-in";
     } else {
       this.apply_zoom(
         false,
         x * this.tile_size * this.scale,
         y * this.tile_size * this.scale
       );
-      this.canvas_wrapper.style.cursor = "zoom-out";
     }
-    setTimeout(() => {
-      this.canvas_wrapper.style.cursor = "crosshair";
-    }, 200);
   }
 
   /**
