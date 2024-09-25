@@ -5,6 +5,7 @@ export class ColorUtil {
   static selection_color = "rgba(196, 252, 250, 0.48)";
   static primary_color_default = "rgba(0, 0, 0, 1)";
   static secondary_color_default = "rgba(255, 255, 255, 1)";
+  static frame_backgorund_color = "rgba(34, 34, 34, 1)";
 
   /**
    * Retrieves a color by key from the predefined colors
