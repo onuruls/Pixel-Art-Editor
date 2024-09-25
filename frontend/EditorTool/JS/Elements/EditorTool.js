@@ -76,6 +76,7 @@ export class EditorTool extends HTMLElement {
     const resp_project = await BackendClient.get_project_by_id(project.id);
     project.build_project_structure(resp_project.root_folder);
     this.project = project;
+    this.top_menu.update_project_name(project.name);
     this.title_screen.remove();
     this.appendChild(this.top_menu);
     this.appendChild(this.editor_container);
