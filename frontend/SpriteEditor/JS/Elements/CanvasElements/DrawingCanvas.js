@@ -10,6 +10,17 @@ export class DrawingCanvas extends CanvasElement {
   constructor(sprite_canvas) {
     super(sprite_canvas);
     this.context = null;
+    this.draw_pen_canvas_bind = this.draw_pen_canvas.bind(this);
+    this.draw_eraser_canvas_bind = this.draw_eraser_canvas.bind(this);
+    this.fill_canvas_bind = this.fill_canvas.bind(this);
+    this.revert_undo_bind = this.revert_undo.bind(this);
+    this.revert_redo_bind = this.revert_redo.bind(this);
+    this.draw_shape_bind = this.draw_shape.bind(this);
+    this.move_canvas_bind = this.move_canvas.bind(this);
+    this.cut_selected_area_bind = this.cut_selected_area.bind(this);
+    this.paste_selected_area_bind = this.paste_selected_area.bind(this);
+    this.repaint_canvas_bind = this.repaint_canvas.bind(this);
+    this.erase_selected_pixels_bind = this.erase_selected_pixels.bind(this);
   }
 
   render() {
@@ -19,39 +30,82 @@ export class DrawingCanvas extends CanvasElement {
    * Initializes the Canvas
    */
   init() {
-    this.sprite_editor.addEventListener("pen_matrix_changed", (event) => {
-      this.draw_pen_canvas(event);
-    });
-    this.sprite_editor.addEventListener("eraser_matrix_changed", (event) => {
-      this.draw_eraser_canvas(event);
-    });
-    this.sprite_editor.addEventListener("fill_matrix_changed", (event) => {
-      this.fill_canvas(event);
-    });
-    this.sprite_editor.addEventListener("revert_undo", (event) => {
-      this.revert_undo(event);
-    });
-    this.sprite_editor.addEventListener("revert_redo", (event) => {
-      this.revert_redo(event);
-    });
-    this.sprite_editor.addEventListener("draw_shape", (event) => {
-      this.draw_shape(event);
-    });
-    this.sprite_editor.addEventListener("move_canvas", (event) => {
-      this.move_canvas(event);
-    });
-    this.sprite_editor.addEventListener("cut_selected_area", (event) => {
-      this.cut_selected_area(event);
-    });
-    this.sprite_editor.addEventListener("paste_selected_area", (event) => {
-      this.paste_selected_area(event);
-    });
-    this.sprite_editor.addEventListener("repaint_canvas", (event) => {
-      this.repaint_canvas(event);
-    });
-    this.sprite_editor.addEventListener("erase_selected_pixels", (event) => {
-      this.erase_selected_pixels(event);
-    });
+    this.sprite_editor.addEventListener(
+      "pen_matrix_changed",
+      this.draw_pen_canvas_bind
+    );
+    this.sprite_editor.addEventListener(
+      "eraser_matrix_changed",
+      this.draw_eraser_canvas_bind
+    );
+    this.sprite_editor.addEventListener(
+      "fill_matrix_changed",
+      this.fill_canvas_bind
+    );
+    this.sprite_editor.addEventListener("revert_undo", this.revert_undo_bind);
+    this.sprite_editor.addEventListener("revert_redo", this.revert_redo_bind);
+    this.sprite_editor.addEventListener("draw_shape", this.draw_shape_bind);
+    this.sprite_editor.addEventListener("move_canvas", this.move_canvas_bind);
+    this.sprite_editor.addEventListener(
+      "cut_selected_area",
+      this.cut_selected_area_bind
+    );
+    this.sprite_editor.addEventListener(
+      "paste_selected_area",
+      this.paste_selected_area_bind
+    );
+    this.sprite_editor.addEventListener(
+      "repaint_canvas",
+      this.repaint_canvas_bind
+    );
+    this.sprite_editor.addEventListener(
+      "erase_selected_pixels",
+      this.erase_selected_pixels_bind
+    );
+  }
+
+  disconnectedCallback() {
+    this.sprite_editor.removeEventListener(
+      "pen_matrix_changed",
+      this.draw_pen_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "eraser_matrix_changed",
+      this.draw_eraser_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "fill_matrix_changed",
+      this.fill_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "revert_undo",
+      this.revert_undo_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "revert_redo",
+      this.revert_redo_bind
+    );
+    this.sprite_editor.removeEventListener("draw_shape", this.draw_shape_bind);
+    this.sprite_editor.removeEventListener(
+      "move_canvas",
+      this.move_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "cut_selected_area",
+      this.cut_selected_area_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "paste_selected_area",
+      this.paste_selected_area_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "repaint_canvas",
+      this.repaint_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "erase_selected_pixels",
+      this.erase_selected_pixels_bind
+    );
   }
 
   /**

@@ -13,6 +13,11 @@ export class TempCanvas extends CanvasElement {
     super(sprite_canvas);
     this.context = null;
     this.selection_color = [196, 252, 250, 123];
+    this.draw_shape_bind = this.draw_shape.bind(this);
+    this.revert_canvas_bind = this.revert_canvas.bind(this);
+    this.update_selected_area_bind = this.update_selected_area.bind(this);
+    this.selected_area_copied_bind = this.selected_area_copied.bind(this);
+    this.remove_selected_bind = this.remove_selection.bind(this);
   }
 
   render() {
@@ -24,21 +29,46 @@ export class TempCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.sprite_editor.addEventListener("draw_temp_shape", (event) => {
-      this.draw_shape(event);
-    });
-    this.sprite_editor.addEventListener("draw_shape", () => {
-      this.revert_canvas();
-    });
-    this.sprite_editor.addEventListener("update_selected_area", (event) => {
-      this.update_selected_area(event);
-    });
-    this.sprite_editor.addEventListener("selected_area_copied", (event) => {
-      this.selected_area_copied(event);
-    });
-    this.sprite_editor.addEventListener("remove_selection", () => {
-      this.remove_selection();
-    });
+    this.sprite_editor.addEventListener(
+      "draw_temp_shape",
+      this.draw_shape_bind
+    );
+    this.sprite_editor.addEventListener("draw_shape", this.revert_canvas_bind);
+    this.sprite_editor.addEventListener(
+      "update_selected_area",
+      this.update_selected_area_bind
+    );
+    this.sprite_editor.addEventListener(
+      "selected_area_copied",
+      this.selected_area_copied_bind
+    );
+    this.sprite_editor.addEventListener(
+      "remove_selection",
+      this.remove_selected_bind
+    );
+  }
+
+  disconnectedCallback() {
+    this.sprite_editor.removeEventListener(
+      "draw_temp_shape",
+      this.draw_shape_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "draw_shape",
+      this.revert_canvas_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "update_selected_area",
+      this.update_selected_area_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "selected_area_copied",
+      this.selected_area_copied_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "remove_selection",
+      this.remove_selected_bind
+    );
   }
 
   /**

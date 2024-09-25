@@ -13,6 +13,8 @@ export class HoverCanvas extends CanvasElement {
     super(sprite_canvas);
     this.context = null;
     this.hover_color = ColorUtil.hover_color;
+    this.draw_hover_bind = this.draw_hover.bind(this);
+    this.remove_hover_bind = this.remove_hover.bind(this);
   }
 
   render() {
@@ -24,12 +26,22 @@ export class HoverCanvas extends CanvasElement {
    */
   init() {
     this.context = this.canvas.getContext("2d");
-    this.sprite_editor.addEventListener("hover_matrix_changed", (event) => {
-      this.draw_hover(event);
-    });
-    this.sprite_editor.addEventListener("remove_hover", (event) => {
-      this.remove_hover(event);
-    });
+    this.sprite_editor.addEventListener(
+      "hover_matrix_changed",
+      this.draw_hover_bind
+    );
+    this.sprite_editor.addEventListener("remove_hover", this.remove_hover_bind);
+  }
+
+  disconnectedCallback() {
+    this.sprite_editor.removeEventListener(
+      "hover_matrix_changed",
+      this.draw_hover_bind
+    );
+    this.sprite_editor.removeEventListener(
+      "remove_hover",
+      this.remove_hover_bind
+    );
   }
 
   /**

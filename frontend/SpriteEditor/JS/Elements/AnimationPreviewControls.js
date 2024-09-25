@@ -12,6 +12,8 @@ export class AnimationPreviewControls extends HTMLElement {
     this.fps_input = this.create_fps_input();
     this.fps_count = 11;
     this.is_playing = false;
+    this.play_clicked_bind = this.play_clicked.bind(this);
+    this.fps_input_changed_bind = this.fps_input_changed.bind(this);
     this.init();
   }
 
@@ -48,11 +50,13 @@ export class AnimationPreviewControls extends HTMLElement {
   init() {
     this.appendChild(this.play_button);
     this.appendChild(this.fps_input);
-    this.play_button.addEventListener("click", this.play_clicked.bind(this));
-    this.fps_input.addEventListener(
-      "change",
-      this.fps_input_changed.bind(this)
-    );
+    this.play_button.addEventListener("click", this.play_clicked_bind);
+    this.fps_input.addEventListener("change", this.fps_input_changed_bind);
+  }
+
+  disconnectedCallback() {
+    this.play_button.removeEventListener("click", this.play_clicked_bind);
+    this.fps_input.removeEventListener("change", this.fps_input_changed_bind);
   }
 
   /**

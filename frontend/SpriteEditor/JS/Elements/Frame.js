@@ -18,6 +18,12 @@ export class Frame extends HTMLElement {
     this.dragging = false;
     this.drag_start_y = NaN;
     this.drag_start_top = NaN;
+    this.frame_clicked_bind = this.frame_clicked.bind(this);
+    this.delete_clicked_bind = this.delete_clicked.bind(this);
+    this.copy_clicked_bind = this.copy_clicked.bind(this);
+    this.drag_start_bind = this.drag_start.bind(this);
+    this.drag_move_bind = this.drag_move.bind(this);
+    this.drag_end_bind = this.drag_end.bind(this);
     this.init();
   }
 
@@ -97,12 +103,15 @@ export class Frame extends HTMLElement {
     this.appendChild(this.delete_label);
     this.appendChild(this.copy_label);
     this.appendChild(this.move_label);
-    this.thumbnail.addEventListener("click", this.frame_clicked.bind(this));
-    this.delete_label.addEventListener("click", this.delete_clicked.bind(this));
-    this.copy_label.addEventListener("click", this.copy_clicked.bind(this));
-    this.move_label.addEventListener("mousedown", this.drag_start.bind(this));
-    document.addEventListener("mousemove", this.drag_move.bind(this));
-    document.addEventListener("mouseup", this.drag_end.bind(this));
+  }
+
+  connectedCallback() {
+    this.thumbnail.addEventListener("click", this.frame_clicked_bind);
+    this.delete_label.addEventListener("click", this.delete_clicked_bind);
+    this.copy_label.addEventListener("click", this.copy_clicked_bind);
+    this.move_label.addEventListener("mousedown", this.drag_start_bind);
+    document.addEventListener("mousemove", this.drag_move_bind);
+    document.addEventListener("mouseup", this.drag_end_bind);
   }
 
   /**
@@ -203,18 +212,12 @@ export class Frame extends HTMLElement {
    * Removes all listeners before removing element from DOM
    */
   disconnectedCallback() {
-    this.thumbnail.removeEventListener("click", this.frame_clicked);
-    this.delete_label.removeEventListener(
-      "click",
-      this.delete_clicked.bind(this)
-    );
-    this.copy_label.removeEventListener("click", this.copy_clicked.bind(this));
-    this.move_label.removeEventListener(
-      "mousedown",
-      this.drag_start.bind(this)
-    );
-    document.removeEventListener("mousemove", this.drag_move.bind(this));
-    document.removeEventListener("mouseup", this.drag_end.bind(this));
+    this.thumbnail.removeEventListener("click", this.frame_clicked_bind);
+    this.delete_label.removeEventListener("click", this.delete_clicked_bind);
+    this.copy_label.removeEventListener("click", this.copy_clicked_bind);
+    this.move_label.removeEventListener("mousedown", this.drag_start_bind);
+    document.removeEventListener("mousemove", this.drag_move_bind);
+    document.removeEventListener("mouseup", this.drag_end_bind);
   }
 }
 

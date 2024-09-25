@@ -59,16 +59,17 @@ export class MapEditor extends HTMLElement {
    * @param {HTMLDivElement} editor_container
    */
   load_map_editor(map_file, editor_container) {
-    if (this.map_file && this.map_file.id === map_file.id) return;
+    // if (this.map_file && this.map_file.id === map_file.id) {
+    //   editor_container.appendChild(this);
+    //   return;
+    // }
     this.load_file_assets(map_file.data).then(() => {
       this.map_file = map_file;
       this.clear_editor(editor_container);
       this.load_file();
       this.map_canvas.redraw_every_layer();
       this.dispatchEvent(new CustomEvent("layers-updated"));
-      // setTimeout(() => {
       this.dispatchEvent(new CustomEvent("reload_map_preview"));
-      // }, 0);
     });
   }
 
@@ -79,6 +80,10 @@ export class MapEditor extends HTMLElement {
     if (!this.initialized) {
       this.init();
     }
+    this.set_listeners();
+    setTimeout(() => {
+      this.map_canvas.input_canvas.set_tool_liseners();
+    }, 0);
   }
 
   /**

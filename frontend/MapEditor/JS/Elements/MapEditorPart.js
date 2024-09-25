@@ -17,6 +17,7 @@ export class MapEditorPart extends HTMLElement {
       this.init();
       this.initialized = true;
     }
+    this.set_listeners();
   }
 
   initCSS() {
@@ -29,4 +30,6 @@ export class MapEditorPart extends HTMLElement {
     css.setAttribute("type", "text/css");
     this.appendChild(css);
   }
+
+  set_listeners() {}
 }
