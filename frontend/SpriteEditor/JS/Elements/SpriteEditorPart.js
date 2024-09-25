@@ -16,7 +16,10 @@ export class SpriteEditorPart extends HTMLElement {
       this.init();
       this.initialized = true;
     }
+    this.set_listeners();
   }
+
+  set_listeners() {}
 
   initCSS() {
     this.css = document.createElement("link");

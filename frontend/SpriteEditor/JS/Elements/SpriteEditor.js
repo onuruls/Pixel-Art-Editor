@@ -72,6 +72,14 @@ export class SpriteEditor extends HTMLElement {
       this.sprite_tools?.querySelector("#secondary_color_input")?.value ||
         "#FFFFFF"
     );
+    this.sprite_tools_toolbox = null;
+    this.sprite_tools_color_input = null;
+    this.sprite_tools_seconds_color_input = null;
+    this.color_changed_bind = this.color_changed.bind(this);
+    this.secondary_color_changed_bind = this.secondary_color_changed.bind(this);
+    this.keydown_handler_bind = this.keydown_handler.bind(this);
+    this.toolbox_clicked_bind = this.toolbox_clicked.bind(this);
+    this.import_sprite_bind = this.import_sprite.bind(this);
   }
 
   /**
@@ -81,6 +89,7 @@ export class SpriteEditor extends HTMLElement {
     if (!this.initialized) {
       this.init();
     }
+    this.set_listeners();
   }
 
   /**
@@ -90,9 +99,8 @@ export class SpriteEditor extends HTMLElement {
     this.appendCSS();
     this.appendComponents();
     this.create_file_input();
-
-    this.set_listeners();
     this.selected_tool = new Pen(this);
+    this.sprite_canvas.input_canvas.set_tool_listeners();
     this.selected_color = ColorUtil.hex_to_rgb_array(
       this.sprite_tools.querySelector("#color_input").value
     );
@@ -180,55 +188,90 @@ export class SpriteEditor extends HTMLElement {
   }
 
   add_toolbox_listener() {
-    const toolbox = this.sprite_tools.querySelector(".toolbox");
-    toolbox.addEventListener("click", (event) => {
-      const clickedElement = event.target.closest(".tool-button");
-      if (clickedElement) {
-        const tool = clickedElement.dataset.tool;
-        this.selected_tool.destroy();
-        this.selected_tool = this.select_tool_from_string(tool);
-      }
-    });
+    this.sprite_tools_toolbox = this.sprite_tools.querySelector(".toolbox");
+    this.sprite_tools_toolbox.addEventListener(
+      "click",
+      this.toolbox_clicked_bind
+    );
   }
 
   add_color_input_listener() {
-    const colorInput = this.sprite_tools.querySelector("#color_input");
-    const secondaryColorInput = this.sprite_tools.querySelector(
+    this.sprite_tools_color_input =
+      this.sprite_tools.querySelector("#color_input");
+    this.sprite_tools_seconds_color_input = this.sprite_tools.querySelector(
       "#secondary_color_input"
     );
 
-    colorInput.addEventListener("input", (event) => {
-      this.selected_color = ColorUtil.hex_to_rgb_array(event.target.value);
-    });
+    this.sprite_tools_color_input.addEventListener(
+      "input",
+      this.color_changed_bind
+    );
 
-    secondaryColorInput.addEventListener("input", (event) => {
-      this.secondary_color = ColorUtil.hex_to_rgb_array(event.target.value);
-    });
+    this.sprite_tools_seconds_color_input.addEventListener(
+      "input",
+      this.secondary_color_changed_bind
+    );
   }
 
   add_keyboard_shortcuts() {
-    document.addEventListener("keydown", (event) => {
-      if (event.ctrlKey) {
-        switch (event.key) {
-          case "z":
-            this.revert_last_action();
-            break;
-          case "y":
-            this.redo_last_action();
-            break;
-        }
-      } else if (event.key === "Delete" && this.selected_points.length > 0) {
-        this.erase_selected_pixels();
-      } else {
-        this.handle_tool_shortcuts(event);
-      }
-    });
+    document.addEventListener("keydown", this.keydown_handler_bind);
   }
 
   add_import_listener() {
-    this.import_input.addEventListener("change", (event) => {
-      this.import_sprite(event);
-    });
+    this.import_input.addEventListener("change", this.import_sprite_bind);
+  }
+
+  color_changed(event) {
+    this.selected_color = ColorUtil.hex_to_rgb_array(event.target.value);
+  }
+
+  secondary_color_changed(event) {
+    this.secondary_color = ColorUtil.hex_to_rgb_array(event.target.value);
+  }
+
+  toolbox_clicked(event) {
+    const clickedElement = event.target.closest(".tool-button");
+    if (clickedElement) {
+      const tool = clickedElement.dataset.tool;
+      this.selected_tool.destroy();
+      this.selected_tool = this.select_tool_from_string(tool);
+      this.sprite_canvas.input_canvas.set_tool_listeners();
+    }
+  }
+
+  keydown_handler(event) {
+    if (event.ctrlKey) {
+      switch (event.key) {
+        case "z":
+          this.revert_last_action();
+          break;
+        case "y":
+          this.redo_last_action();
+          break;
+      }
+    } else if (event.key === "Delete" && this.selected_points.length > 0) {
+      this.erase_selected_pixels();
+    } else {
+      this.handle_tool_shortcuts(event);
+    }
+  }
+
+  disconnectedCallback() {
+    this.sprite_tools_toolbox.removeEventListener(
+      "click",
+      this.toolbox_clicked_bind
+    );
+    this.sprite_tools_color_input.removeEventListener(
+      "input",
+      this.color_changed_bind
+    );
+
+    this.sprite_tools_seconds_color_input.removeEventListener(
+      "input",
+      this.secondary_color_changed_bind
+    );
+    document.removeEventListener("keydown", this.keydown_handler_bind);
+    this.import_input.removeEventListener("change", this.import_sprite_bind);
   }
   /**
    * Handles tool shortcuts
@@ -277,6 +320,7 @@ export class SpriteEditor extends HTMLElement {
       if (clicked_element) {
         this.selected_tool.destroy();
         this.selected_tool = this.select_tool_from_string(tool);
+        this.sprite_canvas.input_canvas.set_tool_listeners();
         const tool_buttons = this.sprite_tools.querySelectorAll(".tool-button");
         tool_buttons.forEach((btn) => btn.classList.remove("active"));
         clicked_element.classList.add("active");
@@ -1205,6 +1249,8 @@ export class SpriteEditor extends HTMLElement {
     });
     this.sprite_preview.sprite_frames.switch_active_frame(0);
     this.action_buffer = [];
+    this.sprite_canvas.input_canvas.set_tool_listeners();
+    this.selected_tool.canvas = this.sprite_canvas.drawing_canvas.canvas;
   }
 
   /**

@@ -27,9 +27,7 @@ export class CanvasElement extends HTMLElement {
   /**
    * Removes all the listeners when canvas is removed from DOM
    */
-  disable_listeners() {
-    console.error("Implement disable listeners in child class");
-  }
+  disable_listeners() {}
 
   update_canvas_size() {
     const scale = this.map_editor.scale;

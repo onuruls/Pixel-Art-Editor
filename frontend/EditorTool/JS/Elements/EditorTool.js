@@ -180,7 +180,6 @@ export class EditorTool extends HTMLElement {
   load_map_editor(file) {
     if (!this.map_editor.isConnected) {
       this.remove_sprite_and_map_editors();
-      this.editor_container.appendChild(this.map_editor);
     }
     if (this.map_editor.map_tools) {
       this.map_editor.map_tools.fetch_assets();

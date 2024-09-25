@@ -23,7 +23,7 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.hover_canvas = new HoverCanvas(this);
     this.input_canvas = new InputCanvas(this);
     this.canvas_wrapper = null;
-
+    this.contextmenu_bind = this.contextmenu.bind(this);
     this.canvas_array = [
       this.background_canvas,
       this.onion_skin_canvas,
@@ -53,9 +53,21 @@ export class SpriteCanvas extends SpriteEditorPart {
     this.canvas_wrapper.append(this.temp_canvas);
     this.canvas_wrapper.append(this.hover_canvas);
     this.canvas_wrapper.append(this.input_canvas);
-    this.canvas_wrapper.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-    });
+  }
+
+  set_listeners() {
+    this.canvas_wrapper.addEventListener("contextmenu", this.contextmenu_bind);
+  }
+
+  contextmenu(event) {
+    event.preventDefault();
+  }
+
+  disconnectedCallback() {
+    this.canvas_wrapper.removeEventListener(
+      "contextmenu",
+      this.contextmenu_bind
+    );
   }
 
   /**
