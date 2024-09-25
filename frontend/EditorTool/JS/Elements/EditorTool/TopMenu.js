@@ -117,6 +117,17 @@ export class TopMenu extends HTMLElement {
   }
 
   /**
+   * Updates the project name displayed in the project container
+   * @param {string} project_name
+   */
+  update_project_name(project_name) {
+    this.project_name = project_name;
+    this.project_name_element.textContent = project_name;
+    const input = this.input_container.querySelector("input");
+    input.value = project_name;
+  }
+
+  /**
    * Creates the input container for the project rename
    * @returns {HTMLDivElement}
    */
