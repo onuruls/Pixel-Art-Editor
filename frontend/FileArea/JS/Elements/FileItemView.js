@@ -1,5 +1,6 @@
 import { FileAreaView } from "./FileAreaView.js";
 import { ItemView } from "./ItemView.js";
+import { ColorUtil } from "../../../Util/ColorUtil.js";
 
 /**
  * View-Class of a File in the FileAreaView.
@@ -39,25 +40,16 @@ export class FileItemView extends ItemView {
    */
   init() {
     super.init();
-    switch (this.type) {
-      case "png":
-        this.icon.addEventListener("dblclick", async () => {
-          if (this.file_area.file_system_handler) {
-            await this.file_area.open_file(this.id);
-          } else {
-            console.error("File system handler is not ready.");
-          }
-        });
-        break;
-      case "tmx":
-        this.icon.addEventListener("dblclick", async () => {
-          if (this.file_area.file_system_handler) {
-            await this.file_area.open_file(this.id);
-          } else {
-            console.error("File system handler is not ready.");
-          }
-        });
-        break;
+    this.icon.addEventListener("dblclick", async () => {
+      if (this.file_area.file_system_handler) {
+        await this.file_area.open_file(this.id);
+      } else {
+        console.error("File system handler is not ready.");
+      }
+    });
+    if (this.type === "png") {
+      this.addEventListener("mouseenter", this.show_sprite_preview.bind(this));
+      this.addEventListener("mouseleave", this.hide_sprite_preview.bind(this));
     }
   }
 
@@ -90,6 +82,31 @@ export class FileItemView extends ItemView {
       this.name = this.edit_name_input.value;
       this.update_name_field();
     });
+  }
+
+  /**
+   * Shows a small preview of the sprite (png) file when hovered.
+   */
+  show_sprite_preview() {
+    const preview = document.createElement("img");
+    const file = this.file_area.file_system_handler.get_file_by_id(this.id);
+    const url = ColorUtil.matrix_to_img_url(file.data.frames[0].matrix);
+    preview.src = url;
+    preview.classList.add("sprite-file-preview");
+    preview.style.pointerEvents = "none";
+    this.appendChild(preview);
+
+    this.previewElement = preview;
+  }
+
+  /**
+   * Hides the sprite preview when the mouse leaves.
+   */
+  hide_sprite_preview() {
+    if (this.previewElement) {
+      this.removeChild(this.previewElement);
+      this.previewElement = null;
+    }
   }
 }
 
