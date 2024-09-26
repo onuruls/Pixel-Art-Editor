@@ -17,8 +17,7 @@ export class TitleScreen extends HTMLElement {
     this.initial_buttons = new InitialButtons(this);
     this.add_project_inputs = new AddProjectInputs(this);
     this.projects_view = null;
-    this.appendChild(this.initial_buttons);
-    this.appendChild(this.css);
+    this.append(this.initial_buttons, this.css);
     this.init();
   }
 
@@ -51,15 +50,19 @@ export class TitleScreen extends HTMLElement {
    * @param {String} project_name
    */
   async submit_button_clicked(project_name) {
-    const project_data = await BackendClient.create_new_project(project_name);
-    const new_project = new Project(
-      project_data.id,
-      project_data.name,
-      project_data.createdAt,
-      project_data.root_folder_id,
-      project_data.root_folder
-    );
-    this.editor_tool.set_project(new_project);
+    try {
+      const project_data = await BackendClient.create_new_project(project_name);
+      const new_project = new Project(
+        project_data.id,
+        project_data.name,
+        project_data.createdAt,
+        project_data.root_folder_id,
+        project_data.root_folder
+      );
+      this.editor_tool.set_project(new_project);
+    } catch (error) {
+      console.error("Error creating new project:", error);
+    }
   }
 
   /**
@@ -67,16 +70,20 @@ export class TitleScreen extends HTMLElement {
    * @param {Event} event
    */
   async load_project_clicked(event) {
-    let projects = await BackendClient.get_project_list();
-    projects = projects.map((project) => {
-      return new Project(
-        project.id,
-        project.name,
-        project.createdAt,
-        project.root_folder_id
-      );
-    });
-    this.render_loaded_projects(projects);
+    try {
+      const projects_data = await BackendClient.get_project_list();
+      let projects = projects_data.map((project) => {
+        return new Project(
+          project.id,
+          project.name,
+          project.createdAt,
+          project.root_folder_id
+        );
+      });
+      this.render_loaded_projects(projects);
+    } catch (error) {
+      console.error("Error loading projects:", error);
+    }
   }
 
   /**
@@ -91,14 +98,12 @@ export class TitleScreen extends HTMLElement {
 
   /**
    * Creates existing project
-   * @param {Event} event
    */
   new_project_clicked(event) {
-    this.initial_buttons.remove();
+    this.projects_view?.remove();
+    this.initial_buttons?.remove();
     this.appendChild(this.add_project_inputs);
   }
-
-  disconnectedCallback() {}
 }
 
 customElements.define("title-screen", TitleScreen);

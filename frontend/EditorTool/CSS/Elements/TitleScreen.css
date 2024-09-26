@@ -14,83 +14,61 @@ title-screen {
   align-items: center;
   justify-content: center;
 
-  initial-buttons {
-    display: flex;
-    flex-direction: column;
-    row-gap: 20px;
-    align-items: center;
-    justify-content: center;
+  .btn {
+    width: 12em;
+    height: 3em;
+    font-size: 1.25rem;
+    font-weight: 500;
+    background-color: var(--button-bg);
+    color: var(--button-color);
+    border: var(--button-border);
+    cursor: pointer;
+    box-shadow: 0.2em 0.2em 0.4em rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+      transform 0.2s ease-in-out;
 
-    .btn {
-      width: 200px;
-      height: 50px;
-      font-size: 20px;
-      font-weight: 500;
-      background-color: var(--button-bg);
-      color: var(--button-color);
-      border: var(--button-border);
-      cursor: pointer;
-      box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    &:hover {
+      background-color: var(--button-hover-bg);
+      box-shadow: 0.3em 0.3em 0.6em rgba(0, 0, 0, 0.5);
+      transform: translateY(-0.125em);
+    }
 
-      &:hover {
-        background-color: var(--button-hover-bg);
-        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-        transform: translateY(-2px);
-      }
-
-      &:active {
-        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        transform: translateY(0);
-      }
+    &:active {
+      box-shadow: 0.1em 0.1em 0.2em rgba(0, 0, 0, 0.2);
+      transform: translateY(0);
     }
   }
 
-  add-project-inputs {
-    width: 300px;
+  initial-buttons {
     display: flex;
     flex-direction: column;
-    row-gap: 20px;
+    row-gap: 1.25em;
+    align-items: center;
+    justify-content: center;
+  }
+
+  add-project-inputs {
+    width: 20em;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1.25em;
     align-items: center;
     justify-content: center;
 
     #new_project_name {
       width: 100%;
-      font-size: 24px;
+      font-size: 1.5rem;
       font-family: "VT323", monospace;
       background-color: var(--button-bg);
       color: var(--button-color);
       border: var(--button-border);
-      padding: 10px;
+      padding: 0.5em;
     }
+
     .button-div {
       display: flex;
       width: 100%;
-      column-gap: 20px;
-
-      .btn {
-        width: 200px;
-        height: 50px;
-        font-size: 20px;
-        font-weight: 500;
-        background-color: var(--button-bg);
-        color: var(--button-color);
-        border: var(--button-border);
-        cursor: pointer;
-        box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-        transition: box-shadow 0.3s ease, transform 0.3s ease;
-
-        &:hover {
-          background-color: var(--button-hover-bg);
-          box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-          transform: translateY(-2px);
-        }
-
-        &:active {
-          box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-          transform: translateY(0);
-        }
-      }
+      column-gap: 1.25em;
     }
   }
 
@@ -98,12 +76,12 @@ title-screen {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 400px;
-    width: 750px;
+    height: 25em;
+    width: 50em;
     background-color: var(--secondary-bg);
     padding: 1.25rem;
     row-gap: 1rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.2);
     scrollbar-color: var(--neutral-accent) var(--secondary-bg);
 
     .views-container {
@@ -122,7 +100,12 @@ title-screen {
         padding: 0.75rem 1.25rem;
         transition: box-shadow 0.3s ease-in-out,
           background-color 0.3s ease-in-out;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 0.125em 0.375em rgba(0, 0, 0, 0.15);
+
+        &:hover {
+          box-shadow: 0.188em 0.375em 0.75em var(--primary-bg);
+          background-color: var(--container-hover-bg);
+        }
 
         .project-buttons {
           display: flex;
@@ -131,14 +114,9 @@ title-screen {
           align-items: center;
 
           .btn {
-            padding: 0.5em;
-            width: 2.5em;
-            height: 2.5em;
-            text-align: center;
-            &:hover {
-              background-color: var(--button-hover-bg);
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            }
+            width: 2em;
+            height: 2em;
+            font-size: 1.25rem;
           }
         }
 
@@ -160,29 +138,13 @@ title-screen {
             color: lightgray;
           }
         }
-
-        &:hover {
-          box-shadow: 3px 6px 12px var(--primary-bg);
-          background-color: var(--container-hover-bg);
-        }
       }
     }
 
-    .btn {
-      width: 12em;
-      height: 3em;
-      font-size: 1.25rem;
-      background-color: var(--button-bg);
-      color: var(--button-color);
-      border: var(--button-border);
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-      transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-
-      &:hover {
-        background-color: var(--button-hover-bg);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-      }
+    .overview-buttons {
+      display: flex;
+      justify-content: space-evenly;
+      width: 100%;
     }
   }
 }

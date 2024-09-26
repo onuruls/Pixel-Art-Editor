@@ -1,6 +1,7 @@
 sprite-preview {
-  width: 15vw;
-  padding: 5px 10px;
+  flex: 2;
+  min-width: 225px;
+  padding: 5px 5px;
   background-color: var(--secondary-bg);
   display: flex;
   flex-direction: column;
@@ -82,30 +83,30 @@ sprite-preview {
           border-top-left-radius: 3px;
           top: 75px;
           left: 75px;
-        }
 
-        .delete_label:hover {
-          font-size: 20px;
+          &:hover {
+            font-size: 20px;
+          }
         }
 
         .copy_label {
           border-top-right-radius: 3px;
           top: 75px;
           left: 0px;
-        }
 
-        .copy_label:hover {
-          font-size: 20px;
+          &:hover {
+            font-size: 20px;
+          }
         }
 
         .move_label {
           border-bottom-left-radius: 3px;
           top: 0px;
           left: 75px;
-        }
 
-        .move_label:hover {
-          font-size: 20px;
+          &:hover {
+            font-size: 20px;
+          }
         }
       }
 
@@ -150,11 +151,11 @@ sprite-preview {
       height: 40px;
       width: 100px;
       color: var(--neutral-accent);
-    }
 
-    .new_frame_container:hover {
-      border-color: var(--active-accent);
-      color: var(--active-accent);
+      &:hover {
+        border-color: var(--active-accent);
+        color: var(--active-accent);
+      }
     }
 
     .frame_dummy {

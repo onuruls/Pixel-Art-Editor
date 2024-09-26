@@ -43,7 +43,7 @@ export class FileItemView extends ItemView {
       case "png":
         this.icon.addEventListener("dblclick", async () => {
           if (this.file_area.file_system_handler) {
-            await this.file_area.open_sprite_file(this.id);
+            await this.file_area.open_file(this.id);
           } else {
             console.error("File system handler is not ready.");
           }
@@ -52,7 +52,7 @@ export class FileItemView extends ItemView {
       case "tmx":
         this.icon.addEventListener("dblclick", async () => {
           if (this.file_area.file_system_handler) {
-            await this.file_area.open_map_file(this.id);
+            await this.file_area.open_file(this.id);
           } else {
             console.error("File system handler is not ready.");
           }

@@ -1,7 +1,10 @@
 map-editor-map-preview {
   display: flex;
+  flex-direction: column;
+  justify-content: staer;
+  row-gap: 1rem;
   position: relative;
-  width: 300px;
+  width: 200px;
   height: 200px;
   align-items: center;
   justify-content: center;

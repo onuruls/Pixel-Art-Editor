@@ -1,4 +1,5 @@
 sprite-tools {
+  flex: 1.5;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -99,8 +100,7 @@ sprite-tools {
 
   .palettes {
     display: grid;
-    grid-template-columns: repeat(3, 2.4rem);
-    justify-content: center;
+    grid-template-columns: repeat(3, 1fr);
   }
 
   input[type="color"] {
