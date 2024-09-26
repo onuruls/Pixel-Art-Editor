@@ -39,6 +39,14 @@ file-area-view {
       }
     }
 
+    .sprite-file-preview {
+      width: 60%;
+      height: auto;
+      border: 1px solid #ccc;
+      z-index: 100;
+      position: absolute;
+    }
+
     .rename-input {
       margin-top: 12px;
       width: 100%;

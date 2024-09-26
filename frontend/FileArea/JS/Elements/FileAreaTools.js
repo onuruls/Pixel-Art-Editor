@@ -1,4 +1,5 @@
 import { FileArea } from "./FileArea.js";
+import { BackendClient } from "../../../BackendClient/BackendClient.js";
 
 export class FileAreaTools extends HTMLElement {
   /**
@@ -119,7 +120,7 @@ export class FileAreaTools extends HTMLElement {
         this.file_area.editor_tool.sprite_editor.save_sprite_file();
         break;
       case "MapEditor":
-        // TODO: Implement saving for MapEditor
+        BackendClient.save_map_file(this.file_area.editor_tool.active_file);
         break;
     }
   }

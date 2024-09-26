@@ -1248,9 +1248,8 @@ export class SpriteEditor extends HTMLElement {
     });
     setTimeout(() => {
       this.sprite_preview.sprite_frames.frames.forEach((frame, f_index) => {
-        const img_url = this.matrix_to_img_url(this.canvas_matrixes[f_index]);
         frame.update_thumbnail(
-          this.matrix_to_img_url(this.canvas_matrixes[f_index])
+          ColorUtil.matrix_to_img_url(this.canvas_matrixes[f_index])
         );
       });
     }, 0);
@@ -1277,33 +1276,9 @@ export class SpriteEditor extends HTMLElement {
       })
     );
     this.canvas_matrix = canvas;
+    this.canvas_matrixes[this.current_frame_index] = canvas;
     this.end_action_buffer();
     this.repaint_canvas();
-  }
-
-  /**
-   * Turns a matrix into a imgURL
-   * @param {Array<Array<Array<Number>>>} matrix
-   */
-  matrix_to_img_url(matrix) {
-    const width = matrix[0].length;
-    const height = matrix.length;
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
-    context.fillStyle = ColorUtil.frame_backgorund_color;
-    context.fillRect(0, 0, width, height);
-    matrix.forEach((row, row_i) =>
-      row.forEach((_, col_i) => {
-        if (matrix[col_i][row_i][3] > 0) {
-          const color = ColorUtil.rgb_array_to_hex(matrix[col_i][row_i]);
-          context.fillStyle = color;
-          context.fillRect(col_i, row_i, 1, 1);
-        }
-      })
-    );
-    return canvas.toDataURL();
   }
 
   async save_sprite_file() {

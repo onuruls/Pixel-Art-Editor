@@ -201,4 +201,29 @@ export class ColorUtil {
       ? new_color_array
       : ColorUtil.rgba_array_to_string(new_color_array);
   }
+
+  /**
+   * Turns a matrix into a imgURL
+   * @param {Array<Array<Array<Number>>>} matrix
+   */
+  static matrix_to_img_url(matrix) {
+    const width = matrix[0].length;
+    const height = matrix.length;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    context.fillStyle = this.frame_backgorund_color;
+    context.fillRect(0, 0, width, height);
+    matrix.forEach((row, row_i) =>
+      row.forEach((_, col_i) => {
+        if (matrix[col_i][row_i][3] > 0) {
+          const color = this.rgb_array_to_hex(matrix[col_i][row_i]);
+          context.fillStyle = color;
+          context.fillRect(col_i, row_i, 1, 1);
+        }
+      })
+    );
+    return canvas.toDataURL();
+  }
 }
