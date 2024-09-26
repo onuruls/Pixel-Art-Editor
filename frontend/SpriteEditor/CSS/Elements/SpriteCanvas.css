@@ -1,5 +1,5 @@
 sprite-canvas {
-  width: 85vw;
+  flex: 10;
   display: flex;
   align-items: center;
   background-color: var(--primary-bg);

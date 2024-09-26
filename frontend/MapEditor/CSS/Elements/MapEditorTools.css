@@ -1,4 +1,5 @@
 map-editor-tools {
+  flex: 1.5;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -79,7 +80,7 @@ map-editor-tools {
     width: min-content;
     padding: 0.5rem 0.5rem;
     background-color: var(--container-bg);
-    max-height: 250px; 
+    max-height: 250px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-bg) var(--container-bg);
