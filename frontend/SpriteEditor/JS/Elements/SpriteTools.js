@@ -184,7 +184,7 @@ export class SpriteTools extends SpriteEditorPart {
     this.tool_buttons.forEach((button) => {
       const tool_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, tool_info);
-      if (button.id === "mirror_pen") button.classList.add("active");
+      if (button.id === "pen") button.classList.add("active");
       button.addEventListener("click", this.tool_buttons_clicked_bind);
     });
   }
@@ -207,6 +207,7 @@ export class SpriteTools extends SpriteEditorPart {
     this.pixel_size_options.forEach((button) => {
       const pixel_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, pixel_info);
+      if (button.id === "size_1") button.classList.add("active");
       button.addEventListener("click", this.pixel_button_clicked_bind);
     });
   }
