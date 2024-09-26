@@ -1,7 +1,7 @@
 sprite-preview {
   flex: 2;
   min-width: 225px;
-  padding: 5px 5px;
+  padding-top: 5px;
   background-color: var(--secondary-bg);
   display: flex;
   flex-direction: column;
