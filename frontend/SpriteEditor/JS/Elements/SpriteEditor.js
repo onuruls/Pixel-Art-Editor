@@ -1327,7 +1327,7 @@ export class SpriteEditor extends HTMLElement {
     this.canvas_matrix.forEach((row, i) =>
       row.forEach((pixel, j) => {
         context.fillStyle = ColorUtil.rgba_array_to_string(pixel);
-        context.fillRect(j, i, 1, 1);
+        context.fillRect(i, j, 1, 1);
       })
     );
     link.href = canvas.toDataURL("image/png");
