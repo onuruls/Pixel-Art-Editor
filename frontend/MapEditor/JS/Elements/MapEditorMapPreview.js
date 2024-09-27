@@ -131,25 +131,24 @@ export class MapEditorMapPreview extends MapEditorPart {
    * @param {String} asset
    */
   draw_single_tile(x, y, asset) {
-    this.map_editor
-      .load_image(asset)
-      .then((img_) => {
-        this.preview_context.drawImage(
-          img_,
-          x * this.tile_size,
-          y * this.tile_size,
-          this.tile_size,
-          this.tile_size
-        );
-      })
-      .catch((error) => {
-        this.preview_context.clearRect(
-          x * this.tile_size,
-          y * this.tile_size,
-          this.tile_size,
-          this.tile_size
-        );
-      });
+    const img = this.map_editor.image_cache[asset];
+    if (img) {
+      this.preview_context.drawImage(
+        img,
+        x * this.tile_size,
+        y * this.tile_size,
+        this.tile_size,
+        this.tile_size
+      );
+    } else {
+      console.warn(`Asset nicht im Cache gefunden: ${asset}`);
+      this.preview_context.clearRect(
+        x * this.tile_size,
+        y * this.tile_size,
+        this.tile_size,
+        this.tile_size
+      );
+    }
   }
 
   /**
