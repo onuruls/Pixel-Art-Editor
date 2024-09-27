@@ -141,7 +141,6 @@ export class MapEditorMapPreview extends MapEditorPart {
         this.tile_size
       );
     } else {
-      console.warn(`Asset nicht im Cache gefunden: ${asset}`);
       this.preview_context.clearRect(
         x * this.tile_size,
         y * this.tile_size,

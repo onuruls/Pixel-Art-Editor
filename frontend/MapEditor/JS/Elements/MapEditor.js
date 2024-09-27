@@ -466,6 +466,9 @@ export class MapEditor extends HTMLElement {
    * @returns {Promise<Image>}
    */
   load_image(src) {
+    if (this.image_cache[src]) {
+      return Promise.resolve(this.image_cache[src]);
+    }
     return new Promise((resolve, reject) => {
       if (this.image_cache[src]) {
         resolve(this.image_cache[src]);
@@ -487,7 +490,8 @@ export class MapEditor extends HTMLElement {
    */
   preload_assets() {
     const assets = this.get_all_assets_from_layers();
-    return this.load_assets(assets);
+    if (assets.length === 0) return Promise.resolve();
+    return Promise.all(assets.map((asset) => this.load_image(asset)));
   }
 
   /**
