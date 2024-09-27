@@ -43,17 +43,11 @@ export class CanvasElement extends HTMLElement {
    */
   paint_single_pixel(x, y, asset) {
     const size = this.map_editor.scale * this.map_editor.tile_size;
-
-    if (this.map_editor.image_cache[asset]) {
-      const img = this.map_editor.image_cache[asset];
+    const img = this.map_editor.image_cache[asset];
+    if (img) {
       this.context.drawImage(img, x * size, y * size, size, size);
     } else {
-      const img = new Image();
-      img.src = asset;
-      img.onload = () => {
-        this.map_editor.image_cache[asset] = img;
-        this.context.drawImage(img, x * size, y * size, size, size);
-      };
+      console.error(`Asset not found in cache: ${asset}`);
     }
   }
 
