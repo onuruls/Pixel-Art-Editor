@@ -4,7 +4,7 @@ import { Util } from "../../../Util/Util.js";
 export class MapEditorTools extends MapEditorPart {
   constructor(map_editor) {
     super(map_editor);
-    this.map_editor = map_editor; 
+    this.map_editor = map_editor;
     this.assets = [];
     this.dummy_assets = [
       "dummy_dirt",
@@ -144,30 +144,50 @@ export class MapEditorTools extends MapEditorPart {
    */
   async fetch_assets() {
     try {
-      const response = await fetch('http://localhost:3000/sprites');
+      const response = await fetch("http://localhost:3000/sprites");
       if (!response.ok) {
         throw new Error(`Failed to fetch assets: ${response.statusText}`);
       }
       const assets = await response.json();
       this.assets = [...this.dummy_assets, ...assets];
+      await this.preload_assets();
+
       this.update_assets();
     } catch (error) {
-      console.error('Error fetching assets:', error);
+      console.error("Error fetching assets:", error);
       this.assets = [...this.dummy_assets];
+      await this.preload_assets();
       this.update_assets();
     }
+  }
+
+  /**
+   * Preloads fetched assets
+   * @returns {Promise}
+   */
+  preload_assets() {
+    const assetUrls = this.assets.map((asset) => {
+      if (asset.startsWith("dummy_")) {
+        return `img/assets/${asset}.png`;
+      } else {
+        return `http://localhost:3000/uploads/${asset}`;
+      }
+    });
+    return this.map_editor.load_assets(assetUrls);
   }
 
   /**
    * Updates the assets section with the fetched assets.
    */
   update_assets() {
-    const assetbox = this.map_editor.querySelector('.assetbox');
+    const assetbox = this.map_editor.querySelector(".assetbox");
     if (!assetbox) {
-      console.error('Asset box not found');
+      console.error("Asset box not found");
       return;
     }
-    assetbox.innerHTML = this.assets.map((asset) => this.create_asset_button(asset)).join('');
+    assetbox.innerHTML = this.assets
+      .map((asset) => this.create_asset_button(asset))
+      .join("");
     this.setup_asset_buttons();
   }
 
@@ -178,8 +198,8 @@ export class MapEditorTools extends MapEditorPart {
    */
   create_asset_button(asset) {
     const title = this.capitalize(asset.replace("_", " ").replace(".png", ""));
-    let img_src = '';
-    if (asset.startsWith('dummy_')) {
+    let img_src = "";
+    if (asset.startsWith("dummy_")) {
       img_src = `img/assets/${asset}.png`;
     } else {
       img_src = `http://localhost:3000/uploads/${asset}`;
@@ -219,7 +239,8 @@ export class MapEditorTools extends MapEditorPart {
    * Sets up event listeners for pixel size buttons.
    */
   setup_pixel_size_buttons() {
-    const pixel_size_options = this.map_editor.querySelectorAll(".pixel-size-option");
+    const pixel_size_options =
+      this.map_editor.querySelectorAll(".pixel-size-option");
     pixel_size_options.forEach((button) => {
       const pixel_info = JSON.parse(button.getAttribute("data-info"));
       Util.create_tool_info(button, pixel_info);
@@ -245,13 +266,18 @@ export class MapEditorTools extends MapEditorPart {
         asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
         const asset_name = button.dataset.asset;
-        let asset_url = '';
-        if (asset_name.startsWith('dummy_')) {
+        let asset_url = "";
+        if (asset_name.startsWith("dummy_")) {
           asset_url = `img/assets/${asset_name}.png`;
         } else {
           asset_url = `http://localhost:3000/uploads/${asset_name}`;
         }
-        this.map_editor.selected_asset = asset_url;
+
+        if (this.map_editor.image_cache[asset_url]) {
+          this.map_editor.selected_asset = asset_url;
+        } else {
+          console.error(`Asset not preloaded: ${asset_url}`);
+        }
       });
     });
   }

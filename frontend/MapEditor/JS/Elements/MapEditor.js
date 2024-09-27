@@ -95,22 +95,24 @@ export class MapEditor extends HTMLElement {
     this.set_listeners();
     this.selected_tool = new Pen(this);
     this.map_canvas.input_canvas.set_tool_liseners();
-    this.initialized = true;
-    this.dispatchEvent(new CustomEvent("layers-updated"));
-    const size_obs = new ResizeObserver((entries) => {
-      entries.forEach((e) => {
-        this.map_canvas_width = e.contentRect.width;
-        this.map_canvas_height = e.contentRect.height;
+    this.preload_assets().then(() => {
+      this.initialized = true;
+      this.dispatchEvent(new CustomEvent("layers-updated"));
+      const size_obs = new ResizeObserver((entries) => {
+        entries.forEach((e) => {
+          this.map_canvas_width = e.contentRect.width;
+          this.map_canvas_height = e.contentRect.height;
+        });
+        this.resize_canvas_wrapper();
+        this.map_canvas.set_canvas_sizes(
+          this.canvas_wrapper_width,
+          this.canvas_wrapper_height
+        );
+        this.map_canvas.background_canvas.draw_background_grid();
+        this.layer_manager;
       });
-      this.resize_canvas_wrapper();
-      this.map_canvas.set_canvas_sizes(
-        this.canvas_wrapper_width,
-        this.canvas_wrapper_height
-      );
-      this.map_canvas.background_canvas.draw_background_grid();
-      this.layer_manager;
+      size_obs.observe(this.map_canvas);
     });
-    size_obs.observe(this.map_canvas);
   }
 
   /**
@@ -443,6 +445,22 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Retrieves all unique asset URLs
+   * @returns {Array<String>}
+   */
+  get_all_assets_from_layers() {
+    const assets = new Set();
+    this.layer_manager.layers.forEach((layer) => {
+      layer.content.forEach((row) => {
+        row.forEach((asset) => {
+          if (asset) assets.add(asset);
+        });
+      });
+    });
+    return Array.from(assets);
+  }
+
+  /**
    * Loads an image and caches it.
    * @param {String} src
    * @returns {Promise<Image>}
@@ -464,12 +482,25 @@ export class MapEditor extends HTMLElement {
   }
 
   /**
+   * Preloads all assets used in the map editor
+   * @returns {Promise}
+   */
+  preload_assets() {
+    const assets = this.get_all_assets_from_layers();
+    return this.load_assets(assets);
+  }
+
+  /**
    * Loading alle Assets at "once" when loading a file
    * @param {Array<String>} assets
    * @returns {Promise}
    */
   load_assets(assets) {
-    const promises = assets.map((asset) => this.load_image(asset));
+    const promises = assets.map((asset) => {
+      return this.load_image(asset).then((img) => {
+        console.log(`Asset loaded: ${asset}`);
+      });
+    });
     return Promise.all(promises);
   }
 
@@ -480,14 +511,10 @@ export class MapEditor extends HTMLElement {
    * @returns {Promise}
    */
   load_file_assets(file_data) {
-    const assets = [];
-    file_data.forEach((layer) =>
-      layer.content.forEach((row) => row.forEach((col) => assets.push(col)))
-    );
-    const unique_assets = [...new Set(assets)];
-    const filtered_assets = unique_assets.filter((asset) => asset !== "");
-    if (filtered_assets.length === 0) return Promise.resolve();
-    return this.load_assets(filtered_assets);
+    this.layer_manager.layers = file_data;
+    const assets = this.get_all_assets_from_layers();
+    if (assets.length === 0) return Promise.resolve();
+    return this.load_assets(assets);
   }
 
   /**
@@ -661,7 +688,8 @@ export class MapEditor extends HTMLElement {
    */
   draw_shape_matrix(shape_points, final = false) {
     if (this.selected_asset) {
-      this.load_image(this.selected_asset).then((img) => {
+      const img = this.image_cache[this.selected_asset];
+      if (img) {
         const expanded_shape_points = EditorUtil.expand_shape_points(
           shape_points,
           this.pixel_size,
@@ -703,7 +731,9 @@ export class MapEditor extends HTMLElement {
             })
           );
         }
-      });
+      } else {
+        console.error(`Asset not found in cache: ${this.selected_asset}`);
+      }
     }
   }
 
