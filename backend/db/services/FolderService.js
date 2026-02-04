@@ -39,7 +39,7 @@ class FolderService {
           id: file.id,
           name: file.name,
           type: file.type,
-          url: file.filepath,
+          url: `/uploads/${file.filepath}`,
           folder_id: file.folder_id,
           data: file.data,
         });

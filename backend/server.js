@@ -15,7 +15,7 @@ if (!fs.existsSync(config.UPLOADS_DIR)) {
 
 app.use(express.json({ limit: "10mb" }));
 
-// CORS setup
+// CORS setup (only enabled if CORS_ORIGIN is configured)
 if (config.CORS_ORIGIN.length > 0) {
   app.use(
     cors({
@@ -24,11 +24,6 @@ if (config.CORS_ORIGIN.length > 0) {
       allowedHeaders: ["Content-Type"],
     })
   );
-} else {
-  // If no CORS origin specified, we assume same-origin usage (production style)
-  // or that we rely on default same-origin policy if we were strict,
-  // but to be safe for dev without config:
-  app.use(cors()); 
 }
 
 // Serve API requests
@@ -337,16 +332,22 @@ apiRouter.delete("/files/:id", async (req, res) => {
 /**
  * Endpoint to retrieve all PNG files from the uploads directory.
  */
-apiRouter.get("/sprites", (req, res) => {
-  fs.readdir(config.UPLOADS_DIR, (err, files) => {
-    if (err) {
-      console.error("Error reading directory:", err);
-      // If uploads dir is empty/missing, just return empty list
-      return res.status(200).json([]);
-    }
-    const png_files = files.filter((file) => path.extname(file) === ".png");
-    res.status(200).json(png_files);
-  });
+apiRouter.get("/sprites", async (req, res) => {
+  try {
+    const { File } = require("./db/db");
+    const files = await File.findAll({
+      where: { type: "png" },
+      attributes: ["name", "filepath"],
+    });
+    const sprites = files.map((f) => ({
+      name: f.name,
+      filename: f.filepath,
+    }));
+    res.status(200).json(sprites);
+  } catch (err) {
+    console.error("Error fetching sprites:", err);
+    res.status(200).json([]);
+  }
 });
 
 apiRouter.put("/map_files/:id", async (req, res) => {
@@ -362,22 +363,7 @@ apiRouter.put("/map_files/:id", async (req, res) => {
 });
 
 // Mount API routes
-// We mount on / but also /api for consistency if we wanted to migrate. 
-// For now, to keep the frontend working perfectly without massive changes immediately, we keep root routes.
-// But the plan says "Put API routes under /api". 
-// To allow the current frontend to work WITHOUT modifying it yet (STEP 6 logic), 
-// I should mount on BOTH or just root, but STEP 6 says I will update the frontend.
-// So I will mount on /api AND root aliases? No, cleaner to just do /api and update frontend in Step 6.
-// But wait, the frontend is currently hardcoded to localhost:3000/...
-// I will mount on /api AND keep compatibility aliases OR config the frontend to use /api.
-// Plan Phase 6 says "Replace all fetch... with /api...". 
-// So I will mount everything on `/` for now to not break it before Step 6?
-// Actually, I can just mount to BOTH to be safe during transition, or just do the frontend update immediately after.
-// Let's mount to /api and / (legacy) to be safe?
-// The plan says: "Put API routes under /api (recommended)... Optionally keep old routes"
-// I will mount them on root matching current structure, AND on /api. 
 app.use("/api", apiRouter);
-app.use("/", apiRouter);
 
 // Serve uploads
 app.use("/uploads", express.static(config.UPLOADS_DIR));
@@ -385,10 +371,10 @@ app.use("/uploads", express.static(config.UPLOADS_DIR));
 // Serve Frontend
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// Default to serving index.html for unknown routes (SPA fallback if needed, or just let it be)
-// The frontend structure is `frontend/EditorTool` etc. 
-// The user currently accesses `frontend/EditorTool`. 
-// If we serve `../frontend` at root, then `http://localhost:3000/EditorTool/` works.
+// Redirect root to editor
+app.get("/", (req, res) => {
+  res.redirect("/EditorTool/index.html");
+});
 
 const { initDB } = require("./db/db");
 

@@ -67,11 +67,22 @@ curl -X POST http://localhost:3000/api/projects \
 
 Environment variables can be set in `docker-compose.yml` or a `.env` file (not included by default).
 
-| Variable      | Default | Description                              |
-| ------------- | ------- | ---------------------------------------- |
-| `PORT`        | `3000`  | Port to listen on.                       |
-| `DATA_DIR`    | `.data` | Directory for DB and Uploads.            |
-| `CORS_ORIGIN` | _Empty_ | Comma-separated list of allowed origins. |
+| Variable      | Default | Description                                              |
+| ------------- | ------- | -------------------------------------------------------- |
+| `PORT`        | `3000`  | Port to listen on.                                       |
+| `DATA_DIR`    | `.data` | Directory for DB and Uploads.                            |
+| `CORS_ORIGIN` | _Empty_ | Comma-separated allowed origins. CORS disabled if empty. |
+
+## Troubleshooting
+
+**Database Corruption**
+
+If the server fails to start with a database error, reset the database:
+
+```bash
+rm backend/.data/database.db
+# Then restart the server
+```
 
 ## Project Structure
 

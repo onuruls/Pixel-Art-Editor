@@ -144,18 +144,34 @@ export class MapEditorTools extends MapEditorPart {
    */
   async fetch_assets() {
     try {
-      const response = await fetch("http://localhost:3000/sprites");
+      const response = await fetch("/api/sprites");
       if (!response.ok) {
         throw new Error(`Failed to fetch assets: ${response.statusText}`);
       }
-      const assets = await response.json();
-      this.assets = [...this.dummy_assets, ...assets];
+      const sprites = await response.json();
+      // Convert sprite objects to our unified format
+      const spriteAssets = sprites.map((s) => ({
+        name: s.name,
+        filename: s.filename,
+        isDummy: false,
+      }));
+      // Dummy assets use their string name as both name and filename
+      const dummyAssets = this.dummy_assets.map((d) => ({
+        name: d.replace("dummy_", "").replace("_", " "),
+        filename: d,
+        isDummy: true,
+      }));
+      this.assets = [...dummyAssets, ...spriteAssets];
       await this.preload_assets();
 
       this.update_assets();
     } catch (error) {
       console.error("Error fetching assets:", error);
-      this.assets = [...this.dummy_assets];
+      this.assets = this.dummy_assets.map((d) => ({
+        name: d.replace("dummy_", "").replace("_", " "),
+        filename: d,
+        isDummy: true,
+      }));
       await this.preload_assets();
       this.update_assets();
     }
@@ -167,10 +183,10 @@ export class MapEditorTools extends MapEditorPart {
    */
   preload_assets() {
     const assetUrls = this.assets.map((asset) => {
-      if (asset.startsWith("dummy_")) {
-        return `img/assets/${asset}.png`;
+      if (asset.isDummy) {
+        return `img/assets/${asset.filename}.png`;
       } else {
-        return `http://localhost:3000/uploads/${asset}`;
+        return `/uploads/${asset.filename}`;
       }
     });
     return this.map_editor.load_assets(assetUrls);
@@ -193,19 +209,19 @@ export class MapEditorTools extends MapEditorPart {
 
   /**
    * Creates an HTML button for an asset.
-   * @param {String} asset - Name of the asset.
+   * @param {Object} asset - Asset object with name, filename, isDummy.
    * @returns {String}
    */
   create_asset_button(asset) {
-    const title = this.capitalize(asset.replace("_", " ").replace(".png", ""));
+    const title = this.capitalize(asset.name);
     let img_src = "";
-    if (asset.startsWith("dummy_")) {
-      img_src = `img/assets/${asset}.png`;
+    if (asset.isDummy) {
+      img_src = `img/assets/${asset.filename}.png`;
     } else {
-      img_src = `http://localhost:3000/uploads/${asset}`;
+      img_src = `/uploads/${asset.filename}`;
     }
     return `
-      <button class="asset-button" data-asset="${asset}" data-info='["${title} asset"]'>
+      <button class="asset-button" data-asset="${asset.filename}" data-isdummy="${asset.isDummy}" data-info='["${title} asset"]'>
         <img src="${img_src}" alt="${title}">
       </button>`;
   }
@@ -265,12 +281,13 @@ export class MapEditorTools extends MapEditorPart {
       button.addEventListener("click", () => {
         asset_buttons.forEach((btn) => btn.classList.remove("active"));
         button.classList.add("active");
-        const asset_name = button.dataset.asset;
+        const asset_filename = button.dataset.asset;
+        const isDummy = button.dataset.isdummy === "true";
         let asset_url = "";
-        if (asset_name.startsWith("dummy_")) {
-          asset_url = `img/assets/${asset_name}.png`;
+        if (isDummy) {
+          asset_url = `img/assets/${asset_filename}.png`;
         } else {
-          asset_url = `http://localhost:3000/uploads/${asset_name}`;
+          asset_url = `/uploads/${asset_filename}`;
         }
 
         if (this.map_editor.image_cache[asset_url]) {

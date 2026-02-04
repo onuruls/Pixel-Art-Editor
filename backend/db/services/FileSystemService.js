@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { randomUUID } = require("crypto");
 const config = require("../../config");
 
 class FileSystemService {
@@ -24,19 +25,24 @@ class FileSystemService {
   }
 
   /**
+   * Sanitize file extension to only allow safe characters
+   */
+  sanitize_extension(type) {
+    return type.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  }
+
+  /**
    * Creates a new file in the file system
-   * Returns the filename (relative path)
+   * Returns the stored filename (UUID-based for safety)
    */
   async create_file(name, type) {
     await this.create_directory_if_not_exists();
-    // Sanitize name to prevent path traversal? 
-    // Ideally we should but for now keeping it simple as we trust internal logic somewhat, 
-    // but better to be safe. We will assume 'name' is just a filename stem.
-    const filename = `${name}.${type}`;
-    const file_path = this.get_full_path(filename);
+    const safeExt = this.sanitize_extension(type);
+    const storedFilename = `${randomUUID()}.${safeExt}`;
+    const file_path = this.get_full_path(storedFilename);
     
     fs.writeFileSync(file_path, "");
-    return filename;
+    return storedFilename;
   }
 
   /**

@@ -28,17 +28,17 @@ afterAll(async () => {
 });
 
 describe("API Endpoints", () => {
-  it("GET /health should return status ok", async () => {
-    const res = await request(app).get("/health");
+  it("GET /api/health should return status ok", async () => {
+    const res = await request(app).get("/api/health");
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("status", "ok");
   });
 
   let projectId;
 
-  it("POST /projects should create a project", async () => {
+  it("POST /api/projects should create a project", async () => {
     const res = await request(app)
-      .post("/projects")
+      .post("/api/projects")
       .send({ name: "Test Project" });
     
     expect(res.statusCode).toEqual(201);
@@ -47,15 +47,15 @@ describe("API Endpoints", () => {
     projectId = res.body.id;
   });
 
-  it("GET /projects should list projects", async () => {
-    const res = await request(app).get("/projects");
+  it("GET /api/projects should list projects", async () => {
+    const res = await request(app).get("/api/projects");
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body.length).toBeGreaterThan(0);
   });
 
-  it("GET /projects/:id should return project details", async () => {
-    const res = await request(app).get(`/projects/${projectId}`);
+  it("GET /api/projects/:id should return project details", async () => {
+    const res = await request(app).get(`/api/projects/${projectId}`);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("id", projectId);
   });

@@ -119,29 +119,17 @@ Folder.belongsTo(Folder, {
 
 Folder.hasMany(File, { foreignKey: "folder_id", onDelete: "CASCADE" });
 
-const fs = require("fs");
+
 
 const initDB = async () => {
   try {
-    // alter: true adds missing columns/tables to match model
     await sequelize.sync({ alter: true });
     console.log("Database synchronized");
   } catch (err) {
-    console.error("Database sync failed:", err);
-    console.log("Attempting to reset database to fix schema mismatch...");
-    
-    try {
-      if (fs.existsSync(config.DB_PATH)) {
-        fs.unlinkSync(config.DB_PATH);
-        console.log("Old database file deleted.");
-      }
-      // Retry sync from scratch
-      await sequelize.sync({ force: true });
-      console.log("Database reset and synchronized successfully.");
-    } catch (retryErr) {
-      console.error("Database reset failed. Please delete the data directory manually.", retryErr);
-      process.exit(1);
-    }
+    console.error("Database sync failed:", err.message);
+    console.error(`To reset the database, delete: ${config.DB_PATH}`);
+    console.error("Then restart the application.");
+    process.exit(1);
   }
 };
 
