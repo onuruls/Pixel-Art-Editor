@@ -1,9 +1,10 @@
 const { Sequelize, DataTypes } = require("sequelize");
-const path = require("path");
+const config = require("../config");
 
 const sequelize = new Sequelize({
   dialect: "sqlite",
-  storage: path.resolve(__dirname, "database.db"),
+  storage: config.DB_PATH,
+  logging: false, // Less noise
 });
 
 /**
@@ -52,12 +53,6 @@ const Folder = sequelize.define(
   },
   {
     // paranoid: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ["name", "parent_folder_id"],
-      },
-    ],
   }
 );
 
@@ -124,8 +119,30 @@ Folder.belongsTo(Folder, {
 
 Folder.hasMany(File, { foreignKey: "folder_id", onDelete: "CASCADE" });
 
-sequelize.sync().then(async () => {
-  console.log("Database synchronized");
-});
+const fs = require("fs");
 
-module.exports = { sequelize, Project, Folder, File };
+const initDB = async () => {
+  try {
+    // alter: true adds missing columns/tables to match model
+    await sequelize.sync({ alter: true });
+    console.log("Database synchronized");
+  } catch (err) {
+    console.error("Database sync failed:", err);
+    console.log("Attempting to reset database to fix schema mismatch...");
+    
+    try {
+      if (fs.existsSync(config.DB_PATH)) {
+        fs.unlinkSync(config.DB_PATH);
+        console.log("Old database file deleted.");
+      }
+      // Retry sync from scratch
+      await sequelize.sync({ force: true });
+      console.log("Database reset and synchronized successfully.");
+    } catch (retryErr) {
+      console.error("Database reset failed. Please delete the data directory manually.", retryErr);
+      process.exit(1);
+    }
+  }
+};
+
+module.exports = { sequelize, Project, Folder, File, initDB };

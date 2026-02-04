@@ -10,7 +10,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async create_new_project(project_name) {
-    const response = await fetch("http://localhost:3000/projects", {
+    const response = await fetch("/api/projects", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,7 +28,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async get_project_list() {
-    const response = await fetch("http://localhost:3000/projects");
+    const response = await fetch("/api/projects");
     if (!response.ok) {
       throw new Error("Error fetching projects.");
     }
@@ -42,7 +42,7 @@ export class BackendClient {
    */
   static async get_project_by_id(project_id) {
     const response = await fetch(
-      `http://localhost:3000/projects/${project_id}`
+      `/api/projects/${project_id}`
     );
     return await response.json();
   }
@@ -54,7 +54,7 @@ export class BackendClient {
    */
   static async rename_project(project_id, new_name) {
     const response = await fetch(
-      `http://localhost:3000/projects/${project_id}/rename`,
+      `/api/projects/${project_id}/rename`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -72,7 +72,7 @@ export class BackendClient {
    */
   static async delete_project(project_id) {
     const response = await fetch(
-      `http://localhost:3000/projects/${project_id}`,
+      `/api/projects/${project_id}`,
       {
         method: "DELETE",
       }
@@ -91,7 +91,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async read_directory_content(folder_id) {
-    const response = await fetch(`http://localhost:3000/folders/${folder_id}`);
+    const response = await fetch(`/api/folders/${folder_id}`);
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);
     }
@@ -105,7 +105,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async create_folder(folder_id, folder_name) {
-    const response = await fetch("http://localhost:3000/projects/folders", {
+    const response = await fetch("/api/projects/folders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -128,7 +128,7 @@ export class BackendClient {
    * @returns {String}
    */
   static async rename_folder_by_id(id, new_name) {
-    const response = await fetch(`http://localhost:3000/folders/${id}/rename`, {
+    const response = await fetch(`/api/folders/${id}/rename`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -148,7 +148,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async move_folder_by_id(folder_id, target_folder_id) {
-    const response = await fetch(`http://localhost:3000/folders/move`, {
+    const response = await fetch(`/api/folders/move`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export class BackendClient {
    * @returns {String}
    */
   static async delete_folder_by_id(folder_id) {
-    const response = await fetch(`http://localhost:3000/folders/${folder_id}`, {
+    const response = await fetch(`/api/folders/${folder_id}`, {
       method: "DELETE",
     });
     if (!response.ok) {
@@ -188,7 +188,7 @@ export class BackendClient {
    * @returns {File}
    */
   static async get_file_by_id(file_id) {
-    const response = await fetch(`http://localhost:3000/files/${file_id}`);
+    const response = await fetch(`/api/files/${file_id}`);
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -213,7 +213,7 @@ export class BackendClient {
    */
   static async create_file(folder_id, file_name, file_type, data) {
     const response = await fetch(
-      `http://localhost:3000/folders/${folder_id}/files`,
+      `/api/folders/${folder_id}/files`,
       {
         method: "POST",
         headers: {
@@ -240,7 +240,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async move_file_by_id(file_id, target_folder_id) {
-    const response = await fetch(`http://localhost:3000/files/move`, {
+    const response = await fetch(`/api/files/move`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -263,7 +263,7 @@ export class BackendClient {
    * @returns {any}
    */
   static async write_file(file_id, content) {
-    const response = await fetch(`http://localhost:3000/files/${file_id}`, {
+    const response = await fetch(`/api/files/${file_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -284,7 +284,7 @@ export class BackendClient {
    */
   static async rename_file_by_id(file_id, new_name) {
     const response = await fetch(
-      `http://localhost:3000/files/${file_id}/rename`,
+      `/api/files/${file_id}/rename`,
       {
         method: "PUT",
         headers: {
@@ -305,7 +305,7 @@ export class BackendClient {
    * @returns {String}
    */
   static async delete_file_by_id(file_id) {
-    const response = await fetch(`http://localhost:3000/files/${file_id}`, {
+    const response = await fetch(`/api/files/${file_id}`, {
       method: "DELETE",
     });
     if (!response.ok) {
@@ -319,7 +319,7 @@ export class BackendClient {
    * @returns {Promise<Array<String>>}
    */
   static async get_assets() {
-    const response = await fetch("http://localhost:3000/sprites");
+    const response = await fetch("/api/sprites");
     if (!response.ok) {
       throw new Error(`Failed to fetch assets: ${response.statusText}`);
     }
@@ -331,7 +331,7 @@ export class BackendClient {
    * @param {File} file
    */
   static async save_map_file(file) {
-    const response = await fetch(`http://localhost:3000/map_files/${file.id}`, {
+    const response = await fetch(`/api/map_files/${file.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

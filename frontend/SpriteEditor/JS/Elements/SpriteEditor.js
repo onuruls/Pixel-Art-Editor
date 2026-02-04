@@ -359,6 +359,7 @@ export class SpriteEditor extends HTMLElement {
   end_action_buffer() {
     this.action_stack.push(this.action_buffer);
     this.clear_changed_points();
+    this.update_frame_thumbnail();
     this.save_sprite_file();
   }
 

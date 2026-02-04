@@ -25,7 +25,7 @@ export class SpriteEditorPart extends HTMLElement {
     this.css = document.createElement("link");
     this.css.setAttribute(
       "href",
-      `http://127.0.0.1:5500/frontend/SpriteEditor/CSS/Elements/${this.constructor.name}.css`
+      `../SpriteEditor/CSS/Elements/${this.constructor.name}.css`
     );
     this.css.setAttribute("rel", "stylesheet");
     this.css.setAttribute("type", "text/css");

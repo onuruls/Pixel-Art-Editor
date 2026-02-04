@@ -5,8 +5,16 @@ const file_system_service = require("./FileSystemService");
 const helper = require("../utils/helpers");
 const path = require("path");
 const { Op } = require("sequelize");
+const config = require("../../config");
 
 class FileService {
+  /**
+   * Helper to get full path from filename
+   */
+  get_full_path(filename) {
+    return path.join(config.UPLOADS_DIR, filename);
+  }
+
   /**
    * Service for managing file-related operations
    * @param {Number} folder_id
@@ -47,21 +55,23 @@ class FileService {
       }
     }
 
-    const file_path = await file_system_service.create_file(name, type);
+    // create_file now returns the filename (relative)
+    const stored_filename = await file_system_service.create_file(name, type);
+    const full_path = this.get_full_path(stored_filename);
 
     if (type === "png") {
       const matrix_preview = data.frames[0].matrix;
       const png = this.generate_png(matrix_preview);
-      png.pack().pipe(fs.createWriteStream(file_path));
+      png.pack().pipe(fs.createWriteStream(full_path));
     } else if (type === "tmx") {
       const dummyContent = JSON.stringify(data);
-      fs.writeFileSync(file_path, dummyContent);
+      fs.writeFileSync(full_path, dummyContent);
     }
 
     const new_file = await File.create({
       name,
       type,
-      filepath: file_path,
+      filepath: stored_filename, // Storing filename only
       data,
       folder_id,
     });
@@ -84,7 +94,7 @@ class FileService {
       name: file.name,
       type: file.type,
       folder_id: file.folder_id,
-      url: file.filepath,
+      url: `/uploads/${file.filepath}`, // Return web-accessible URL
       data: file.data,
     };
   }
@@ -101,16 +111,19 @@ class FileService {
       throw new Error("File not found");
     }
 
+    const full_path = this.get_full_path(file.filepath);
+
     if (file.type === "png" && data) {
       const preview_matrix = data.frames[0].matrix;
       const png = this.generate_png(preview_matrix);
-      png.pack().pipe(fs.createWriteStream(file.filepath));
+      png.pack().pipe(fs.createWriteStream(full_path));
     } else {
+      // For TMX or others, we might strictly only support PNG write here as per original code?
+      // Original code threw "Unsupported file type" if not PNG for write_file logic (implied).
       throw new Error("Unsupported file type");
     }
 
     file.data = data;
-
     await file.save();
   }
 
@@ -155,16 +168,16 @@ class FileService {
       );
     }
 
-    const old_file_path = file.filepath;
-    const ext = path.extname(old_file_path);
-    const new_file_path = path.join(
-      path.dirname(old_file_path),
-      new_name + ext
-    );
-    await file_system_service.rename_file(old_file_path, new_file_path);
+    const old_filename = file.filepath; // e.g. "foo.png"
+    // We assume the stored filename structure matches the name if we want to rename the file on disk too.
+    // However, keeping them synced is good practice but we must be careful with extension.
+    const ext = path.extname(old_filename); // includes dot
+    const new_filename = new_name + ext;
+
+    await file_system_service.rename_file(old_filename, new_filename);
 
     file.name = new_name;
-    file.filepath = new_file_path;
+    file.filepath = new_filename;
     await file.save();
   }
 
