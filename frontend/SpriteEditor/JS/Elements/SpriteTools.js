@@ -133,6 +133,11 @@ export class SpriteTools extends SpriteEditorPart {
         icon: "color_picker",
         info: JSON.stringify(["(O) Color picker"]),
       },
+      {
+        id: "ai_sprite",
+        icon: "ai",
+        info: JSON.stringify(["(A) AI Sprite Generator"]),
+      },
     ];
 
     return `

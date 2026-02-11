@@ -1,51 +1,36 @@
 # Pixel Art Editor
 
-A professional web-based tool for creating 2D sprites and designing tile maps for games.
+A web-based tool for creating 2D sprites and tile maps for games.
 
 ## Features
 
-- **Sprite Editor**: Pixel-perfect drawing, frames, palette management.
-- **Map Editor**: Tile mapping, layers, tools (fill, shape), and minimap.
-- **Project Management**: Organize assets in a hierarchical folder structure.
-- **Portable**: SQLite-backed per-project storage, easy to move or backup.
+- **Sprite Editor**: Pixel-perfect drawing, animation frames, and palette management
+- **Map Editor**: Tile-based level design with layers and editing tools
+- **AI Sprite Generator**: Create pixel-art sprites from text prompts using Stable Diffusion
+- **Project Management**: Organize assets in folders within projects
 
 ## Tech Stack
 
-- **Frontend**: Vanilla JavaScript (ES Modules), HTML5 Canvas, CSS.
-- **Backend**: Node.js, Express.
-- **Database**: SQLite (via Sequelize).
-- **Storage**: Local filesystem for media assets.
+- Frontend: Vanilla JavaScript, HTML5 Canvas, CSS
+- Backend: Node.js + Express
+- Database: SQLite
+- AI: Hugging Face Stable Diffusion XL
 
-## Architecture
+## Getting Started
 
-The application is a full-stack monolith. The **Frontend** is a Single Page Application (SPA) served by the **Backend**.
+**With Docker (recommended):**
+```bash
+docker compose up --build
+```
 
-- **Backend**: REST API managing Projects, Folders, and Files. Stores metadata in SQLite and pixel data as PNGs in a local uploads directory.
-- **Frontend**: Talks to the backend via `/api`.
+**Without Docker:**
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-## Quick Start (Local)
-
-1.  **Backend Setup**
-
-    ```bash
-    cd backend
-    npm install
-    npm run dev
-    ```
-
-2.  **Access**
-    Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Quick Start (Docker)
-
-1.  **Run**
-
-    ```bash
-    docker compose up --build
-    ```
-
-2.  **Access**
-    Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000)
 
 ## API Examples
 
@@ -96,6 +81,28 @@ rm backend/.data/database.db
 ├── docs/               # Documentation
 └── docker-compose.yml  # Docker orchestration
 ```
+
+## AI Sprite Generator
+
+Uses Stable Diffusion XL to generate pixel-art sprites from text descriptions.
+
+**Setup:**
+1. Get a free [Hugging Face](https://huggingface.co) API token
+2. Set environment variable: `HF_API_TOKEN=your_token_here`
+
+**Usage:**
+Click the AI icon in the Sprite Editor, type what you want ("red dragon", "health potion", etc.), and hit generate.
+
+**API:**
+```bash
+curl -X POST http://localhost:3000/api/ai/generate-sprite \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "red potion bottle", "folderId": 1, "palette": 32}'
+```
+
+Options: `prompt` (required), `folderId` (required), `palette` (16/32/64), `removeBackground` (true/false)
+
+> First request may take 30-60s due to model loading on free tier.
 
 ## License
 

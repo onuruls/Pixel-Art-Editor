@@ -6,10 +6,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - pixel_art_data:/app/backend/.data
+      - ./backend/.data:/app/backend/.data
+    env_file:
+      - backend/.env
     environment:
       - PORT=3000
     restart: unless-stopped
-
-volumes:
-  pixel_art_data:

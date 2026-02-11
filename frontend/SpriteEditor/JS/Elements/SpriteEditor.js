@@ -21,6 +21,7 @@ import { Dithering } from "../Tools/Dithering.js";
 import { EditorTool } from "../../../EditorTool/JS/Elements/EditorTool.js";
 import { EditorUtil } from "../../../Util/EditorUtil.js";
 import { ColorUtil } from "../../../Util/ColorUtil.js";
+import { AiSpritePanel } from "./AiSpritePanel.js";
 
 export class SpriteEditor extends HTMLElement {
   /**
@@ -146,9 +147,11 @@ export class SpriteEditor extends HTMLElement {
     this.sprite_tools = new SpriteTools(this);
     this.sprite_canvas = new SpriteCanvas(this);
     this.sprite_preview = new SpritePreview(this);
+    this.ai_sprite_panel = new AiSpritePanel(this);
     this.appendChild(this.sprite_tools);
     this.appendChild(this.sprite_canvas);
     this.appendChild(this.sprite_preview);
+    this.appendChild(this.ai_sprite_panel);
     this.canvas_wrapper = this.sprite_canvas.querySelector(".canvas-wrapper");
   }
 
@@ -233,6 +236,13 @@ export class SpriteEditor extends HTMLElement {
     const clickedElement = event.target.closest(".tool-button");
     if (clickedElement) {
       const tool = clickedElement.dataset.tool;
+      
+      // Handle AI tool separately - opens panel instead of selecting tool
+      if (tool === "ai_sprite") {
+        this.ai_sprite_panel.toggle_panel();
+        return;
+      }
+      
       this.selected_tool.destroy();
       this.selected_tool = this.select_tool_from_string(tool);
       this.sprite_canvas.input_canvas.set_tool_listeners();

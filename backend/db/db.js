@@ -127,9 +127,22 @@ const initDB = async () => {
     console.log("Database synchronized");
   } catch (err) {
     console.error("Database sync failed:", err.message);
-    console.error(`To reset the database, delete: ${config.DB_PATH}`);
-    console.error("Then restart the application.");
-    process.exit(1);
+    console.log("Attempting to auto-fix by resetting the database...");
+
+    try {
+      const fs = require('fs');
+      if (fs.existsSync(config.DB_PATH)) {
+        fs.unlinkSync(config.DB_PATH);
+        console.log("Corrupted database file deleted.");
+      }
+
+      // Re-try sync after deletion
+      await sequelize.sync({ force: true });
+      console.log("Database successfully reset and synchronized.");
+    } catch (retryErr) {
+      console.error("Fatal: Could not recover database:", retryErr.message);
+      process.exit(1);
+    }
   }
 };
 

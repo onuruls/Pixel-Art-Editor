@@ -1,3 +1,6 @@
+// Load environment variables from .env file
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -364,6 +367,10 @@ apiRouter.put("/map_files/:id", async (req, res) => {
 
 // Mount API routes
 app.use("/api", apiRouter);
+
+// Mount AI routes
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
 
 // Serve uploads
 app.use("/uploads", express.static(config.UPLOADS_DIR));
