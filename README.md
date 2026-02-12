@@ -9,6 +9,16 @@ A web-based tool for creating 2D sprites and tile maps for games.
 - 🤖 **AI Sprite Generator** — Create pixel-art sprites from text prompts using Stable Diffusion
 - 📁 **Project Management** — Organize assets in folders within projects
 
+## Screenshots
+
+<!-- markdownlint-disable MD033 -->
+<div align="center">
+  <img src="docs/spriteeditor.webp" width="600" alt="Sprite Editor">
+  <br/>
+  <img src="docs/mapeditor.webp" width="600" alt="Map Editor">
+</div>
+<!-- markdownlint-enable MD033 -->
+
 ## Architecture
 
 ```
@@ -47,7 +57,7 @@ A web-based tool for creating 2D sprites and tile maps for games.
 docker compose up --build
 ```
 
-Open http://localhost:3000 in your browser.
+Open <http://localhost:3000> in your browser.
 
 ### Without Docker
 
@@ -57,7 +67,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser.
+Open <http://localhost:3000> in your browser.
 
 ## Configuration
 
